@@ -1,0 +1,9 @@
+header {
+  module_name: "navi_planning"
+  status {
+    error_code: PLANNING_ERROR
+    msg: "planner failed to make a driving plan"
+  }
+}
+is_replan: true
+gear: GEAR_DRIVE
