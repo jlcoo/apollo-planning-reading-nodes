@@ -37,15 +37,15 @@
 namespace apollo {
 namespace planning {
 // ReferenceLine作为的是list的元素, 怎么构造一个ReferenceLine兑现
-class ReferenceLine {
+class ReferenceLine {                                                                   // 道路参考线
  public:
-  ReferenceLine() = default;
-  explicit ReferenceLine(const ReferenceLine& reference_line) = default;
+  ReferenceLine() = default;                                                            // 默认的构造函数
+  explicit ReferenceLine(const ReferenceLine& reference_line) = default;                // 禁止隐式转换的构造函数
   template <typename Iterator>
   explicit ReferenceLine(const Iterator begin, const Iterator end)
       : reference_points_(begin, end),
-        map_path_(std::move(std::vector<hdmap::MapPathPoint>(begin, end))) {}
-  explicit ReferenceLine(const std::vector<ReferencePoint>& reference_points);
+        map_path_(std::move(std::vector<hdmap::MapPathPoint>(begin, end))) {}           // 带模板的构造函数
+  explicit ReferenceLine(const std::vector<ReferencePoint>& reference_points);          // 由参考线的点集构成一条道路中心线
   explicit ReferenceLine(const hdmap::Path& hdmap_path);
   // stitching 拼接
   /** Stitch current reference line with the other reference line

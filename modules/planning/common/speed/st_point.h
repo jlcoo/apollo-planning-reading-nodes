@@ -28,17 +28,17 @@
 namespace apollo {
 namespace planning {
 // STPoint怎么是一个二维数组
-class STPoint : public common::math::Vec2d {
+class STPoint : public common::math::Vec2d {                     // st坐标系下的点就是继承于二维的向量(x, y)
  public:
-  STPoint() = default;
-  STPoint(const double s, const double t);
-  explicit STPoint(const common::math::Vec2d& vec2d_point);
+  STPoint() = default;                                           // 默认的构造函数
+  STPoint(const double s, const double t);                       // 利用距离和时间进行构造, (s是纵坐标, t是横坐标)
+  explicit STPoint(const common::math::Vec2d& vec2d_point);      // 禁止隐式转换的构造函数
 
-  double s() const;
-  double t() const;
-  void set_s(const double s);
-  void set_t(const double t);
-  std::string DebugString() const;
+  double s() const;                                              // 获得s点
+  double t() const;                                              // 获得t点
+  void set_s(const double s);                                    // 设置s点
+  void set_t(const double t);                                    // 设置t点
+  std::string DebugString() const;                               // debug的信息
 };
 
 }  // namespace planning

@@ -31,25 +31,25 @@
 namespace apollo {
 namespace planning {
 // 参考线的点, 二维向量
-class ReferencePoint : public hdmap::MapPathPoint {
+class ReferencePoint : public hdmap::MapPathPoint {                                   // 参考线的点, MapPathPoint继承于二维向量点common::math::Vec2d
  public:
-  ReferencePoint() = default;
+  ReferencePoint() = default;                                                         // 默认的构造函数
 
-  ReferencePoint(const MapPathPoint& map_path_point, const double kappa,
+  ReferencePoint(const MapPathPoint& map_path_point, const double kappa,              // 通过地图中的道路点, 曲率和曲率的微分进行构造中心参考线
                  const double dkappa);
 
-  common::PathPoint ToPathPoint(double s) const;
+  common::PathPoint ToPathPoint(double s) const;                                      // 将s距离上的一个点转换为道路上的一个点
 
-  double kappa() const;
-  double dkappa() const;
+  double kappa() const;                                                               // 获取中心参考线上一点的曲率
+  double dkappa() const;                                                              // 获取中心参考线上一点的曲率的微分
 
-  std::string DebugString() const;
+  std::string DebugString() const;                                                    // debug得到的一些信息
 
-  static void RemoveDuplicates(std::vector<ReferencePoint>* points);
+  static void RemoveDuplicates(std::vector<ReferencePoint>* points);                  // 移除中心参考线中的一些重复的点
 
  private:
-  double kappa_ = 0.0;
-  double dkappa_ = 0.0;
+  double kappa_ = 0.0;                                                                // 曲率
+  double dkappa_ = 0.0;                                                               // 曲率的微分
 };
 
 }  // namespace planning

@@ -38,10 +38,10 @@ namespace planning {
  */   // StdPlannerDispatcher继承于planner  // planner的调度员
 class StdPlannerDispatcher final : public PlannerDispatcher {
  public:
-  StdPlannerDispatcher() = default;
-  virtual ~StdPlannerDispatcher() = default;
+  StdPlannerDispatcher() = default;                              // 默认的构造函数
+  virtual ~StdPlannerDispatcher() = default;                     // 默认的析构函数
 
-  std::unique_ptr<Planner> DispatchPlanner() override;
+  std::unique_ptr<Planner> DispatchPlanner() override;           // 调度planner(规划器)
 };
 
 }  // namespace planning

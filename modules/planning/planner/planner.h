@@ -46,14 +46,14 @@ class Planner {
   /**
    * @brief Constructor
    */
-  Planner() = default;
+  Planner() = default;                                                                           // 默认的构造函数
 
   /**
    * @brief Destructor
    */
-  virtual ~Planner() = default;
+  virtual ~Planner() = default;                                                                  // 默认的析构函数
 
-  virtual std::string Name() = 0;
+  virtual std::string Name() = 0;                                                                // 初始化planner(规划器), 纯虚函数
   virtual apollo::common::Status Init(const PlanningConfig& config) = 0;
 
   /**
@@ -62,8 +62,8 @@ class Planner {
    * @param frame Current planning frame.
    * @return OK if planning succeeds; error otherwise.
    */
-  virtual apollo::common::Status Plan(
-      const common::TrajectoryPoint& planning_init_point, Frame* frame) = 0;
+  virtual apollo::common::Status Plan( // 通过起点和当前planning的帧,规划出完整的轨迹
+      const common::TrajectoryPoint& planning_init_point, Frame* frame) = 0;                     // 计算轨迹点(planner的输出就是轨迹trajectories)
 
  protected:                            // planning基类中使用到了聚合的思想
   PlanningConfig config_;              // planning配置项, 就是planning_config.pb.txt这个配置文件

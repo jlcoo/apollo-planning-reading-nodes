@@ -48,23 +48,23 @@ namespace planning {
  * @class ReferenceLineInfo
  * @brief ReferenceLineInfo holds all data for one reference line.
  */    // 包含了所有的数据
-class ReferenceLineInfo {
+class ReferenceLineInfo {                                                       // 一条中心参考线的信息
  public:
-  ReferenceLineInfo() = default;
+  ReferenceLineInfo() = default;                                                // 默认的构造函数
   explicit ReferenceLineInfo(const common::VehicleState& vehicle_state,         // 车辆状态
                              const common::TrajectoryPoint& adc_planning_point, // TrajectoryPoint, 轨迹点
                              const ReferenceLine& reference_line,               // 参考线, ReferenceLine是一个类
                              const hdmap::RouteSegments& segments);             // routing 片段，RouteSegments继承于LaneSegment
 
-  bool Init(const std::vector<const Obstacle*>& obstacles);
+  bool Init(const std::vector<const Obstacle*>& obstacles);                     // 通过障碍物指针的数组进行初始化中心参考线(reference line)
 
-  bool IsInited() const;
+  bool IsInited() const;                                                        // 中心参考线是否被初始化
 
-  bool AddObstacles(const std::vector<const Obstacle*>& obstacles);    // 添加障碍物
-  PathObstacle* AddObstacle(const Obstacle* obstacle);
-  bool AddObstacleHelper(const Obstacle* obstacle);
+  bool AddObstacles(const std::vector<const Obstacle*>& obstacles);             // 添加障碍物
+  PathObstacle* AddObstacle(const Obstacle* obstacle);                          // 在车道上(path)添加一个障碍物
+  bool AddObstacleHelper(const Obstacle* obstacle);                             // 障碍物的帮助者, 这个是什么意思?
 
-  PathDecision* path_decision();
+  PathDecision* path_decision();                                                // path的决策者(看选择那一条道路)
   const PathDecision& path_decision() const;
   const ReferenceLine& reference_line() const;
 

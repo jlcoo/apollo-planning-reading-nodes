@@ -57,7 +57,7 @@ namespace planning {
  */
 // 一帧数据就是一次planning
 // 用于数据准备,包括地图，车辆状态，prediction数据，ref_line 
-class Frame {
+class Frame {                                                         // frame是指做planning所需的数据
  public:     // 构造函数
   explicit Frame(uint32_t sequence_num,                               // 序列号
                  const common::TrajectoryPoint &planning_start_point, // 规划的起点
@@ -72,15 +72,15 @@ class Frame {
 
   std::string DebugString() const;
 
-  const PublishableTrajectory &ComputedTrajectory() const;
+  const PublishableTrajectory &ComputedTrajectory() const;            // 可发布的轨迹
 
   void RecordInputDebug(planning_internal::Debug *debug);
 
-  std::list<ReferenceLineInfo> &reference_line_info();
+  std::list<ReferenceLineInfo> &reference_line_info();                // 车道中心线信息(reference line)
 
-  Obstacle *Find(const std::string &id);
+  Obstacle *Find(const std::string &id);                              // 通过障碍物的id查找出指定的障碍物
 
-  const ReferenceLineInfo *FindDriveReferenceLineInfo();
+  const ReferenceLineInfo *FindDriveReferenceLineInfo();              // 找出可行驶参考线的信息
 
   const ReferenceLineInfo *DriveReferenceLineInfo() const;
 

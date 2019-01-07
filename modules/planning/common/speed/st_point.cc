@@ -29,15 +29,15 @@ namespace planning {
 
 using apollo::common::util::StringPrintf;
 
-STPoint::STPoint(const double s, const double t) : Vec2d(t, s) {}
+STPoint::STPoint(const double s, const double t) : Vec2d(t, s) {}                  // 构造一个t为横坐标, s为纵坐标的直角坐标系
 
-STPoint::STPoint(const common::math::Vec2d& vec2d_point) : Vec2d(vec2d_point) {}
+STPoint::STPoint(const common::math::Vec2d& vec2d_point) : Vec2d(vec2d_point) {}   // 通过一个二维向量进行构造
 
-double STPoint::s() const { return y_; }
+double STPoint::s() const { return y_; }                                           // 直接返回y轴上的值
 
-double STPoint::t() const { return x_; }
+double STPoint::t() const { return x_; }                                           // 直接返回x轴上的值
 
-void STPoint::set_s(const double s) { return set_y(s); }
+void STPoint::set_s(const double s) { return set_y(s); }                           // 设置y轴上面的值
 
 void STPoint::set_t(const double t) { return set_x(t); }
 

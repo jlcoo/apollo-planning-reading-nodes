@@ -116,13 +116,13 @@ message ObjectDecisions {
 }
 
 message MainStop {
-  optional StopReasonCode reason_code = 1;     // 停止的原因
-  optional string reason = 2;                  // 
+  optional StopReasonCode reason_code = 1;                               // 停止的原因的代码
+  optional string reason = 2;                                            // 停止的原因
   // When stopped, the front center of vehicle should be at this point.
-  optional apollo.common.PointENU stop_point = 3; // 停止的位置
+  optional apollo.common.PointENU stop_point = 3;                        // 停止的位置
   // When stopped, the heading of the vehicle should be stop_heading.
-  optional double stop_heading = 4;            // 停止的朝向
-  optional apollo.routing.ChangeLaneType change_lane_type = 5;  // FORWARD = 0;LEFT = 1;RIGHT = 2;
+  optional double stop_heading = 4;                                      // 停止的朝向
+  optional apollo.routing.ChangeLaneType change_lane_type = 5;           // FORWARD = 0;LEFT = 1;RIGHT = 2;
 }
 
 message EmergencyStopHardBrake {

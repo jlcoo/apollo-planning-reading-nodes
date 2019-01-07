@@ -38,18 +38,18 @@ namespace planning {
  */   // planner的调度员
 class PlannerDispatcher {
  public:
-  PlannerDispatcher() = default;
-  virtual ~PlannerDispatcher() = default;
+  PlannerDispatcher() = default;                                                        // 默认的构造函数
+  virtual ~PlannerDispatcher() = default;                                               // 默认的析构函数
 
-  virtual common::Status Init() {
-    RegisterPlanners();   // 注册planner
-    return common::Status::OK(); //初始化完成
+  virtual common::Status Init() {                                                       // 虚函数的初始化, 主要是注册规划器
+    RegisterPlanners();                                                                 // 注册planner
+    return common::Status::OK();                                                        //初始化完成
   }
 
-  virtual std::unique_ptr<Planner> DispatchPlanner() = 0;
+  virtual std::unique_ptr<Planner> DispatchPlanner() = 0;                               // 纯虚函数的planner规划器的提供函数
 
  protected:
-  void RegisterPlanners();  // 连成员变量一起继承
+  void RegisterPlanners();                                                              // 连成员变量一起继承
   // PlanningConfig_PlannerType即PlanningConfig::PlannerType是一个枚举值， Planner的基类
 // enum PlanningConfig_PlannerType {
 //   PlanningConfig_PlannerType_RTK = 0,
@@ -57,7 +57,7 @@ class PlannerDispatcher {
 //   PlanningConfig_PlannerType_LATTICE = 2,
 //   PlanningConfig_PlannerType_NAVI = 3,
 //   PlanningConfig_PlannerType_OPENSPACE = 4
-// };   // PlanningConfig::PlannerType是EM
+// };   // PlanningConfig::PlannerType是EM  // 四种不同的planner类型, planner是抽象出来的基类
   common::util::Factory<PlanningConfig::PlannerType, Planner> planner_factory_;         // planner的工厂模式
 };
 

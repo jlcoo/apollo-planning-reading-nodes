@@ -29,48 +29,48 @@
 namespace apollo {
 namespace planning {
 
-using common::math::LineSegment2d;
-using common::math::Vec2d;
+using common::math::LineSegment2d;                                                    // 二维空间的线段
+using common::math::Vec2d;                                                            // 二维空间的点(向量)
 
 StBoundary::StBoundary(
-    const std::vector<std::pair<STPoint, STPoint>>& point_pairs) {
+    const std::vector<std::pair<STPoint, STPoint>>& point_pairs) {                    // 通过一个点对构造一个st的边框
   CHECK(IsValid(point_pairs)) << "The input point_pairs are NOT valid";
 
-  std::vector<std::pair<STPoint, STPoint>> reduced_pairs(point_pairs);
-  RemoveRedundantPoints(&reduced_pairs);
+  std::vector<std::pair<STPoint, STPoint>> reduced_pairs(point_pairs);                // 先把这些点对先构造一些剩余的点对
+  RemoveRedundantPoints(&reduced_pairs);                                              // 消除冗余的点对, 就是很相近的点直接不要
 
-  for (const auto& item : reduced_pairs) {
+  for (const auto& item : reduced_pairs) {                                            // 迭代冗余的这些点
     // use same t for both points
-    const double t = item.first.t();
+    const double t = item.first.t();                                                  // 上下边界使用同样的t
     lower_points_.emplace_back(item.first.s(), t);
     upper_points_.emplace_back(item.second.s(), t);
   }
 
-  for (auto it = lower_points_.begin(); it != lower_points_.end(); ++it) {
-    points_.emplace_back(it->x(), it->y());
+  for (auto it = lower_points_.begin(); it != lower_points_.end(); ++it) {            // 先把这些点的下边界加入到数组中
+    points_.emplace_back(it->x(), it->y());                                           // std::vector<Vec2d> points_; 在ploygon2d.h中定义
   }
-  for (auto rit = upper_points_.rbegin(); rit != upper_points_.rend(); ++rit) {
+  for (auto rit = upper_points_.rbegin(); rit != upper_points_.rend(); ++rit) {       // 再把这些点的上边界反向加入到该数组中
     points_.emplace_back(rit->x(), rit->y());
   }
 
-  BuildFromPoints();
+  BuildFromPoints();                                                                  // 在ploygon2d.cc文件中具体实现
 
-  for (const auto& point : lower_points_) {
+  for (const auto& point : lower_points_) {                                           // 迭代下边界的点, 找到最小的s
     min_s_ = std::fmin(min_s_, point.s());
   }
-  for (const auto& point : upper_points_) {
+  for (const auto& point : upper_points_) {                                           // 迭代上边界的点, 找到最大的s
     max_s_ = std::fmax(max_s_, point.s());
   }
-  min_t_ = lower_points_.front().t();
+  min_t_ = lower_points_.front().t();                                                 // 找到最小的t和最大的t
   max_t_ = lower_points_.back().t();
 }
 
 bool StBoundary::IsPointNear(const common::math::LineSegment2d& seg,
-                             const Vec2d& point, const double max_dist) {
+                             const Vec2d& point, const double max_dist) {             // 点到线段的距离
   return seg.DistanceSquareTo(point) < max_dist * max_dist;
 }
 
-std::string StBoundary::TypeName(BoundaryType type) {
+std::string StBoundary::TypeName(BoundaryType type) {                                 // 返回字符串的边框类型
   if (type == BoundaryType::FOLLOW) {
     return "FOLLOW";
   } else if (type == BoundaryType::KEEP_CLEAR) {
@@ -90,57 +90,57 @@ std::string StBoundary::TypeName(BoundaryType type) {
 }
 // 删除冗余点
 void StBoundary::RemoveRedundantPoints(
-    std::vector<std::pair<STPoint, STPoint>>* point_pairs) {  // 将离散的点组成线段
-  if (!point_pairs || point_pairs->size() <= 2) {  // 容错处理
+    std::vector<std::pair<STPoint, STPoint>>* point_pairs) {                     // 将离散的点组成线段
+  if (!point_pairs || point_pairs->size() <= 2) {                                // 容错处理
     return;
   }
 
-  const double kMaxDist = 0.1;  // 最大的距离
+  const double kMaxDist = 0.1;                                                   // 最大的相邻距离
   size_t i = 0;
   size_t j = 1;
 
-  while (i < point_pairs->size() && j + 1 < point_pairs->size()) {
-    LineSegment2d lower_seg(point_pairs->at(i).first,
-                            point_pairs->at(j + 1).first); // 二维的线段
+  while (i < point_pairs->size() && j + 1 < point_pairs->size()) {               // 从0开始迭代所有的点
+    LineSegment2d lower_seg(point_pairs->at(i).first,                            // 点对的第一个点组成下边界, 第二个点组成上边界
+                            point_pairs->at(j + 1).first);                       // 二维的线段
     LineSegment2d upper_seg(point_pairs->at(i).second,
                             point_pairs->at(j + 1).second);
-    if (!IsPointNear(lower_seg, point_pairs->at(j).first, kMaxDist) ||
-        !IsPointNear(upper_seg, point_pairs->at(j).second, kMaxDist)) {  // 都相近
-      ++i;   // 如果相邻就不会更新i的值
+    if (!IsPointNear(lower_seg, point_pairs->at(j).first, kMaxDist) ||           // 如果很相近就直接跳过其中一个点
+        !IsPointNear(upper_seg, point_pairs->at(j).second, kMaxDist)) {          // 都相近
+      ++i;                                                                       // 如果相邻就不会更新i的值
       if (i != j) {
         point_pairs->at(i) = point_pairs->at(j);
       }
     }
     ++j;
   }
-  point_pairs->at(++i) = point_pairs->back();
-  point_pairs->resize(i + 1);  // 重新定义数组的大小
+  point_pairs->at(++i) = point_pairs->back();                                    // 保存最后一个点
+  point_pairs->resize(i + 1);                                                    // 重新定义数组的大小
 }
 
 bool StBoundary::IsValid(
-    const std::vector<std::pair<STPoint, STPoint>>& point_pairs) const {
+    const std::vector<std::pair<STPoint, STPoint>>& point_pairs) const {         // 判断一个边框是否合法
   if (point_pairs.size() < 2) {
     AERROR << "point_pairs.size() must > 2. current point_pairs.size() = "
            << point_pairs.size();
     return false;
   }
 
-  constexpr double kStBoundaryEpsilon = 1e-9;
+  constexpr double kStBoundaryEpsilon = 1e-9;                                    // st边框的无限小值
   constexpr double kMinDeltaT = 1e-6;
-  for (size_t i = 0; i < point_pairs.size(); ++i) {    // 点对
-    const auto& curr_lower = point_pairs[i].first;
-    const auto& curr_upper = point_pairs[i].second;
+  for (size_t i = 0; i < point_pairs.size(); ++i) {                              // 点对
+    const auto& curr_lower = point_pairs[i].first;                               // 点对中的第一个点就是下界
+    const auto& curr_upper = point_pairs[i].second;                              // 第二个点是上界
     if (curr_upper.s() < curr_lower.s()) {
       AERROR << "s is not increasing";
       return false;
     }
 
-    if (std::fabs(curr_lower.t() - curr_upper.t()) > kStBoundaryEpsilon) {
+    if (std::fabs(curr_lower.t() - curr_upper.t()) > kStBoundaryEpsilon) {       // 上下边界的时间应该是一样的
       AERROR << "t diff is larger in each STPoint pair";
       return false;
     }
 
-    if (i + 1 != point_pairs.size()) {
+    if (i + 1 != point_pairs.size()) {                                           // t(时间)必须是递增的
       const auto& next_lower = point_pairs[i + 1].first;
       const auto& next_upper = point_pairs[i + 1].second;
       if (std::fmax(curr_lower.t(), curr_upper.t()) + kMinDeltaT >=
@@ -272,15 +272,15 @@ bool StBoundary::GetUnblockSRange(const double curr_time, double* s_upper,
   CHECK_NOTNULL(s_upper);
   CHECK_NOTNULL(s_lower);
 
-  *s_upper = s_high_limit_;
-  *s_lower = 0.0;
+  *s_upper = s_high_limit_;                                                             // s的上界
+  *s_lower = 0.0;                                                                       // s的下界
   if (curr_time < min_t_ || curr_time > max_t_) {
     return true;
   }
 
   size_t left = 0;
   size_t right = 0;
-  if (!GetIndexRange(lower_points_, curr_time, &left, &right)) {
+  if (!GetIndexRange(lower_points_, curr_time, &left, &right)) {                        // 获得一些范围的坐标点
     AERROR << "Fail to get index range.";
     return false;
   }
@@ -340,38 +340,38 @@ double StBoundary::min_t() const { return min_t_; }
 double StBoundary::max_s() const { return max_s_; }
 double StBoundary::max_t() const { return max_t_; }
 
-bool StBoundary::GetIndexRange(const std::vector<STPoint>& points,
-                               const double t, size_t* left,
+bool StBoundary::GetIndexRange(const std::vector<STPoint>& points,                      // st的点
+                               const double t, size_t* left,                            // 时间t
                                size_t* right) const {
   CHECK_NOTNULL(left);
   CHECK_NOTNULL(right);
-  if (t < points.front().t() || t > points.back().t()) {
+  if (t < points.front().t() || t > points.back().t()) {                                // t不在points对应时间的方位内
     AERROR << "t is out of range. t = " << t;
     return false;
   }
-  auto comp = [](const STPoint& p, const double t) { return p.t() < t; };
-  auto first_ge = std::lower_bound(points.begin(), points.end(), t, comp);
-  size_t index = std::distance(points.begin(), first_ge);
+  auto comp = [](const STPoint& p, const double t) { return p.t() < t; };               // 小于t的第一个点
+  auto first_ge = std::lower_bound(points.begin(), points.end(), t, comp);              // 找到第一个等于t的点
+  size_t index = std::distance(points.begin(), first_ge);                               // 两个迭代器的距离
   if (index == 0) {
     *left = *right = 0;
   } else if (first_ge == points.end()) {
     *left = *right = points.size() - 1;
   } else {
-    *left = index - 1;
-    *right = index;
+    *left = index - 1;                                                                  // 左右边界作为索引的输出
+    *right = index;                                                                     // 坐标空间是左闭右开[)
   }
   return true;
 }
 
-StBoundary StBoundary::GenerateStBoundary(
-    const std::vector<STPoint>& lower_points,
-    const std::vector<STPoint>& upper_points) {
+StBoundary StBoundary::GenerateStBoundary(                                              // 产生st坐标系下的边框
+    const std::vector<STPoint>& lower_points,                                           // 下边界的点
+    const std::vector<STPoint>& upper_points) {                                         // 上边界的点
   if (lower_points.size() != upper_points.size() || lower_points.size() < 2) {
-    return StBoundary();
+    return StBoundary();                                                                // 容错处理, 错误的情况下返回一个空对象
   }
 
-  std::vector<std::pair<STPoint, STPoint>> point_pairs;
-  for (size_t i = 0; i < lower_points.size() && i < upper_points.size(); ++i) {
+  std::vector<std::pair<STPoint, STPoint>> point_pairs;                                 // 临时的点对
+  for (size_t i = 0; i < lower_points.size() && i < upper_points.size(); ++i) {         // 不断迭代
     point_pairs.emplace_back(
         STPoint(lower_points.at(i).s(), lower_points.at(i).t()),
         STPoint(upper_points.at(i).s(), upper_points.at(i).t()));
@@ -379,9 +379,9 @@ StBoundary StBoundary::GenerateStBoundary(
   return StBoundary(point_pairs);
 }
 
-StBoundary StBoundary::CutOffByT(const double t) const {
-  std::vector<STPoint> lower_points;
-  std::vector<STPoint> upper_points;
+StBoundary StBoundary::CutOffByT(const double t) const {                                // 小于t的一些点都直接cut掉(直接不要了)
+  std::vector<STPoint> lower_points;                                                    // 下边界的点
+  std::vector<STPoint> upper_points;                                                    // 上边界的点
   for (size_t i = 0; i < lower_points_.size() && i < upper_points_.size();
        ++i) {
     if (lower_points_[i].t() < t) {
@@ -390,7 +390,7 @@ StBoundary StBoundary::CutOffByT(const double t) const {
     lower_points.push_back(lower_points_[i]);
     upper_points.push_back(upper_points_[i]);
   }
-  return GenerateStBoundary(lower_points, upper_points);
+  return GenerateStBoundary(lower_points, upper_points);                                // 过滤掉小于t的其他点
 }
 
 }  // namespace planning
