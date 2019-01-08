@@ -34,26 +34,26 @@
 namespace apollo {
 namespace planning {
 
-using apollo::perception::PerceptionObstacle;
+using apollo::perception::PerceptionObstacle;                                               // 感知到的障碍物
 
-const std::string& Obstacle::Id() const { return id_; }
+const std::string& Obstacle::Id() const { return id_; }                                     // 直接返回障碍物的ID
 
-std::int32_t Obstacle::PerceptionId() const { return perception_id_; }
+std::int32_t Obstacle::PerceptionId() const { return perception_id_; }                      // 返回在感知中该障碍物的ID
 
-Obstacle::Obstacle(const std::string& id,
+Obstacle::Obstacle(const std::string& id,                                                   // 通过一个ID号, 感知到的障碍物
                    const PerceptionObstacle& perception_obstacle)
-    : id_(id),
+    : id_(id),                                                                              // 初始化列表直接赋值
       perception_id_(perception_obstacle.id()),
       perception_obstacle_(perception_obstacle),
       perception_bounding_box_({perception_obstacle_.position().x(),
-                                perception_obstacle_.position().y()},  // 点对
+                                perception_obstacle_.position().y()},                       // 点对
                                perception_obstacle_.theta(),
                                perception_obstacle_.length(),
                                perception_obstacle_.width()) {
-  std::vector<common::math::Vec2d> polygon_points;    // 多变型的点
+  std::vector<common::math::Vec2d> polygon_points;                                          // 多边形的点
   if (FLAGS_use_navigation_mode ||
       perception_obstacle.polygon_point_size() <= 2) {
-    perception_bounding_box_.GetAllCorners(&polygon_points);   // 获得多边形的角
+    perception_bounding_box_.GetAllCorners(&polygon_points);                                // 获得多边形的角
   } else {
     CHECK(perception_obstacle.polygon_point_size() > 2)
         << "object " << id << "has less than 3 polygon points";
@@ -61,14 +61,14 @@ Obstacle::Obstacle(const std::string& id,
       polygon_points.emplace_back(point.x(), point.y());
     }
   }
-  CHECK(common::math::Polygon2d::ComputeConvexHull(polygon_points,
+  CHECK(common::math::Polygon2d::ComputeConvexHull(polygon_points,                          // 多边形必须有凸包 
                                                    &perception_polygon_))
       << "object[" << id << "] polygon is not a valid convex hull";
 
   is_static_ = IsStaticObstacle(perception_obstacle);
   is_virtual_ = IsVirtualObstacle(perception_obstacle);
   speed_ = std::hypot(perception_obstacle.velocity().x(),
-                      perception_obstacle.velocity().y());  // x,y方向的速度平方再开方
+                      perception_obstacle.velocity().y());                                 // x,y方向的速度平方再开方
 }
 
 Obstacle::Obstacle(const std::string& id,
@@ -123,7 +123,7 @@ bool Obstacle::IsVirtualObstacle(
   return perception_obstacle.id() < 0;   // 虚拟障碍物
 }
 
-common::TrajectoryPoint Obstacle::GetPointAtTime(
+common::TrajectoryPoint Obstacle::GetPointAtTime(                                // 通过一个相对时间获得一个轨迹点
     const double relative_time) const {
   const auto& points = trajectory_.trajectory_point();
   if (points.size() < 2) {
@@ -259,8 +259,8 @@ std::unique_ptr<Obstacle> Obstacle::CreateStaticVirtualObstacles(
     point->set_x(corner_point.x());
     point->set_y(corner_point.y());
   }
-  auto* obstacle = new Obstacle(id, perception_obstacle);
-  obstacle->is_virtual_ = true;
+  auto* obstacle = new Obstacle(id, perception_obstacle);                 // 通过感知的障碍物创建一个新的障碍物
+  obstacle->is_virtual_ = true;                                           // 设置虚拟的障碍物
   return std::unique_ptr<Obstacle>(obstacle);   // unique_ptr的使用, unique_ptr只兼容旧式的C风格
 }
 

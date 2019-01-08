@@ -56,51 +56,51 @@ message ADCSignals {
   repeated SignalType signal = 1;
 }
 // emergency stop(紧急停车)
-message EStop {
+message EStop {                                         // 是否需要紧急停车
   // is_estop == true when emergency stop is required
   optional bool is_estop = 1;
-  optional string reason = 2;
+  optional string reason = 2;                           // 紧急停车的原因
 }
 
 message TaskStats {
-  optional string name = 1;
-  optional double time_ms = 2;
+  optional string name = 1;                             // 任务的名字
+  optional double time_ms = 2;                          // 任务执行的时间
 }
 
 message LatencyStats {
-  optional double total_time_ms = 1;
-  repeated TaskStats task_stats = 2;
-  optional double init_frame_time_ms = 3;
+  optional double total_time_ms = 1;                                               // 总时间(单位是ms)
+  repeated TaskStats task_stats = 2;                                               // 多个任务的状态
+  optional double init_frame_time_ms = 3;                                          // 初始化一帧数据的时间(ms)
 }
 // 轨迹
 // next id: 21
-message ADCTrajectory {
-  optional apollo.common.Header header = 1;
+message ADCTrajectory {                                                            // 自动驾驶车辆的轨迹
+  optional apollo.common.Header header = 1;                                        // 头结点的信息
 
-  optional double total_path_length = 2; // in meters
-  optional double total_path_time = 3; // in seconds
+  optional double total_path_length = 2; // in meters                              // path(路径)的总长度
+  optional double total_path_time = 3; // in seconds                               // 走完path(路径)的总时间
 
   // path data + speed data  //包含了PathPoint
-  repeated apollo.common.TrajectoryPoint trajectory_point = 12;
+  repeated apollo.common.TrajectoryPoint trajectory_point = 12;                    // 重复的轨迹点(包含了path point和速度, 加速度, 相对时间戳等信息)
 
-  optional EStop estop = 6;   // 紧急停车
+  optional EStop estop = 6;                                                        // 紧急停车
 
   // path point without speed info
-  repeated apollo.common.PathPoint path_point = 13;
+  repeated apollo.common.PathPoint path_point = 13;                                // 没有速度信息的道路采样点的信息
 
   // is_replan == true mean replan triggered  // 重新触发
-  optional bool is_replan = 9 [default = false];
+  optional bool is_replan = 9 [default = false];                                   // 是否需要重新进行规划处理(默认是不进行规划的)
 
   // Specify trajectory gear     // canbus 相关的gear
-  optional apollo.canbus.Chassis.GearPosition gear = 10;
+  optional apollo.canbus.Chassis.GearPosition gear = 10;                           // 自动驾驶车辆的档位在哪里
   // planning的决策结果
-  optional apollo.planning.DecisionResult decision = 14;
+  optional apollo.planning.DecisionResult decision = 14;                           // 决策的结果
 
-  optional LatencyStats latency_stats = 15;
+  optional LatencyStats latency_stats = 15;                                        // 延迟统计的状态
 
   // the routing used for current planning result
-  optional apollo.common.Header routing_header = 16;
-  optional apollo.planning_internal.Debug debug = 8;
+  optional apollo.common.Header routing_header = 16;                               // 当前使用的routing的结果(就是routing的头)
+  optional apollo.planning_internal.Debug debug = 8;                               // planning内部debug的信息
 
   // replaced by path_point
   repeated ADCPathPoint adc_path_point = 7 [deprecated=true];

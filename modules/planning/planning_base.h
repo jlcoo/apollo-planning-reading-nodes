@@ -64,8 +64,8 @@ class PlanningBase : public apollo::common::ApolloApp {                         
    */
   virtual apollo::common::Status Plan(                                            // 接口函数, 规划出响应的轨迹
       const double current_time_stamp,
-      const std::vector<common::TrajectoryPoint>& stitching_trajectory,
-      ADCTrajectory* trajectory) = 0;
+      const std::vector<common::TrajectoryPoint>& stitching_trajectory,           // TrajectoryPoint是在pnc_point.proto文件中定义的, 具有一个路径点, 速度, 加速度, 相对时间
+      ADCTrajectory* trajectory) = 0;                                             // ADCTrajectory是在planning.proto文件中定义, 主要包括了path的总长度, 总时间, 轨迹点, 是否紧急刹车, 道路点 等等
 
  protected:
   void PublishPlanningPb(ADCTrajectory* trajectory_pb, double timestamp);        // ADCTrajectory是在planning.proto文件中定义, 是轨迹的一些字节段

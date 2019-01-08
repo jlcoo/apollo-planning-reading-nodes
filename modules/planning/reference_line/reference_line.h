@@ -46,7 +46,7 @@ class ReferenceLine {                                                           
       : reference_points_(begin, end),
         map_path_(std::move(std::vector<hdmap::MapPathPoint>(begin, end))) {}           // 带模板的构造函数
   explicit ReferenceLine(const std::vector<ReferencePoint>& reference_points);          // 由参考线的点集构成一条道路中心线
-  explicit ReferenceLine(const hdmap::Path& hdmap_path);
+  explicit ReferenceLine(const hdmap::Path& hdmap_path);                                // 通过高精地图的path进行构造reference line(中心参考线)
   // stitching 拼接
   /** Stitch current reference line with the other reference line
    * The stitching strategy is to use current reference points as much as
@@ -70,13 +70,13 @@ class ReferenceLine {                                                           
    *
    * @return false if these two reference line cannot be stitched
    */
-  bool Stitch(const ReferenceLine& other);
+  bool Stitch(const ReferenceLine& other);                                             // 合并两条reference line
 
-  bool Shrink(const common::math::Vec2d& point, double look_backward,
+  bool Shrink(const common::math::Vec2d& point, double look_backward,                  // 二维向量的点进行剪切
               double look_forward);
 
-  const hdmap::Path& map_path() const;
-  const std::vector<ReferencePoint>& reference_points() const;
+  const hdmap::Path& map_path() const;                                                 // 高精地图中的path
+  const std::vector<ReferencePoint>& reference_points() const;                         // reference line相关的所有点集
 
   ReferencePoint GetReferencePoint(const double s) const;
   std::vector<ReferencePoint> GetReferencePoints(double start_s,
@@ -86,7 +86,7 @@ class ReferenceLine {                                                           
 
   ReferencePoint GetNearestReferencePoint(const common::math::Vec2d& xy) const;
 
-  std::vector<hdmap::LaneSegment> GetLaneSegments(const double start_s,
+  std::vector<hdmap::LaneSegment> GetLaneSegments(const double start_s,                // 获取lane的片段的集合(多少米为一个片段呢?)
                                                   const double end_s) const;
 
   ReferencePoint GetNearestReferencePoint(const double s) const;

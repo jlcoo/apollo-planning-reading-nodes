@@ -36,9 +36,9 @@ namespace planning {
 
 using apollo::common::VehicleConfigHelper;
 using apollo::common::util::FindOrDie;
-
-namespace {
-const double kStBoundaryDeltaS = 0.2;        // meters      
+// 具有internal属性, 仅作用于当前文件
+namespace {                                  // 编译器会在内部为匿名的命名空间生成一个唯一的名字, 还会为这个匿名的命名空间生成一条using指令
+const double kStBoundaryDeltaS = 0.2;        // meters  , 采样点的距离?     
 const double kStBoundarySparseDeltaS = 1.0;  // meters  稀疏的DeltaS
 const double kStBoundaryDeltaT = 0.05;       // seconds 0.05秒一次
 }  // namespace
@@ -61,23 +61,23 @@ const std::unordered_map<ObjectDecisionType::ObjectTagCase, int,
 
 const std::string& PathObstacle::Id() const { return id_; }
 
-PathObstacle::PathObstacle(const Obstacle* obstacle) : obstacle_(obstacle) {
+PathObstacle::PathObstacle(const Obstacle* obstacle) : obstacle_(obstacle) {            // 通过感知到的障碍物构造在道路上的障碍物
   CHECK_NOTNULL(obstacle);
   id_ = obstacle_->Id();
 }
 
-void PathObstacle::SetPerceptionSlBoundary(const SLBoundary& sl_boundary) {
+void PathObstacle::SetPerceptionSlBoundary(const SLBoundary& sl_boundary) {             // 设置感知到的sl的边框(boundary)
   perception_sl_boundary_ = sl_boundary;   // sl坐标系下的boundary
 }
 
 double PathObstacle::MinRadiusStopDistance(
-    const common::VehicleParam& vehicle_param) const {
+    const common::VehicleParam& vehicle_param) const {                                  // 最小停止距离的半径
   if (min_radius_stop_distance_ > 0) {
     return min_radius_stop_distance_;
   }
-  constexpr double stop_distance_buffer = 0.5;
+  constexpr double stop_distance_buffer = 0.5;                                          // 停止距离为0.5米
   const double min_turn_radius = VehicleConfigHelper::MinSafeTurnRadius();
-  double lateral_diff = vehicle_param.width() / 2.0 +
+  double lateral_diff = vehicle_param.width() / 2.0 +                                   // 横向差异
                         std::max(std::fabs(perception_sl_boundary_.start_l()),
                                  std::fabs(perception_sl_boundary_.end_l()));
   const double kEpison = 1e-5;
@@ -86,7 +86,7 @@ double PathObstacle::MinRadiusStopDistance(
       std::sqrt(std::fabs(min_turn_radius * min_turn_radius -
                           (min_turn_radius - lateral_diff) *
                               (min_turn_radius - lateral_diff))) +
-      stop_distance_buffer;
+      stop_distance_buffer;                                                              // 停止距离的buffer(缓冲区)
   stop_distance -= vehicle_param.front_edge_to_center();
   stop_distance = std::min(stop_distance, FLAGS_max_stop_distance_obstacle);
   stop_distance = std::max(stop_distance, FLAGS_min_stop_distance_obstacle);
@@ -96,13 +96,13 @@ double PathObstacle::MinRadiusStopDistance(
 void PathObstacle::BuildReferenceLineStBoundary(
     const ReferenceLine& reference_line, const double adc_start_s) {
   const auto& adc_param =
-      VehicleConfigHelper::instance()->GetConfig().vehicle_param();  // 获得车辆参数
-  const double adc_width = adc_param.width();
+      VehicleConfigHelper::instance()->GetConfig().vehicle_param();                      // 获得车辆参数
+  const double adc_width = adc_param.width();                                            // 车的宽度
   if (obstacle_->IsStatic() ||
       obstacle_->Trajectory().trajectory_point().empty()) {
-    std::vector<std::pair<STPoint, STPoint>> point_pairs;      // ST的点对
-    double start_s = perception_sl_boundary_.start_s();
-    double end_s = perception_sl_boundary_.end_s();
+    std::vector<std::pair<STPoint, STPoint>> point_pairs;                                // ST的点对
+    double start_s = perception_sl_boundary_.start_s();                                  // 起点
+    double end_s = perception_sl_boundary_.end_s();                                      // 终点
     if (end_s - start_s < kStBoundaryDeltaS) {
       end_s = start_s + kStBoundaryDeltaS;
     }
@@ -114,9 +114,9 @@ void PathObstacle::BuildReferenceLineStBoundary(
                              STPoint(end_s - adc_start_s, 0.0));
     point_pairs.emplace_back(STPoint(start_s - adc_start_s, FLAGS_st_max_t),
                              STPoint(end_s - adc_start_s, FLAGS_st_max_t));
-    reference_line_st_boundary_ = StBoundary(point_pairs);
+    reference_line_st_boundary_ = StBoundary(point_pairs);                              // 中心参考线在st坐标系下的边框(boundary)
   } else {
-    if (BuildTrajectoryStBoundary(reference_line, adc_start_s,
+    if (BuildTrajectoryStBoundary(reference_line, adc_start_s,                          // 动态障碍物必须通过起点, 参考线, 生成一个参考线的boundary(边框)
                                   &reference_line_st_boundary_)) {
       ADEBUG << "Found st_boundary for obstacle " << id_;
       ADEBUG << "st_boundary: min_t = " << reference_line_st_boundary_.min_t()
@@ -130,19 +130,19 @@ void PathObstacle::BuildReferenceLineStBoundary(
 }
 
 bool PathObstacle::BuildTrajectoryStBoundary(
-    const ReferenceLine& reference_line, const double adc_start_s,
-    StBoundary* const st_boundary) {
+    const ReferenceLine& reference_line, const double adc_start_s,                      // 参考线, 起点
+    StBoundary* const st_boundary) {                                                    // 生成一个st坐标系下的边界(doundary)
   const auto& object_id = obstacle_->Id();
-  const auto& perception = obstacle_->Perception();
+  const auto& perception = obstacle_->Perception();                                     // 感知的障碍物
   if (!IsValidObstacle(perception)) {
     AERROR << "Fail to build trajectory st boundary because object is not "
               "valid. PerceptionObstacle: "
            << perception.DebugString();
     return false;
   }
-  const double object_width = perception.width();
-  const double object_length = perception.length();
-  const auto& trajectory_points = obstacle_->Trajectory().trajectory_point();
+  const double object_width = perception.width();                                       // 宽度
+  const double object_length = perception.length();                                     // 长度
+  const auto& trajectory_points = obstacle_->Trajectory().trajectory_point();           // 轨迹点
   if (trajectory_points.empty()) {
     AWARN << "object " << object_id << " has no trajectory points";
     return false;
@@ -152,33 +152,33 @@ bool PathObstacle::BuildTrajectoryStBoundary(
   const double adc_length = adc_param.length();
   const double adc_half_length = adc_length / 2.0;
   const double adc_width = adc_param.width();
-  common::math::Box2d min_box({0, 0}, 1.0, 1.0, 1.0);
-  common::math::Box2d max_box({0, 0}, 1.0, 1.0, 1.0);
-  std::vector<std::pair<STPoint, STPoint>> polygon_points;
+  common::math::Box2d min_box({0, 0}, 1.0, 1.0, 1.0);                                   // 初始化一个最小的box
+  common::math::Box2d max_box({0, 0}, 1.0, 1.0, 1.0);                                   // 初始化一个最大的box
+  std::vector<std::pair<STPoint, STPoint>> polygon_points;                              // 一个多边形的点
 
-  SLBoundary last_sl_boundary;
-  int last_index = 0;
+  SLBoundary last_sl_boundary;                                                          // 上一个sl的边框点
+  int last_index = 0;                                                                   // 上一次的索引值
 
-  for (int i = 1; i < trajectory_points.size(); ++i) {
+  for (int i = 1; i < trajectory_points.size(); ++i) {                                  // 迭代轨迹的所有点
     ADEBUG << "last_sl_boundary: " << last_sl_boundary.ShortDebugString();
 
-    const auto& first_traj_point = trajectory_points[i - 1];
-    const auto& second_traj_point = trajectory_points[i];
+    const auto& first_traj_point = trajectory_points[i - 1];                            // 第一个轨迹点
+    const auto& second_traj_point = trajectory_points[i];                               // 第二个轨迹点
     const auto& first_point = first_traj_point.path_point();
     const auto& second_point = second_traj_point.path_point();
 
-    double total_length =
+    double total_length =                                                               // 获得两个点的总距离
         object_length + common::util::DistanceXY(first_point, second_point);
 
-    common::math::Vec2d center((first_point.x() + second_point.x()) / 2.0,
+    common::math::Vec2d center((first_point.x() + second_point.x()) / 2.0,              // 障碍物的中心点
                                (first_point.y() + second_point.y()) / 2.0);
-    common::math::Box2d object_moving_box(center, first_point.theta(),
+    common::math::Box2d object_moving_box(center, first_point.theta(),                  // 构造一个新的box
                                           total_length, object_width);
-    SLBoundary object_boundary;
+    SLBoundary object_boundary;                                                         // sl的边框
     // NOTICE: this method will have errors when the reference line is not
     // straight. Need double loop to cover all corner cases.
     const double distance_xy =
-        common::util::DistanceXY(trajectory_points[last_index].path_point(),
+        common::util::DistanceXY(trajectory_points[last_index].path_point(),            // 到最后轨迹点的距离
                                  trajectory_points[i].path_point());
     if (last_sl_boundary.start_l() > distance_xy ||
         last_sl_boundary.end_l() < -distance_xy) {
@@ -186,9 +186,9 @@ bool PathObstacle::BuildTrajectoryStBoundary(
     }
 
     const double mid_s =
-        (last_sl_boundary.start_s() + last_sl_boundary.end_s()) / 2.0;
-    const double start_s = std::fmax(0.0, mid_s - 2.0 * distance_xy);
-    const double end_s = (i == 1) ? reference_line.Length()
+        (last_sl_boundary.start_s() + last_sl_boundary.end_s()) / 2.0;                  // boundary的中点
+    const double start_s = std::fmax(0.0, mid_s - 2.0 * distance_xy);                   // 起点
+    const double end_s = (i == 1) ? reference_line.Length()                             // 终点
                                   : std::fmin(reference_line.Length(),
                                               mid_s + 2.0 * distance_xy);
 
@@ -199,12 +199,12 @@ bool PathObstacle::BuildTrajectoryStBoundary(
     }
 
     // update history record
-    last_sl_boundary = object_boundary;
+    last_sl_boundary = object_boundary;                                                 // 更新历史点
     last_index = i;
 
     // skip if object is entirely on one side of reference line.
-    constexpr double kSkipLDistanceFactor = 0.4;
-    const double skip_l_distance =
+    constexpr double kSkipLDistanceFactor = 0.4;                                        // 如果对象完全位于参考线的一侧就跳过
+    const double skip_l_distance =                                                      // 跳过的距离公式是boundary的距离差的0.4倍再加上自动驾驶车辆的一半
         (object_boundary.end_s() - object_boundary.start_s()) *
             kSkipLDistanceFactor +
         adc_width / 2.0;
@@ -219,24 +219,24 @@ bool PathObstacle::BuildTrajectoryStBoundary(
     if (object_boundary.end_s() < 0) {  // skip if behind reference line
       continue;
     }
-    constexpr double kSparseMappingS = 20.0;
+    constexpr double kSparseMappingS = 20.0;                                            // 稀疏地图的距离是20米
     const double st_boundary_delta_s =
         (std::fabs(object_boundary.start_s() - adc_start_s) > kSparseMappingS)
-            ? kStBoundarySparseDeltaS
+            ? kStBoundarySparseDeltaS                                                   // 稀疏地图的delta值为1.0米
             : kStBoundaryDeltaS;
     const double object_s_diff =
-        object_boundary.end_s() - object_boundary.start_s();
+        object_boundary.end_s() - object_boundary.start_s();                            // 物体在s轴上的差值
     if (object_s_diff < st_boundary_delta_s) {
       continue;
     }
     const double delta_t =
-        second_traj_point.relative_time() - first_traj_point.relative_time();
+        second_traj_point.relative_time() - first_traj_point.relative_time();           // 时间戳
     double low_s = std::max(object_boundary.start_s() - adc_half_length, 0.0);
     bool has_low = false;
     double high_s =
         std::min(object_boundary.end_s() + adc_half_length, FLAGS_st_max_s);
     bool has_high = false;
-    while (low_s + st_boundary_delta_s < high_s && !(has_low && has_high)) {
+    while (low_s + st_boundary_delta_s < high_s && !(has_low && has_high)) {            // 这里使用的是什么算法???
       if (!has_low) {
         auto low_ref = reference_line.GetReferencePoint(low_s);
         has_low = object_moving_box.HasOverlap(
@@ -293,40 +293,40 @@ bool PathObstacle::BuildTrajectoryStBoundary(
   return true;
 }
 
-const StBoundary& PathObstacle::reference_line_st_boundary() const {
+const StBoundary& PathObstacle::reference_line_st_boundary() const {              // 直接返回参考线的boundary
   return reference_line_st_boundary_;
 }
 
-const StBoundary& PathObstacle::st_boundary() const { return st_boundary_; }
+const StBoundary& PathObstacle::st_boundary() const { return st_boundary_; }      // 返回该障碍物的st坐标系下的boundary
 
-const std::vector<std::string>& PathObstacle::decider_tags() const {
+const std::vector<std::string>& PathObstacle::decider_tags() const {              // 返回决策的便签
   return decider_tags_;
 }
 
-const std::vector<ObjectDecisionType>& PathObstacle::decisions() const {
+const std::vector<ObjectDecisionType>& PathObstacle::decisions() const {          // 障碍物的决策类型
   return decisions_;
 }
 
-bool PathObstacle::IsLateralDecision(const ObjectDecisionType& decision) {
+bool PathObstacle::IsLateralDecision(const ObjectDecisionType& decision) {        // 横向决策
   return decision.has_ignore() || decision.has_nudge() ||
          decision.has_sidepass();
 }
 
-bool PathObstacle::IsLongitudinalDecision(const ObjectDecisionType& decision) {
+bool PathObstacle::IsLongitudinalDecision(const ObjectDecisionType& decision) {   // 是否是纵向决策
   return decision.has_ignore() || decision.has_stop() || decision.has_yield() ||
          decision.has_follow() || decision.has_overtake();
 }
 
-ObjectDecisionType PathObstacle::MergeLongitudinalDecision(
+ObjectDecisionType PathObstacle::MergeLongitudinalDecision(                       // 合并纵向的决策
     const ObjectDecisionType& lhs, const ObjectDecisionType& rhs) {
-  if (lhs.object_tag_case() == ObjectDecisionType::OBJECT_TAG_NOT_SET) {
+  if (lhs.object_tag_case() == ObjectDecisionType::OBJECT_TAG_NOT_SET) {          // 物体的tag没有被设置
     return rhs;
   }
   if (rhs.object_tag_case() == ObjectDecisionType::OBJECT_TAG_NOT_SET) {
     return lhs;
   }
   const auto lhs_val =
-      FindOrDie(s_longitudinal_decision_safety_sorter_, lhs.object_tag_case());
+      FindOrDie(s_longitudinal_decision_safety_sorter_, lhs.object_tag_case());   // 纵向的策略按照安全性排序
   const auto rhs_val =
       FindOrDie(s_longitudinal_decision_safety_sorter_, rhs.object_tag_case());
   if (lhs_val < rhs_val) {
@@ -336,13 +336,13 @@ ObjectDecisionType PathObstacle::MergeLongitudinalDecision(
   } else {
     if (lhs.has_ignore()) {
       return rhs;
-    } else if (lhs.has_stop()) {
+    } else if (lhs.has_stop()) {                                                  // 停止
       return lhs.stop().distance_s() < rhs.stop().distance_s() ? lhs : rhs;
-    } else if (lhs.has_yield()) {
+    } else if (lhs.has_yield()) {                                                 // 让行
       return lhs.yield().distance_s() < rhs.yield().distance_s() ? lhs : rhs;
-    } else if (lhs.has_follow()) {
+    } else if (lhs.has_follow()) {                                                // 跟行
       return lhs.follow().distance_s() < rhs.follow().distance_s() ? lhs : rhs;
-    } else if (lhs.has_overtake()) {
+    } else if (lhs.has_overtake()) {                                              // 超车
       return lhs.overtake().distance_s() > rhs.overtake().distance_s() ? lhs
                                                                        : rhs;
     } else {
@@ -500,13 +500,13 @@ void PathObstacle::EraseReferenceLineStBoundary() {
 
 bool PathObstacle::IsValidObstacle(
     const perception::PerceptionObstacle& perception_obstacle) {
-  const double object_width = perception_obstacle.width();
+  const double object_width = perception_obstacle.width();                       // 感知障碍物的宽度和长度
   const double object_length = perception_obstacle.length();
 
-  const double kMinObjectDimension = 1.0e-6;
+  const double kMinObjectDimension = 1.0e-6;                                     // 障碍物的最小维度
   return !std::isnan(object_width) && !std::isnan(object_length) &&
-         object_width > kMinObjectDimension &&
-         object_length > kMinObjectDimension;
+         object_width > kMinObjectDimension &&                                   // 宽度和长度至少要大于1.0e-6
+         object_length > kMinObjectDimension;                                    // 长度的限制
 }
 
 }  // namespace planning

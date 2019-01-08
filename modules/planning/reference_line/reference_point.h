@@ -30,9 +30,9 @@
 
 namespace apollo {
 namespace planning {
-// 参考线的点, 二维向量
+// 参考线的点, 二维向量                                                                  // MapPathPoint继承于LaneWaypoint(内部有一个LaneInfoConstPtr的指针和一个sl坐标)
 class ReferencePoint : public hdmap::MapPathPoint {                                   // 参考线的点, MapPathPoint继承于二维向量点common::math::Vec2d
- public:
+ public:                                                                              // 所以ReferencePoint应该也有sl坐标和lane的相关信息, 除此之外还有, 航向角, 曲率和曲率的微分
   ReferencePoint() = default;                                                         // 默认的构造函数
 
   ReferencePoint(const MapPathPoint& map_path_point, const double kappa,              // 通过地图中的道路点, 曲率和曲率的微分进行构造中心参考线

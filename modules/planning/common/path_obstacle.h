@@ -59,66 +59,66 @@ namespace planning {
  * Ignore decision belongs to both lateral decision and longitudinal decision,
  * and it has the lowest priority.
  */
-class PathObstacle {       // sl坐标系中的障碍物类
+class PathObstacle {                                                         // sl坐标系中的障碍物类, path被映射到sl坐标系中
  public:
-  PathObstacle() = default;
-  explicit PathObstacle(const Obstacle* obstacle);
+  PathObstacle() = default;                                                  // 默认的构造函数
+  explicit PathObstacle(const Obstacle* obstacle);                           // 禁止隐式转换的构造函数
 
-  const std::string& Id() const;
+  const std::string& Id() const;                                             // 障碍物的id号
 
-  const Obstacle* obstacle() const;
+  const Obstacle* obstacle() const;                                          // 获取这个障碍物
 
   /**
    * return the merged lateral decision
    * Lateral decision is one of {Nudge, Ignore}
    **/
-  const ObjectDecisionType& LateralDecision() const;
+  const ObjectDecisionType& LateralDecision() const;                         // 横向的决策是Nudge和Ignore两者的一个
 
   /**
    * @brief return the merged longitudinal decision
    * Longitudinal decision is one of {Stop, Yield, Follow, Overtake, Ignore}
    **/
-  const ObjectDecisionType& LongitudinalDecision() const;
+  const ObjectDecisionType& LongitudinalDecision() const;                    // 纵向的决策策略
 
-  const std::string DebugString() const;
+  const std::string DebugString() const;                                     // debug的信息
 
-  const SLBoundary& PerceptionSLBoundary() const;
+  const SLBoundary& PerceptionSLBoundary() const;                            // 感知到障碍物的sl边界
 
-  const StBoundary& reference_line_st_boundary() const;
+  const StBoundary& reference_line_st_boundary() const;                      // 参考线的st边界
 
-  const StBoundary& st_boundary() const;
+  const StBoundary& st_boundary() const;                                     // 障碍物在st坐标系下的边框(boundary)
 
-  const std::vector<std::string>& decider_tags() const;
+  const std::vector<std::string>& decider_tags() const;                      // 决策的标签(tags)
 
-  const std::vector<ObjectDecisionType>& decisions() const;
+  const std::vector<ObjectDecisionType>& decisions() const;                  // 决策的类型
 
-  void AddLongitudinalDecision(const std::string& decider_tag,
+  void AddLongitudinalDecision(const std::string& decider_tag,               // 添加纵向决策的策略
                                const ObjectDecisionType& decision);
 
-  void AddLateralDecision(const std::string& decider_tag,
+  void AddLateralDecision(const std::string& decider_tag,                    // 添加横向决策的策略
                           const ObjectDecisionType& decision);
-  bool HasLateralDecision() const;
+  bool HasLateralDecision() const;                                           // 是否有横向的决策策略
 
-  void SetStBoundary(const StBoundary& boundary);
+  void SetStBoundary(const StBoundary& boundary);                            // 设置该障碍物在st坐标系下的边框
 
-  void SetStBoundaryType(const StBoundary::BoundaryType type);
+  void SetStBoundaryType(const StBoundary::BoundaryType type);               // 设置该边框的类型
 
-  void EraseStBoundary();
+  void EraseStBoundary();                                                    // 删除该st坐标下的边框
 
-  void SetReferenceLineStBoundary(const StBoundary& boundary);
+  void SetReferenceLineStBoundary(const StBoundary& boundary);               // 设置st坐标下的参考线
 
-  void SetReferenceLineStBoundaryType(const StBoundary::BoundaryType type);
+  void SetReferenceLineStBoundaryType(const StBoundary::BoundaryType type);  // 设置st坐标下的参考线的类型
 
-  void EraseReferenceLineStBoundary();
+  void EraseReferenceLineStBoundary();                                       // 删除所有的st坐标下的参考线
 
-  bool HasLongitudinalDecision() const;
+  bool HasLongitudinalDecision() const;                                      // 是否有纵向参考策略
 
-  bool HasNonIgnoreDecision() const;
+  bool HasNonIgnoreDecision() const;                                         // 是否有不能被忽略的决策
 
   /**
    * @brief Calculate stop distance with the obstacle using the ADC's minimum
    * turning radius
-   */
+   */                                                                        // 使用自动驾驶的车辆的最小转弯半径计算到障碍物的停止距离
   double MinRadiusStopDistance(const common::VehicleParam& vehicle_param) const;
 
   /**
@@ -127,37 +127,37 @@ class PathObstacle {       // sl坐标系中的障碍物类
    * longitudinal decision is ignore
    *  return longitudinal_decision_ == ignore && lateral_decision == ignore.
    */
-  bool IsIgnore() const;
-  bool IsLongitudinalIgnore() const;
-  bool IsLateralIgnore() const;
+  bool IsIgnore() const;                                                     // 是否可以忽略该障碍物
+  bool IsLongitudinalIgnore() const;                                         // 从纵向上是否可以忽略该障碍物
+  bool IsLateralIgnore() const;                                              // 横向上是否可以忽略该障碍物
 
-  void BuildReferenceLineStBoundary(const ReferenceLine& reference_line,
+  void BuildReferenceLineStBoundary(const ReferenceLine& reference_line,     // 建立一个中心参考线的boundary(边框)
                                     const double adc_start_s);
 
-  void SetPerceptionSlBoundary(const SLBoundary& sl_boundary);
+  void SetPerceptionSlBoundary(const SLBoundary& sl_boundary);               // 设置感知的sl坐标系的边框(boundary)
 
   /**
    * @brief check if a ObjectDecisionType is a longitudinal decision.
    **/
-  static bool IsLongitudinalDecision(const ObjectDecisionType& decision);
+  static bool IsLongitudinalDecision(const ObjectDecisionType& decision);    // 检查一个决策是否是纵向的决策
 
   /**
    * @brief check if a ObjectDecisionType is a lateral decision.
    **/
-  static bool IsLateralDecision(const ObjectDecisionType& decision);
+  static bool IsLateralDecision(const ObjectDecisionType& decision);         // 检查一个决策是否是横向的决策
 
-  void SetBlockingObstacle(bool blocking) { is_blocking_obstacle_ = blocking; }
-  bool IsBlockingObstacle() const { return is_blocking_obstacle_; }
+  void SetBlockingObstacle(bool blocking) { is_blocking_obstacle_ = blocking; } // 把该障碍物设置为一个不能通过的障碍物
+  bool IsBlockingObstacle() const { return is_blocking_obstacle_; }          // 看看一个障碍物是否是一个阻塞的障碍物
 
  private:
   FRIEND_TEST(MergeLongitudinalDecision, AllDecisions);
-  static ObjectDecisionType MergeLongitudinalDecision(
+  static ObjectDecisionType MergeLongitudinalDecision(                       // 合并所有纵向的决策
       const ObjectDecisionType& lhs, const ObjectDecisionType& rhs);
   FRIEND_TEST(MergeLateralDecision, AllDecisions);
-  static ObjectDecisionType MergeLateralDecision(const ObjectDecisionType& lhs,
+  static ObjectDecisionType MergeLateralDecision(const ObjectDecisionType& lhs, // 合并所有横向的决策
                                                  const ObjectDecisionType& rhs);
 
-  bool BuildTrajectoryStBoundary(const ReferenceLine& reference_line,
+  bool BuildTrajectoryStBoundary(const ReferenceLine& reference_line,           // 通过中心参考线, 起点, 建立一个运行轨迹(trajectory)的st边框
                                  const double adc_start_s,
                                  StBoundary* const st_boundary);
   bool IsValidObstacle(

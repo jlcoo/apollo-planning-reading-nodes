@@ -13,12 +13,12 @@ import "modules/planning/proto/sl_boundary.proto";
 import "modules/planning/proto/decision.proto";
 // planning内部使用的接口
 message Debug {
-  optional PlanningData planning_data = 2;
+  optional PlanningData planning_data = 2;                   // debug的输出都是一些planning的数据
 }
 
-message SpeedPlan {
-  optional string name = 1;
-  repeated apollo.common.SpeedPoint speed_point = 2;
+message SpeedPlan {                                          // 速度规划的值
+  optional string name = 1;                                  // 名字服务, 给每个 speed plan取个名字
+  repeated apollo.common.SpeedPoint speed_point = 2;         // 多个速度点(路程, 时间, 速度, 加速度, 加速度的微分)
 }
 
 message StGraphBoundaryDebug {
@@ -115,16 +115,16 @@ message DpPolyGraphDebug {
   repeated SampleLayerDebug sample_layer = 1;
   repeated apollo.common.SLPoint min_cost_point = 2;
 }
-
+// planning data 应该就是一个planning模块的输入
 // next id: 22
-message PlanningData {
+message PlanningData {                                                               // planning的输入数据
   // input
-  optional apollo.localization.LocalizationEstimate adc_position = 7;
-  optional apollo.canbus.Chassis chassis = 8;
-  optional apollo.routing.RoutingResponse routing = 9;
-  optional apollo.common.TrajectoryPoint init_point = 10;
+  optional apollo.localization.LocalizationEstimate adc_position = 7;                // 自动驾驶车辆的位置
+  optional apollo.canbus.Chassis chassis = 8;                                        // 车的底盘相关的报文
+  optional apollo.routing.RoutingResponse routing = 9;                               // planning的输入有routing的请求
+  optional apollo.common.TrajectoryPoint init_point = 10;                            // 初始化的轨迹点(三维空间的一个点, 还有一些曲率和速度信息等)
 
-  repeated apollo.common.Path path = 6;
+  repeated apollo.common.Path path = 6;                                              // path是车道两边的线??
   repeated SpeedPlan speed_plan = 13;
   repeated STGraphDebug st_graph = 14;
   repeated SLFrameDebug sl_frame = 15;

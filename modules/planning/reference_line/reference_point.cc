@@ -30,36 +30,36 @@
 namespace apollo {
 namespace planning {
 
-using apollo::common::PathPoint;
-using apollo::common::util::StrCat;
+using apollo::common::PathPoint;                                                     // 道路上的一个点
+using apollo::common::util::StrCat;                                                  // 拷贝一个字符串
 
 namespace {
 // Minimum distance to remove duplicated points.
-const double kDuplicatedPointsEpsilon = 1e-7;
+const double kDuplicatedPointsEpsilon = 1e-7;                                        // 要移除重复点的最小距离
 }  // namespace
 
-ReferencePoint::ReferencePoint(const MapPathPoint& map_path_point,
+ReferencePoint::ReferencePoint(const MapPathPoint& map_path_point,                   // 构造参考线的一个点
                                const double kappa, const double dkappa)
     : hdmap::MapPathPoint(map_path_point), kappa_(kappa), dkappa_(dkappa) {}
 
-common::PathPoint ReferencePoint::ToPathPoint(double s) const {
+common::PathPoint ReferencePoint::ToPathPoint(double s) const {                      // 通过s(距离)构造一个路径点
   common::PathPoint path_point = common::util::MakePathPoint(
       x(), y(), 0.0, heading(), kappa_, dkappa_, 0.0);
   path_point.set_s(s);
   return path_point;
 }
 
-double ReferencePoint::kappa() const { return kappa_; }
+double ReferencePoint::kappa() const { return kappa_; }                              // 获取中心参考线的曲率
 
-double ReferencePoint::dkappa() const { return dkappa_; }
+double ReferencePoint::dkappa() const { return dkappa_; }                            // 获取中心参考线曲率的微分
 
-std::string ReferencePoint::DebugString() const {
+std::string ReferencePoint::DebugString() const {                                    // debug的信息
   // StrCat only support 9 parameters
   return StrCat("{x: ", x(), ", y: ", y(), ", theta: ", heading()) +
          StrCat(", kappa: ", kappa(), ", dkappa: ", dkappa(), "}");
 }
 
-void ReferencePoint::RemoveDuplicates(std::vector<ReferencePoint>* points) {
+void ReferencePoint::RemoveDuplicates(std::vector<ReferencePoint>* points) {         // 移除中心参考线的重复的点
   CHECK_NOTNULL(points);
   int count = 0;
   const double limit = kDuplicatedPointsEpsilon * kDuplicatedPointsEpsilon;

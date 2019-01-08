@@ -43,13 +43,13 @@ namespace planning {
 // reference line包含xy位置坐标、路的形状属性，然后在reference line基础上再去画其他其他元素。
 // reference line是一条没有宽度的线
 using MapPath = hdmap::Path;             // 高精地图的path
-using apollo::common::SLPoint;
-using apollo::common::util::DistanceXY;
+using apollo::common::SLPoint;                                                         // sl坐标系下的点
+using apollo::common::util::DistanceXY;                                                // xy坐标系下两个点的距离
 using apollo::hdmap::InterpolatedIndex;  // 插值指数
 
 // 通过vector<ReferencePoint>构造ReferenceLine
 ReferenceLine::ReferenceLine(
-    const std::vector<ReferencePoint>& reference_points)
+    const std::vector<ReferencePoint>& reference_points)                               // 通过中心参考线的点集构造中心参考线
     : reference_points_(reference_points),
       map_path_(std::move(std::vector<hdmap::MapPathPoint>(
           reference_points.begin(), reference_points.end()))) {
@@ -67,18 +67,18 @@ ReferenceLine::ReferenceLine(const MapPath& hdmap_path)   // using MapPath = hdm
   CHECK_EQ(map_path_.num_points(), reference_points_.size());   // 作容错检查, map_path的数量是否等于reference_points
 }
 
-bool ReferenceLine::Stitch(const ReferenceLine& other) {
+bool ReferenceLine::Stitch(const ReferenceLine& other) {                             // 两个中心参考线进行合并
   if (other.reference_points().empty()) {
-    AWARN << "The other reference line is empty";
+    AWARN << "The other reference line is empty";                                    // 容错检查
     return true;
   }
-  auto first_point = reference_points_.front();
-  common::SLPoint first_sl;
+  auto first_point = reference_points_.front();                                      // 参考线的起点
+  common::SLPoint first_sl;                                                          // 第一个sl的点
   if (!other.XYToSL(first_point, &first_sl)) {
     AWARN << "failed to project the first point to the other reference line";
     return false;
   }
-  constexpr double kStitchingError = 2e-2;
+  constexpr double kStitchingError = 2e-2;                                           // 合并的误差值
   bool first_join = first_sl.s() > 0 && first_sl.s() < other.Length() &&
                     std::fabs(first_sl.l()) < kStitchingError;
   auto last_point = reference_points_.back();
@@ -126,7 +126,7 @@ bool ReferenceLine::Stitch(const ReferenceLine& other) {
   return true;
 }
 
-ReferencePoint ReferenceLine::GetNearestReferencePoint(
+ReferencePoint ReferenceLine::GetNearestReferencePoint(                            // 获取最近的参考线的点
     const common::math::Vec2d& xy) const {
   double min_dist = std::numeric_limits<double>::max();
   int min_index = 0;
@@ -320,7 +320,7 @@ ReferencePoint ReferenceLine::GetReferencePoint(const double x,
                      reference_points_[index_end], s1, s);
 }
 
-bool ReferenceLine::SLToXY(const SLPoint& sl_point,
+bool ReferenceLine::SLToXY(const SLPoint& sl_point,                                 // 在参考线的类中有sl坐标系和xy坐标系的相互转换
                            common::math::Vec2d* const xy_point) const {
   CHECK_NOTNULL(xy_point);
   if (map_path_.num_points() < 2) {
@@ -349,7 +349,7 @@ bool ReferenceLine::XYToSL(const common::math::Vec2d& xy_point,
   return true;
 }
 // 找到最合适的点
-ReferencePoint ReferenceLine::InterpolateWithMatchedIndex(
+ReferencePoint ReferenceLine::InterpolateWithMatchedIndex(                               // 进行插值
     const ReferencePoint& p0, const double s0, const ReferencePoint& p1,
     const double s1, const InterpolatedIndex& index) const {
   if (std::fabs(s0 - s1) < common::math::kMathEpsilon) {
@@ -415,7 +415,7 @@ bool ReferenceLine::GetLaneWidth(const double s, double* const lane_left_width, 
   if (map_path_.path_points().empty()) {
     return false;
   }
-  return map_path_.GetLaneWidth(s, lane_left_width, lane_right_width);    // 从map地图中获取
+  return map_path_.GetLaneWidth(s, lane_left_width, lane_right_width);            // 从map地图中获取
 }
 
 bool ReferenceLine::GetRoadWidth(const double s, double* const road_left_width,
@@ -427,7 +427,7 @@ bool ReferenceLine::GetRoadWidth(const double s, double* const road_left_width,
 }
 
 void ReferenceLine::GetLaneFromS(
-    const double s, std::vector<hdmap::LaneInfoConstPtr>* lanes) const {
+    const double s, std::vector<hdmap::LaneInfoConstPtr>* lanes) const {          // 给定一个s距离点, 就可以返回可行驶的lanes(车道线)
   CHECK_NOTNULL(lanes);
   auto ref_point = GetReferencePoint(s);
   std::unordered_set<hdmap::LaneInfoConstPtr> lane_set;
@@ -439,7 +439,7 @@ void ReferenceLine::GetLaneFromS(
   }
 }
 
-bool ReferenceLine::IsOnLane(const common::math::Vec2d& vec2d_point) const {
+bool ReferenceLine::IsOnLane(const common::math::Vec2d& vec2d_point) const {      // 一个二维向量是否在车道线上
   common::SLPoint sl_point;
   if (!XYToSL(vec2d_point, &sl_point)) {
     return false;
@@ -447,7 +447,7 @@ bool ReferenceLine::IsOnLane(const common::math::Vec2d& vec2d_point) const {
   return IsOnLane(sl_point);
 }
 
-bool ReferenceLine::IsOnLane(const SLBoundary& sl_boundary) const {
+bool ReferenceLine::IsOnLane(const SLBoundary& sl_boundary) const {               // 一个sl坐标系下的边框是否在车道上
   if (sl_boundary.end_s() < 0 || sl_boundary.start_s() > Length()) {
     return false;
   }
@@ -459,7 +459,7 @@ bool ReferenceLine::IsOnLane(const SLBoundary& sl_boundary) const {
            sl_boundary.end_l() < -lane_right_width);
 }
 
-bool ReferenceLine::IsOnLane(const SLPoint& sl_point) const {
+bool ReferenceLine::IsOnLane(const SLPoint& sl_point) const {                     // 一个sl坐标系下的一个点是否在车道上
   if (sl_point.s() <= 0 || sl_point.s() > map_path_.length()) {
     return false;
   }
@@ -473,12 +473,12 @@ bool ReferenceLine::IsOnLane(const SLPoint& sl_point) const {
   return !(sl_point.l() < -right_width || sl_point.l() > left_width);
 }
 
-bool ReferenceLine::IsBlockRoad(const common::math::Box2d& box2d,
+bool ReferenceLine::IsBlockRoad(const common::math::Box2d& box2d,                 // 是否是拥堵道路
                                 double gap) const {
   return map_path_.OverlapWith(box2d, gap);
 }
 
-bool ReferenceLine::IsOnRoad(const common::math::Vec2d& vec2d_point) const {
+bool ReferenceLine::IsOnRoad(const common::math::Vec2d& vec2d_point) const {      // 是否在路上
   common::SLPoint sl_point;
   if (!XYToSL(vec2d_point, &sl_point)) {
     return false;
@@ -514,11 +514,11 @@ bool ReferenceLine::IsOnRoad(const SLPoint& sl_point) const {
 
 // return a rough approximated SLBoundary using box length. It is guaranteed to
 // be larger than the accurate SL boundary.
-bool ReferenceLine::GetApproximateSLBoundary(
+bool ReferenceLine::GetApproximateSLBoundary(                                      // 获取初略的sl边框(大于准确的SL边框)
     const common::math::Box2d& box, const double start_s, const double end_s,
     SLBoundary* const sl_boundary) const {
-  double s = 0.0;
-  double l = 0.0;
+  double s = 0.0;                                                                  // s坐标点
+  double l = 0.0;                                                                  // l坐标点
   double distance = 0.0;
   if (!map_path_.GetProjectionWithHueristicParams(box.center(), start_s, end_s,
                                                   &s, &l, &distance)) {
@@ -582,11 +582,11 @@ bool ReferenceLine::GetSLBoundary(const common::math::Box2d& box,
 
 std::vector<hdmap::LaneSegment> ReferenceLine::GetLaneSegments(
     const double start_s, const double end_s) const {
-  return map_path_.GetLaneSegments(start_s, end_s);
+  return map_path_.GetLaneSegments(start_s, end_s);                   // 返回一系列的车道到的信息
 }
 
-bool ReferenceLine::GetSLBoundary(const hdmap::Polygon& polygon,
-                                  SLBoundary* const sl_boundary) const {
+bool ReferenceLine::GetSLBoundary(const hdmap::Polygon& polygon,         // 输入的一个多边形
+                                  SLBoundary* const sl_boundary) const { // sl的边框(boundary)
   double start_s(std::numeric_limits<double>::max());
   double end_s(std::numeric_limits<double>::lowest());
   double start_l(std::numeric_limits<double>::max());
@@ -610,7 +610,7 @@ bool ReferenceLine::GetSLBoundary(const hdmap::Polygon& polygon,
   return true;
 }
 
-bool ReferenceLine::HasOverlap(const common::math::Box2d& box) const {
+bool ReferenceLine::HasOverlap(const common::math::Box2d& box) const {         // 是否有Overlap
   SLBoundary sl_boundary;
   if (!GetSLBoundary(box, &sl_boundary)) {
     AERROR << "Failed to get sl boundary for box " << box.DebugString();
@@ -641,7 +641,7 @@ bool ReferenceLine::HasOverlap(const common::math::Box2d& box) const {
   }
 }
 
-std::string ReferenceLine::DebugString() const {
+std::string ReferenceLine::DebugString() const {                                    // 参考线的debug信息
   const auto limit =
       std::min(reference_points_.size(),
                static_cast<size_t>(FLAGS_trajectory_point_num_for_debug));
@@ -651,7 +651,7 @@ std::string ReferenceLine::DebugString() const {
           reference_points_.begin(), reference_points_.begin() + limit, ""));
 }
 
-double ReferenceLine::GetSpeedLimitFromS(const double s) const {
+double ReferenceLine::GetSpeedLimitFromS(const double s) const {                    // 通过s获得相关的速度信息
   for (const auto& speed_limit : speed_limit_) {
     if (s >= speed_limit.start_s && s <= speed_limit.end_s) {
       return speed_limit.speed_limit;
@@ -670,7 +670,7 @@ double ReferenceLine::GetSpeedLimitFromS(const double s) const {
   return speed_limit;
 }
 
-void ReferenceLine::AddSpeedLimit(const hdmap::SpeedControl& speed_control) {
+void ReferenceLine::AddSpeedLimit(const hdmap::SpeedControl& speed_control) {      // 增加速度的约束
   SLBoundary sl_boundary;
   if (GetSLBoundary(speed_control.polygon(), &sl_boundary) &&
       IsOnLane(sl_boundary)) {
