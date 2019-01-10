@@ -122,7 +122,7 @@ bool PathDecision::MergeWithMainStop(const ObjectStop &obj_stop,               /
   main_stop_.set_stop_heading(obj_stop.stop_heading());
   stop_reference_line_s_ = stop_line_s;
 
-  ADEBUG << " main stop obstacle id:" << obj_id                                // 
+  ADEBUG << " main stop obstacle id:" << obj_id                                // 输出一些信息
          << " stop_line_s:" << stop_line_s << " stop_point: ("
          << obj_stop.stop_point().x() << obj_stop.stop_point().y()
          << " ) stop_heading: " << obj_stop.stop_heading();

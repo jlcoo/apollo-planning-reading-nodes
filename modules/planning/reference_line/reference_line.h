@@ -78,30 +78,31 @@ class ReferenceLine {                                                           
   const hdmap::Path& map_path() const;                                                 // 高精地图中的path
   const std::vector<ReferencePoint>& reference_points() const;                         // reference line相关的所有点集
 
-  ReferencePoint GetReferencePoint(const double s) const;
+  ReferencePoint GetReferencePoint(const double s) const;                              // 返回中心参考线上, s(路程)对应的一个点
   std::vector<ReferencePoint> GetReferencePoints(double start_s,
                                                  double end_s) const;
 
-  std::size_t GetNearestReferenceIndex(const double s) const;
-
-  ReferencePoint GetNearestReferencePoint(const common::math::Vec2d& xy) const;
+  std::size_t GetNearestReferenceIndex(const double s) const;                          // 返回最近一个点的索引值
+  // ReferencePoint继承于MapPathPoint, MapPathPoint是继承于二维的向量common::math::Vec2d(里面还包含了一些航向角, std::vector<LaneWaypoint>, laneWaypoint的数组), 
+  // LaneWaypoint就是一个数据结构, 里面包含一个sl的坐标, 和一个LaneInfo的常量指针
+  ReferencePoint GetNearestReferencePoint(const common::math::Vec2d& xy) const;        // 返回一个最近的点, 输入是一个二维的向量, 输出是一个 reference point
 
   std::vector<hdmap::LaneSegment> GetLaneSegments(const double start_s,                // 获取lane的片段的集合(多少米为一个片段呢?)
                                                   const double end_s) const;
 
-  ReferencePoint GetNearestReferencePoint(const double s) const;
+  ReferencePoint GetNearestReferencePoint(const double s) const;                       // 获取最近的参考点
 
-  ReferencePoint GetReferencePoint(const double x, const double y) const;
+  ReferencePoint GetReferencePoint(const double x, const double y) const;              // 将一个x,y坐标转换为一个参考点
 
-  bool GetApproximateSLBoundary(const common::math::Box2d& box,
+  bool GetApproximateSLBoundary(const common::math::Box2d& box,                        // 获取近似的sl坐标系的边界
                                 const double start_s, const double end_s,
                                 SLBoundary* const sl_boundary) const;
-  bool GetSLBoundary(const common::math::Box2d& box,
+  bool GetSLBoundary(const common::math::Box2d& box,                                   // 讲一个二维的box, 添加一个sl坐标系下的边框
                      SLBoundary* const sl_boundary) const;
   bool GetSLBoundary(const hdmap::Polygon& polygon,
                      SLBoundary* const sl_boundary) const;
 
-  bool SLToXY(const common::SLPoint& sl_point,
+  bool SLToXY(const common::SLPoint& sl_point,                                         // 在ReferenceLine类中封装了一个sl坐标和xy坐标相互转换的函数
               common::math::Vec2d* const xy_point) const;
   bool XYToSL(const common::math::Vec2d& xy_point,
               common::SLPoint* const sl_point) const;
@@ -110,31 +111,31 @@ class ReferenceLine {                                                           
     return XYToSL(common::math::Vec2d(xy.x(), xy.y()), sl_point);
   }
   // lane车道
-  bool GetLaneWidth(const double s, double* const lane_left_width,
+  bool GetLaneWidth(const double s, double* const lane_left_width,                     // 通过距离s, lane左边宽度, lane右边宽度获得对应的lane
                     double* const lane_right_width) const;
   // road路面
-  bool GetRoadWidth(const double s, double* const road_left_width,
+  bool GetRoadWidth(const double s, double* const road_left_width,                     // 获取路面的宽度
                     double* const road_right_width) const;
 
-  void GetLaneFromS(const double s,
+  void GetLaneFromS(const double s,                                                    // 获得多条lane(车道)
                     std::vector<hdmap::LaneInfoConstPtr>* lanes) const;
 
   /**
    * @brief: check if a box/point is on lane along reference line
    */
-  bool IsOnLane(const common::SLPoint& sl_point) const;
-  bool IsOnLane(const common::math::Vec2d& vec2d_point) const;
+  bool IsOnLane(const common::SLPoint& sl_point) const;                               // 检查一个sl的坐标是否在车道线上
+  bool IsOnLane(const common::math::Vec2d& vec2d_point) const;                        // 检查一个二维的向量点是否在车道上
   template <class XYPoint>
-  bool IsOnLane(const XYPoint& xy) const {
+  bool IsOnLane(const XYPoint& xy) const {                                            // 检查一个xy坐标系中的点是否子啊车道上
     return IsOnLane(common::math::Vec2d(xy.x(), xy.y()));
   }
-  bool IsOnLane(const SLBoundary& sl_boundary) const;
+  bool IsOnLane(const SLBoundary& sl_boundary) const;                                 // 检查一个sl的边框是否在车道上
 
   /**
    * @brief: check if a box/point is on road
    *         (not on sideways/medians) along reference line
    */
-  bool IsOnRoad(const common::SLPoint& sl_point) const;
+  bool IsOnRoad(const common::SLPoint& sl_point) const;                               // 是否在路上
   bool IsOnRoad(const common::math::Vec2d& vec2d_point) const;
   bool IsOnRoad(const SLBoundary& sl_boundary) const;
 
@@ -146,23 +147,23 @@ class ReferenceLine {                                                           
    * @param gap check the gap of the space
    * @return true if the box blocks the road.
    */
-  bool IsBlockRoad(const common::math::Box2d& box2d, double gap) const;
+  bool IsBlockRoad(const common::math::Box2d& box2d, double gap) const;               // 是否一个box堵塞在路上
 
   /**
    * @brief check if any part of the box has overlap with the road.
    */
-  bool HasOverlap(const common::math::Box2d& box) const;
+  bool HasOverlap(const common::math::Box2d& box) const;                             // 检查一个box是否与道路有重叠
 
-  double Length() const { return map_path_.length(); }
+  double Length() const { return map_path_.length(); }                               // 返回道路的长度
 
-  std::string DebugString() const;
+  std::string DebugString() const;                                                   // debug的字符串信息
 
-  double GetSpeedLimitFromS(const double s) const;
+  double GetSpeedLimitFromS(const double s) const;                                   // 获得s点的速度限制
 
-  void AddSpeedLimit(const hdmap::SpeedControl& speed_control);
-  void AddSpeedLimit(double start_s, double end_s, double speed_limit);
+  void AddSpeedLimit(const hdmap::SpeedControl& speed_control);                      // 添加限速信息
+  void AddSpeedLimit(double start_s, double end_s, double speed_limit);              // 在一定范围内添加速度信息
 
-  uint32_t GetPriority() const { return priority_; }
+  uint32_t GetPriority() const { return priority_; }                                 // 每条reference line都有一个优先级
   void SetPriority(uint32_t priority) { priority_ = priority; }
 
  private:
@@ -184,14 +185,14 @@ class ReferenceLine {                                                           
    * s >= s0 && s <= s1
    * @return The interpolated ReferencePoint.
    */
-  static ReferencePoint Interpolate(const ReferencePoint& p0, const double s0,
+  static ReferencePoint Interpolate(const ReferencePoint& p0, const double s0,       // 线性插值
                                     const ReferencePoint& p1, const double s1,
                                     const double s);
-  ReferencePoint InterpolateWithMatchedIndex(
+  ReferencePoint InterpolateWithMatchedIndex(                                        // 插值匹配指数
       const ReferencePoint& p0, const double s0, const ReferencePoint& p1,
       const double s1, const hdmap::InterpolatedIndex& index) const;
 
-  static double FindMinDistancePoint(const ReferencePoint& p0, const double s0,
+  static double FindMinDistancePoint(const ReferencePoint& p0, const double s0,      // 查找最小距离点
                                      const ReferencePoint& p1, const double s1,
                                      const double x, const double y);
 

@@ -21,99 +21,99 @@ message SpeedPlan {                                          // 速度规划的�
   repeated apollo.common.SpeedPoint speed_point = 2;         // 多个速度点(路程, 时间, 速度, 加速度, 加速度的微分)
 }
 
-message StGraphBoundaryDebug {
+message StGraphBoundaryDebug {                               // st图的边框(boundary)
   enum StBoundaryType {
-    ST_BOUNDARY_TYPE_UNKNOWN = 1;
-    ST_BOUNDARY_TYPE_STOP = 2;
-    ST_BOUNDARY_TYPE_FOLLOW = 3;
-    ST_BOUNDARY_TYPE_YIELD = 4;
-    ST_BOUNDARY_TYPE_OVERTAKE = 5;
-    ST_BOUNDARY_TYPE_KEEP_CLEAR = 6;
+    ST_BOUNDARY_TYPE_UNKNOWN = 1;                            // st的边框(不知名的边框)
+    ST_BOUNDARY_TYPE_STOP = 2;                               // 停止的边框(boundary)
+    ST_BOUNDARY_TYPE_FOLLOW = 3;                             // 跟随(follow)
+    ST_BOUNDARY_TYPE_YIELD = 4;                              // 让行
+    ST_BOUNDARY_TYPE_OVERTAKE = 5;                           // 超车
+    ST_BOUNDARY_TYPE_KEEP_CLEAR = 6;                         // 美国交规,不用管, Danger Keep Clear At All Times
   }
-  optional string name = 1;
-  repeated apollo.common.SpeedPoint point = 2;
-  optional StBoundaryType type = 3;
+  optional string name = 1;                                  // 名字
+  repeated apollo.common.SpeedPoint point = 2;               // 多个速度点
+  optional StBoundaryType type = 3;                          // st的boundary的类型
 }
 
-message SLFrameDebug {
-  optional string name = 1;
-  repeated double sampled_s = 2;
-  repeated double static_obstacle_lower_bound = 3;
-  repeated double dynamic_obstacle_lower_bound = 4;
-  repeated double static_obstacle_upper_bound = 5;
-  repeated double dynamic_obstacle_upper_bound = 6;
-  repeated double map_lower_bound = 7;
-  repeated double map_upper_bound = 8;
-  repeated apollo.common.SLPoint sl_path = 9;
-  repeated double aggregated_boundary_s = 10;
-  repeated double aggregated_boundary_low = 11;
-  repeated double aggregated_boundary_high = 12;
+message SLFrameDebug {                                       // sl坐标系中的debug信息
+  optional string name = 1;                                  // 名字
+  repeated double sampled_s = 2;                             // 多个路程s的采样点
+  repeated double static_obstacle_lower_bound = 3;           // 静态障碍物的下界
+  repeated double dynamic_obstacle_lower_bound = 4;          // 动态障碍物的下界
+  repeated double static_obstacle_upper_bound = 5;           // 静态障碍物的上界
+  repeated double dynamic_obstacle_upper_bound = 6;          // 动态障碍物的上界
+  repeated double map_lower_bound = 7;                       // 地图的下界
+  repeated double map_upper_bound = 8;                       // 地图的上界
+  repeated apollo.common.SLPoint sl_path = 9;                // sl坐标系的点(重复的点, 不断的重复)
+  repeated double aggregated_boundary_s = 10;                // 并集的边框s(路程)
+  repeated double aggregated_boundary_low = 11;              // 并集边框的下界(low)
+  repeated double aggregated_boundary_high = 12;             // 并集边框的上界(high)
 }
 
-message STGraphDebug {
-  message STGraphSpeedConstraint {
-    repeated double t = 1;
-    repeated double lower_bound = 2;
-    repeated double upper_bound = 3;
+message STGraphDebug {                                       // st图中的debug的信息
+  message STGraphSpeedConstraint {                           // ST图形速度约束
+    repeated double t = 1;                                   // 时间
+    repeated double lower_bound = 2;                         // 下界
+    repeated double upper_bound = 3;                         // 上界
   }
-  message STGraphKernelCuiseRef {
-    repeated double t = 1;
-    repeated double cruise_line_s = 2;
+  message STGraphKernelCuiseRef {                            // ST图内核的巡航参考线(ref), STGraphKernelCuiseRef应该是STGraphKernelCruiseRef
+    repeated double t = 1;                                   // 时间
+    repeated double cruise_line_s = 2;                       // 巡航轨迹的s(路程)
   }
-  message STGraphKernelFollowRef {
-    repeated double t = 1;
-    repeated double follow_line_s = 2;
+  message STGraphKernelFollowRef {                           // ST图内核的跟车参考线(ref)
+    repeated double t = 1;                                   // 时间
+    repeated double follow_line_s = 2;                       // 巡航轨迹的s(路程)
   }
 
-  optional string name = 1;
-  repeated StGraphBoundaryDebug boundary = 2;
-  repeated apollo.common.SpeedPoint speed_limit = 3;
-  repeated apollo.common.SpeedPoint speed_profile = 4;
-  optional STGraphSpeedConstraint speed_constraint = 5;
-  optional STGraphKernelCuiseRef kernel_cruise_ref = 6;
-  optional STGraphKernelFollowRef kernel_follow_ref = 7;
+  optional string name = 1;                                  // 名字
+  repeated StGraphBoundaryDebug boundary = 2;                // ST图边框debug的信息
+  repeated apollo.common.SpeedPoint speed_limit = 3;         // 速度限制(限速)SpeedPoint就是路程/时间/速度/加速度/加速度的微分
+  repeated apollo.common.SpeedPoint speed_profile = 4;       // 速度的轮廓??
+  optional STGraphSpeedConstraint speed_constraint = 5;      // 速度的约束
+  optional STGraphKernelCuiseRef kernel_cruise_ref = 6;      // 巡航参考线
+  optional STGraphKernelFollowRef kernel_follow_ref = 7;     // 跟车参考线
 }
 
-message SignalLightDebug {
-  message SignalDebug {
-    optional string light_id = 1;
-    optional apollo.perception.TrafficLight.Color color = 2;
-    optional double light_stop_s = 3;
-    optional double adc_stop_deacceleration = 4;
-    optional bool is_stop_wall_created = 5;
+message SignalLightDebug {                                   // 信号灯的debug信息
+  message SignalDebug {                                      // 在消息段中再定义一个消息段
+    optional string light_id = 1;                            // 信号灯的ID号
+    optional apollo.perception.TrafficLight.Color color = 2; // 感知到信号灯的颜色
+    optional double light_stop_s = 3;                        // 灯停止的距离
+    optional double adc_stop_deacceleration = 4;             // 自动驾驶车辆要停止时的减速度
+    optional bool is_stop_wall_created = 5;                  // 是否创建一个停止墙
   }
-  optional double adc_speed = 1;
-  optional double adc_front_s = 2;
-  repeated SignalDebug signal = 3;
+  optional double adc_speed = 1;                             // 自动驾驶车辆的速度
+  optional double adc_front_s = 2;                           // 自动驾驶车辆前面的距离s
+  repeated SignalDebug signal = 3;                           // 信号灯的信息(交通信号灯)
 }
 
-message DecisionTag {
-  optional string decider_tag = 1;
-  optional apollo.planning.ObjectDecisionType decision = 2;
+message DecisionTag {                                        // 决策的标签
+  optional string decider_tag = 1;                           // 使用的是什么决策(一个字符串名字)
+  optional apollo.planning.ObjectDecisionType decision = 2;  // 决策的类型是什么
 }
 
-message ObstacleDebug {
-  optional string id = 1;
-  optional apollo.planning.SLBoundary sl_boundary = 2;
-  repeated DecisionTag decision_tag = 3;
+message ObstacleDebug {                                      // 障碍物debug的信息
+  optional string id = 1;                                    // 障碍物的id信息
+  optional apollo.planning.SLBoundary sl_boundary = 2;       // 障碍物在sl坐标系中的边界
+  repeated DecisionTag decision_tag = 3;                     // 障碍物的决策信息
 }
 
-message ReferenceLineDebug {
-  optional string id = 1;
-  optional double length = 2;
-  optional double cost = 3;
-  optional bool is_change_lane_path = 4;
-  optional bool is_drivable = 5;
-  optional bool is_protected = 6;
+message ReferenceLineDebug {                                 // 参考线debug的信息
+  optional string id = 1;                                    // 参考线的id信息
+  optional double length = 2;                                // 中心参考线的长度
+  optional double cost = 3;                                  // 参考线的代价函数的大小??
+  optional bool is_change_lane_path = 4;                     // 参考线是否变道
+  optional bool is_drivable = 5;                             // 是否是可以驾驶的障碍物
+  optional bool is_protected = 6;                            // 是否是被保护的障碍物
 }
 
-message SampleLayerDebug {
-  repeated apollo.common.SLPoint sl_point = 1;
+message SampleLayerDebug {                                   // 采样层debug的信心
+  repeated apollo.common.SLPoint sl_point = 1;               // sl坐标系下的信息(重复的sl坐标点)
 }
 
-message DpPolyGraphDebug {
-  repeated SampleLayerDebug sample_layer = 1;
-  repeated apollo.common.SLPoint min_cost_point = 2;
+message DpPolyGraphDebug {                                   // dp多边形图中的debug信息
+  repeated SampleLayerDebug sample_layer = 1;                // 重复类型(多个)采样层的点
+  repeated apollo.common.SLPoint min_cost_point = 2;         // 代价最小的sl坐标系中的点
 }
 // planning data 应该就是一个planning模块的输入
 // next id: 22
@@ -125,59 +125,59 @@ message PlanningData {                                                          
   optional apollo.common.TrajectoryPoint init_point = 10;                            // 初始化的轨迹点(三维空间的一个点, 还有一些曲率和速度信息等)
 
   repeated apollo.common.Path path = 6;                                              // path是车道两边的线??
-  repeated SpeedPlan speed_plan = 13;
-  repeated STGraphDebug st_graph = 14;
-  repeated SLFrameDebug sl_frame = 15;
+  repeated SpeedPlan speed_plan = 13;                                                // 速度规划器(一个名字和多个速度点)
+  repeated STGraphDebug st_graph = 14;                                               // st坐标系中的debug信息
+  repeated SLFrameDebug sl_frame = 15;                                               // sl坐标系下的debug信息
 
-  optional apollo.common.Header prediction_header = 16;
-  optional SignalLightDebug signal_light = 17;
+  optional apollo.common.Header prediction_header = 16;                              // 预测的头部信息
+  optional SignalLightDebug signal_light = 17;                                       // 信号灯的debug信息
 
-  repeated ObstacleDebug obstacle = 18;
-  repeated ReferenceLineDebug reference_line = 19;
-  optional DpPolyGraphDebug dp_poly_graph = 20;
-  optional LatticeStTraining lattice_st_image = 21;
-  optional apollo.relative_map.MapMsg relative_map = 22;
-  optional AutoTuningTrainingData auto_tuning_training_data = 23;
-  optional double front_clear_distance = 24;
+  repeated ObstacleDebug obstacle = 18;                                              // 障碍物的debug信息
+  repeated ReferenceLineDebug reference_line = 19;                                   // 中心参考线的debug信息
+  optional DpPolyGraphDebug dp_poly_graph = 20;                                      // dp图debug的信息
+  optional LatticeStTraining lattice_st_image = 21;                                  // st栅图的训练图信息(有很多个st栅格像素点)
+  optional apollo.relative_map.MapMsg relative_map = 22;                             // 参考地图就是定位地图??
+  optional AutoTuningTrainingData auto_tuning_training_data = 23;                    // 自动调整训练数据
+  optional double front_clear_distance = 24;                                         // 前方需要空出来的距离
 }
 // 栅格的一个像素点
-message LatticeStPixel {
-  optional int32 s = 1;
-  optional int32 t = 2;
-  optional uint32 r = 3;
-  optional uint32 g = 4;
-  optional uint32 b = 5;
+message LatticeStPixel {                                         // 栅格的一个像素点
+  optional int32 s = 1;                                          // s是行驶的距离
+  optional int32 t = 2;                                          // t是行驶的时间
+  optional uint32 r = 3;                                         // r是什么??
+  optional uint32 g = 4;                                         // g是什么?
+  optional uint32 b = 5;                                         // b是什么??
 }
 
-message LatticeStTraining {
-  repeated LatticeStPixel pixel = 1;
-  optional double timestamp = 2;
-  optional string annotation = 3;
-  optional uint32 num_s_grids = 4;
-  optional uint32 num_t_grids = 5;
-  optional double s_resolution = 6;
-  optional double t_resolution = 7;
+message LatticeStTraining {                                      // st坐标系下的栅格训练信息
+  repeated LatticeStPixel pixel = 1;                             // 一个的栅格的像素点
+  optional double timestamp = 2;                                 // 时间戳
+  optional string annotation = 3;                                // 栅格的注解, 就是一个字符串
+  optional uint32 num_s_grids = 4;                               // 栅格中, s点的数量
+  optional uint32 num_t_grids = 5;                               // 栅格中, t点的数量
+  optional double s_resolution = 6;                              // s点的解析度?
+  optional double t_resolution = 7;                              // t点的解析度?
 }
 
 message CostComponents {
-  repeated double cost_component = 1;
+  repeated double cost_component = 1;                            // 多个重复的成本
 }
 
-message AutoTuningTrainingData {
-  optional CostComponents teacher_component = 1;
-  optional CostComponents student_component = 2;
+message AutoTuningTrainingData {                                 // 自动调整训练数据
+  optional CostComponents teacher_component = 1;                 // 成本要素(老师教的成本)
+  optional CostComponents student_component = 2;                 // 成本要素??(学生学的成本)
 }
 
-message CloudReferenceLineRequest {
-  repeated apollo.routing.LaneSegment lane_segment = 1;
+message CloudReferenceLineRequest {                              // 云参考线请求
+  repeated apollo.routing.LaneSegment lane_segment = 1;          // 里面有很多lane片段(id号, 起点和终点)
 }
 
-message CloudReferenceLineRoutingRequest {
-  optional apollo.routing.RoutingResponse routing = 1;
+message CloudReferenceLineRoutingRequest {                       // 云参考线的请求
+  optional apollo.routing.RoutingResponse routing = 1;           // routing的请求参考段
 }
 
-message CloudReferenceLineResponse {
-  repeated apollo.common.Path segment = 1;
+message CloudReferenceLineResponse {                             // 云参考线的输出, (响应) 
+  repeated apollo.common.Path segment = 1;                       // 多个重复的path point(主要是在x,y,z坐标系中进行计算和表达的)
 }
 
 

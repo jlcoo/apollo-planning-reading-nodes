@@ -13,25 +13,25 @@ import "modules/planning/proto/navi_obstacle_decider_config.proto";
 import "modules/planning/proto/open_space_planner_config.proto";
 // planning的配置选项
 enum TaskType {
-  DP_POLY_PATH_OPTIMIZER = 0;
-  DP_ST_SPEED_OPTIMIZER = 1;
-  QP_SPLINE_PATH_OPTIMIZER = 2;
-  QP_SPLINE_ST_SPEED_OPTIMIZER = 3;
-  PATH_DECIDER = 4;
-  SPEED_DECIDER = 5;
-  POLY_ST_SPEED_OPTIMIZER = 6;
-  NAVI_PATH_DECIDER = 7;
-  NAVI_SPEED_DECIDER = 8;
-  NAVI_OBSTACLE_DECIDER = 9;
+  DP_POLY_PATH_OPTIMIZER = 0;                                    // 动态规划计算路径的优化器(应该是在sl坐标系中计算吧?)
+  DP_ST_SPEED_OPTIMIZER = 1;                                     // 动态规划计算速度的优化器(在st坐标系中计算)
+  QP_SPLINE_PATH_OPTIMIZER = 2;                                  // 二次规划(QP)在路径中的优化器
+  QP_SPLINE_ST_SPEED_OPTIMIZER = 3;                              // 二次规划(QP)在st坐标中的速度优化器
+  PATH_DECIDER = 4;                                              // path(路径)的决策者
+  SPEED_DECIDER = 5;                                             // 速度的决策者
+  POLY_ST_SPEED_OPTIMIZER = 6;                                   // 速度的poly优化器
+  NAVI_PATH_DECIDER = 7;                                         // 导航路径的决策者
+  NAVI_SPEED_DECIDER = 8;                                        // 导航速度的决策者 
+  NAVI_OBSTACLE_DECIDER = 9;                                     // 导航障碍物的决策者
 };
 
-message EMPlannerConfig {
-  repeated TaskType task = 1;
-  optional apollo.planning.DpPolyPathConfig dp_poly_path_config = 2;
-  optional apollo.planning.DpStSpeedConfig dp_st_speed_config = 3;
-  optional apollo.planning.QpSplinePathConfig qp_spline_path_config = 4;
-  optional apollo.planning.QpStSpeedConfig qp_st_speed_config = 5;
-  optional apollo.planning.PolyStSpeedConfig poly_st_speed_config = 6;
+message EMPlannerConfig {                                                                  // EM规划器的消息段
+  repeated TaskType task = 1;                                                              // 每个规划器可以有多个任务类型(最多有10个)
+  optional apollo.planning.DpPolyPathConfig dp_poly_path_config = 2;                       // 路程dp的配置项
+  optional apollo.planning.DpStSpeedConfig dp_st_speed_config = 3;                         // 速度dp的配置项
+  optional apollo.planning.QpSplinePathConfig qp_spline_path_config = 4;                   // 路程二次规划的配置项QP对应的spline
+  optional apollo.planning.QpStSpeedConfig qp_st_speed_config = 5;                         // 速度二次规划的配置项QP对应的是st坐标
+  optional apollo.planning.PolyStSpeedConfig poly_st_speed_config = 6;                     // 速度还多了一个配置, 这个配置项是用来干嘛的呢??
 }
 
 message NaviPlannerConfig {
@@ -44,36 +44,36 @@ message NaviPlannerConfig {
 message ScenarioConfig {
   enum ScenarioType {
     // LANE_FOLLOW is the default scenario
-    LANE_FOLLOW = 0;
+    LANE_FOLLOW = 0;                                                   // 默认场景是跟车
 
     // change from one lane to an adjacent lane
-    CHANGE_LANE = 1;
+    CHANGE_LANE = 1;                                                   // 变道到一个相邻车道
 
     // go around an object when it blocks the road.
-    SIDE_PASS = 2;
+    SIDE_PASS = 2;                                                     // 当一个物体阻塞到道路上就绕过该物体
 
     // approach to an intersection
-    APPROACH = 3;
+    APPROACH = 3;                                                      // 接近一个十字路口
 
     // drive at an intersection with 4-way stop sign
-    INTERSECTION_STOP_SIGN_FOUR_WAY = 4;
+    INTERSECTION_STOP_SIGN_FOUR_WAY = 4;                               // 在四车道的十字路口等停止信号
 
     // drive at an intersection with 1 or 2 way stop sign
-    INTERSECTION_STOP_SIGN_ONE_OR_TWO_WAY = 5;
+    INTERSECTION_STOP_SIGN_ONE_OR_TWO_WAY = 5;                         // 单车道或双车道等停止信号
 
     // turn left at an intersection with traffic light
-    INTERSECTION_TRAFFIC_LIGHT_LEFT_TURN = 6;
+    INTERSECTION_TRAFFIC_LIGHT_LEFT_TURN = 6;                          // 十字路口左转
 
     // turn right at an intersection with traffic light
-    INTERSECTION_TRAFFIC_LIGHT_RIGHT_TURN = 7;
+    INTERSECTION_TRAFFIC_LIGHT_RIGHT_TURN = 7;                         // 十字路口右转
 
     // go through an intersection with traffic light
-    INTERSECTION_TRAFFIC_GO_THROUGH = 8;
+    INTERSECTION_TRAFFIC_GO_THROUGH = 8;                               // 十字路口直行
   }
 };
 
-message LaneFollowScenarioConfig {
-  repeated TaskType task = 1;
+message LaneFollowScenarioConfig {                                     // 跟车场景的配置项
+  repeated TaskType task = 1;                                          // 和EMPlannerConfig的配置一样
   optional apollo.planning.DpPolyPathConfig dp_poly_path_config = 2;
   optional apollo.planning.DpStSpeedConfig dp_st_speed_config = 3;
   optional apollo.planning.QpSplinePathConfig qp_spline_path_config = 4;
@@ -81,21 +81,21 @@ message LaneFollowScenarioConfig {
   optional apollo.planning.PolyStSpeedConfig poly_st_speed_config = 6;
 }
 
-message PlanningConfig {
-  enum PlannerType {
-    RTK = 0;
-    EM = 1;  // expectation maximization                          
-    LATTICE = 2;
-    NAVI = 3; // navigation planner
-    OPENSPACE = 4; // open space planner
+message PlanningConfig {                                                  // planning 规划器的配置项
+  enum PlannerType {                                                      // 规划器5选一
+    RTK = 0;                                                              // RTK 寻迹的规划器
+    EM = 1;  // expectation maximization                                  // EM 最大期望的规划器             
+    LATTICE = 2;                                                          // 栅格的规划器
+    NAVI = 3; // navigation planner                                       // 导航的规划器
+    OPENSPACE = 4; // open space planner                                  // 开放道路的规划器
   };
-  optional PlannerType planner_type = 1 [default = EM];    // 配置为EM算法
+  optional PlannerType planner_type = 1 [default = EM];                   // 配置为EM算法, 5选一
 
-  optional EMPlannerConfig em_planner_config = 2;
+  optional EMPlannerConfig em_planner_config = 2;                         // EM规划器的配置
 
-  optional NaviPlannerConfig navi_planner_config = 3;
+  optional NaviPlannerConfig navi_planner_config = 3;                     // 导航规划器的配置
 
-  optional OpenSpacePlannerConfig open_space_planner_config = 4;
+  optional OpenSpacePlannerConfig open_space_planner_config = 4;          // 开放道路的配置
 
-  optional LaneFollowScenarioConfig lane_follow_scenario_config = 5;
+  optional LaneFollowScenarioConfig lane_follow_scenario_config = 5;      // 车道跟随的配置
 }

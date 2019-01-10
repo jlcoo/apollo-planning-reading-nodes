@@ -29,26 +29,26 @@ namespace planning {
 
 PublishableTrajectory::PublishableTrajectory(
     const double header_time,
-    const DiscretizedTrajectory& discretized_trajectory)
+    const DiscretizedTrajectory& discretized_trajectory)                           // 用时间和离散的轨迹进行构造
     : DiscretizedTrajectory(discretized_trajectory),
       header_time_(header_time) {}
 
-PublishableTrajectory::PublishableTrajectory(const ADCTrajectory& trajectory_pb)
+PublishableTrajectory::PublishableTrajectory(const ADCTrajectory& trajectory_pb)   // 用自动驾驶车辆进行构造
     : DiscretizedTrajectory(trajectory_pb),
       header_time_(trajectory_pb.header().timestamp_sec()) {}
 
-double PublishableTrajectory::header_time() const { return header_time_; }
+double PublishableTrajectory::header_time() const { return header_time_; }         // 返回头部信息的时间
 
-void PublishableTrajectory::PopulateTrajectoryProtobuf(
+void PublishableTrajectory::PopulateTrajectoryProtobuf(                            // 构造一个新的自动驾驶车辆的轨迹
     ADCTrajectory* trajectory_pb) const {
-  CHECK_NOTNULL(trajectory_pb);
-  trajectory_pb->mutable_header()->set_timestamp_sec(header_time_);
-  trajectory_pb->mutable_trajectory_point()->CopyFrom(
+  CHECK_NOTNULL(trajectory_pb);                                                    // 检查是否是空指针
+  trajectory_pb->mutable_header()->set_timestamp_sec(header_time_);                // 设置时间戳
+  trajectory_pb->mutable_trajectory_point()->CopyFrom(                             // 构造轨迹点
       {trajectory_points_.begin(), trajectory_points_.end()});
-  if (!trajectory_points_.empty()) {
-    const auto& last_tp = trajectory_points_.back();
+  if (!trajectory_points_.empty()) {                                               // 如果速度都不为空
+    const auto& last_tp = trajectory_points_.back();                               // 设置总路程的长度
     trajectory_pb->set_total_path_length(last_tp.path_point().s());
-    trajectory_pb->set_total_path_time(last_tp.relative_time());
+    trajectory_pb->set_total_path_time(last_tp.relative_time());                   // 设置总path的时间
   }
 }
 

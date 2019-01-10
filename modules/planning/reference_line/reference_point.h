@@ -29,7 +29,7 @@
 #include "modules/map/pnc_map/path.h"
 
 namespace apollo {
-namespace planning {
+namespace planning {  // 重要的信息主要是在path.h和path.cc文件中
 // 参考线的点, 二维向量                                                                  // MapPathPoint继承于LaneWaypoint(内部有一个LaneInfoConstPtr的指针和一个sl坐标)
 class ReferencePoint : public hdmap::MapPathPoint {                                   // 参考线的点, MapPathPoint继承于二维向量点common::math::Vec2d
  public:                                                                              // 所以ReferencePoint应该也有sl坐标和lane的相关信息, 除此之外还有, 航向角, 曲率和曲率的微分

@@ -72,16 +72,16 @@ class Planner {
 };
 // 用到了三重继承, 继承有点点深吧？， 继承于Planner, planner提供一些接口和数据成员
 class PlannerWithReferenceLine : public Planner {   // 继承该类
- public:
+ public:                                            // 带车道中心参考线的规划器
   /**
    * @brief Constructor
    */
-  PlannerWithReferenceLine() = default;
+  PlannerWithReferenceLine() = default;                                      // 默认的构造函数, 
 
   /**
    * @brief Destructor
    */
-  virtual ~PlannerWithReferenceLine() = default;
+  virtual ~PlannerWithReferenceLine() = default;                             // 默认的析构函数
 
   /**
    * @brief Compute a trajectory for execution.
@@ -92,7 +92,7 @@ class PlannerWithReferenceLine : public Planner {   // 继承该类
    */   // PlanOnReferenceLine这个函数会计算执行轨迹
   virtual apollo::common::Status PlanOnReferenceLine(
       const common::TrajectoryPoint& planning_init_point, Frame* frame,   // TrajectoryPoint(轨迹的点)， Frame(是一个)
-      ReferenceLineInfo* reference_line_info) {                           // ReferenceLineInfo(是)
+      ReferenceLineInfo* reference_line_info) {                           // ReferenceLineInfo(是) 计算得到的车道中心线的信息
     CHECK_NOTNULL(frame);
     return apollo::common::Status::OK();
   }

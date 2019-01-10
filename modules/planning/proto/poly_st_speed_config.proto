@@ -5,17 +5,17 @@ package apollo.planning;
 import "modules/planning/proto/st_boundary_config.proto";
 
 // next ID: 11
-message PolyStSpeedConfig {
-  optional double total_path_length = 1;
-  optional double total_time = 2;
-  optional double preferred_accel = 3;
-  optional double preferred_decel = 4;
-  optional double max_accel = 5;
-  optional double min_decel = 6;
-  optional double speed_limit_buffer = 7;
-  optional double speed_weight = 8;
-  optional double jerk_weight = 9;
-  optional double obstacle_weight = 10;
-  optional double unblocking_obstacle_cost = 11;
-  optional apollo.planning.StBoundaryConfig st_boundary_config = 12;
+message PolyStSpeedConfig {                                             // st坐标系中多边形的配置
+  optional double total_path_length = 1;                                // 总长度为250米
+  optional double total_time = 2;                                       // 总时间为8.0秒
+  optional double preferred_accel = 3;                                  // 首选加速度为2.5
+  optional double preferred_decel = 4;                                  // 首选减速度为3.3
+  optional double max_accel = 5;                                        // 最大加速度为2.5
+  optional double min_decel = 6;                                        // 最大减速度为4.5
+  optional double speed_limit_buffer = 7;                               // 限速的buffer为0.05
+  optional double speed_weight = 8;                                     // 速度的权重为100
+  optional double jerk_weight = 9;                                      // 抖动的权重为1.0
+  optional double obstacle_weight = 10;                                 // 障碍物的权重为10.0
+  optional double unblocking_obstacle_cost = 11;                        // 非堵塞障碍物的权重为1000
+  optional apollo.planning.StBoundaryConfig st_boundary_config = 12;    // st速度配置选项里面还有一个st的boundary(边框)
 }

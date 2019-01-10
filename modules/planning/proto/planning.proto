@@ -12,8 +12,8 @@ import "modules/map/proto/map_id.proto";
 import "modules/planning/proto/decision.proto";
 import "modules/planning/proto/planning_internal.proto";
 
-// Deprecated: replaced by apollo.common.TrajectoryPoint
-message ADCTrajectoryPoint {
+// Deprecated: replaced by apollo.common.TrajectoryPoint                    // TrajectoryPoint的封装和抽象性更好
+message ADCTrajectoryPoint {                                                // 轨迹点会包含很多信息(x,y,z), sl坐标系等
   optional double x = 1;  // in meters.
   optional double y = 2;  // in meters.
   optional double z = 3;  // height in meters.
@@ -36,12 +36,12 @@ message ADCTrajectoryPoint {
 }
 
 // Deprecated: replaced by apollo.common.PathPoint
-message ADCPathPoint {
-  optional double x = 1;  // in meters
+message ADCPathPoint {                                                       // 自动驾驶车辆在path中的一个点, 由path point取代了
+  optional double x = 1;  // in meters                                       // x, y, z的三轴坐标
   optional double y = 2;  // in meters
   optional double z = 3;  // in meters
-  optional double curvature = 4;  // curvature (k = 1/r), unit: (1/meters)
-  optional double heading = 5;  // relative to absolute coordinate system
+  optional double curvature = 4;  // curvature (k = 1/r), unit: (1/meters)   // 曲率
+  optional double heading = 5;  // relative to absolute coordinate system    // 航向
 }
 
 message ADCSignals {
@@ -100,39 +100,39 @@ message ADCTrajectory {                                                         
 
   // the routing used for current planning result
   optional apollo.common.Header routing_header = 16;                               // 当前使用的routing的结果(就是routing的头)
-  optional apollo.planning_internal.Debug debug = 8;                               // planning内部debug的信息
+  optional apollo.planning_internal.Debug debug = 8;                               // planning内部debug的信息, debug里面包含了所有的planning的数据
 
   // replaced by path_point
-  repeated ADCPathPoint adc_path_point = 7 [deprecated=true];
+  repeated ADCPathPoint adc_path_point = 7 [deprecated=true];                      // 自动驾驶车辆的路径点由path point取代
   // replaced by trajectory_point
-  repeated ADCTrajectoryPoint adc_trajectory_point = 4 [deprecated=true];
-  optional apollo.common.VehicleSignal signal = 11 [deprecated=true];
-  enum RightOfWayStatus {
-    UNPROTECTED = 0;
-    PROTECTED = 1;
+  repeated ADCTrajectoryPoint adc_trajectory_point = 4 [deprecated=true];          // 自动驾驶车辆的轨迹点, 现在已经被trajetory point这个数据段取代
+  optional apollo.common.VehicleSignal signal = 11 [deprecated=true];              // 车辆的信号信息, 这个字段已将被弃用
+  enum RightOfWayStatus {                                                          // 道路右边的状态
+    UNPROTECTED = 0;                                                               // 没有被保护
+    PROTECTED = 1;                                                                 // 已经被保护
   }
-  optional RightOfWayStatus right_of_way_status = 17;
+  optional RightOfWayStatus right_of_way_status = 17;                              // 道路状态
 
   // lane id along reference line
-  repeated apollo.hdmap.Id lane_id = 18;
+  repeated apollo.hdmap.Id lane_id = 18;                                           // 沿参考中心线的道路ID
 
   // set the engage advice for based on current planning result.
-  optional apollo.common.EngageAdvice engage_advice = 19;
+  optional apollo.common.EngageAdvice engage_advice = 19;                          // 根据当前planning的结果, 设置处理建议
 
   // the region where planning cares most
-  message CriticalRegion {
-    repeated apollo.common.Polygon region = 1;
+  message CriticalRegion {                                                         // 规划器最关心的地区
+    repeated apollo.common.Polygon region = 1;                                     // 几个多边形
   }
 
   // critial region will be empty when planning is NOT sure which region is critical
   // critial regions may or may not overlap
-  optional CriticalRegion critical_region = 20;
+  optional CriticalRegion critical_region = 20;                                    // 当规划器不确定哪个区域是关键区域可能重叠或不重叠时，关键区域将为空
 
-  enum TrajectoryType {
-    UNKNOWN = 0;
-    NORMAL = 1;
-    PATH_FALLBACK = 2;
-    SPEED_FALLBACK = 3;
-  }
-  optional TrajectoryType trajectory_type = 21 [ default = UNKNOWN];
+  enum TrajectoryType {                                                            // 轨迹的类型
+    UNKNOWN = 0;                                                                   // 不知道是啥轨迹
+    NORMAL = 1;                                                                    // 正常的轨迹
+    PATH_FALLBACK = 2;                                                             // path路径反馈的轨迹
+    SPEED_FALLBACK = 3;                                                            // 速度反馈的轨迹
+  } 
+  optional TrajectoryType trajectory_type = 21 [ default = UNKNOWN];               // 默认是不知道是什么类型
 }

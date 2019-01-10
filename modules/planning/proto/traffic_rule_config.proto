@@ -157,21 +157,21 @@ message StopSignConfig {
 // TODO(all) migrate all other traffic rules to pb config
 message TrafficRuleConfig {
   enum RuleId {
-    BACKSIDE_VEHICLE = 1;
-    CHANGE_LANE = 2;
-    CROSSWALK = 3;
-    DESTINATION = 4;
-    FRONT_VEHICLE = 5;
-    KEEP_CLEAR = 6;
-    PULL_OVER = 7;
-    REFERENCE_LINE_END = 8;
-    REROUTING = 9;
-    SIGNAL_LIGHT = 10;
-    STOP_SIGN = 11;
+    BACKSIDE_VEHICLE = 1;                              // 后侧车辆
+    CHANGE_LANE = 2;                                   // 变道
+    CROSSWALK = 3;                                     // 人行道
+    DESTINATION = 4;                                   // 目的地
+    FRONT_VEHICLE = 5;                                 // 前方车辆
+    KEEP_CLEAR = 6;                                    // keep clear
+    PULL_OVER = 7;                                     
+    REFERENCE_LINE_END = 8;                            // 参考线结束
+    REROUTING = 9;                                     // 提前routing
+    SIGNAL_LIGHT = 10;                                 // 信号灯
+    STOP_SIGN = 11;                                    // 停止信号
   }
   optional RuleId rule_id = 1;
-  optional bool enabled = 2;
-  oneof config {
+  optional bool enabled = 2;                           // 是否使能
+  oneof config {                                       // 会选择一个规则进行
     BacksideVehicleConfig backside_vehicle = 3;
     ChangeLaneConfig change_lane = 4;
     CrosswalkConfig crosswalk = 5;
@@ -186,6 +186,6 @@ message TrafficRuleConfig {
   }
 }
 
-message TrafficRuleConfigs {
-  repeated TrafficRuleConfig config = 1;
+message TrafficRuleConfigs {                            // planning规划器会考虑一些交通规则的情形
+  repeated TrafficRuleConfig config = 1;                // 可能会有很多歌交通规则
 }

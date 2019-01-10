@@ -31,7 +31,7 @@
 namespace apollo {
 namespace planning {
 
-using common::TrajectoryPoint;  // 轨迹的点
+using common::TrajectoryPoint;  // 轨迹的点, 包含了速度, 加速度,曲率, 三维坐标等信息
 
 DiscretizedTrajectory::DiscretizedTrajectory(
     const std::vector<TrajectoryPoint>& trajectory_points) {
@@ -45,8 +45,8 @@ DiscretizedTrajectory::DiscretizedTrajectory(const ADCTrajectory& trajectory) {
                             trajectory.trajectory_point().end());
 }
 
-TrajectoryPoint DiscretizedTrajectory::Evaluate(
-    const double relative_time) const {
+TrajectoryPoint DiscretizedTrajectory::Evaluate(                                    // 通过一个相对的时间进行评估一个
+    const double relative_time) const {                                             // 找到小于该时间的第一个点
   auto comp = [](const TrajectoryPoint& p, const double relative_time) {
     return p.relative_time() < relative_time;
   };    // 比较函数
@@ -62,11 +62,11 @@ TrajectoryPoint DiscretizedTrajectory::Evaluate(
           << ") is too large";
     return trajectory_points_.back();   // 时间戳太长
   }
-  return common::math::InterpolateUsingLinearApproximation(
+  return common::math::InterpolateUsingLinearApproximation(                         // 在相对时间的点上生成一个新的点
       *(it_lower - 1), *it_lower, relative_time);
 }
 
-std::uint32_t DiscretizedTrajectory::QueryLowerBoundPoint(
+std::uint32_t DiscretizedTrajectory::QueryLowerBoundPoint(                          // 通过一个时间点找到该时间点的下界
     const double relative_time) const {
   CHECK(!trajectory_points_.empty());
   // 时间间隔比我还要长
@@ -79,33 +79,33 @@ std::uint32_t DiscretizedTrajectory::QueryLowerBoundPoint(
   auto it_lower =
       std::lower_bound(trajectory_points_.begin(), trajectory_points_.end(),
                        relative_time, func);
-  return std::distance(trajectory_points_.begin(), it_lower);  // 迭代器的距离
+  return std::distance(trajectory_points_.begin(), it_lower);                      // 返回迭代器离起点的距离
 }
 
 std::uint32_t DiscretizedTrajectory::QueryNearestPoint(
-    const common::math::Vec2d& position) const {
-  double dist_sqr_min = std::numeric_limits<double>::max();  // 最大值
-  std::uint32_t index_min = 0;
-  for (std::uint32_t i = 0; i < trajectory_points_.size(); ++i) {  // 迭代所有的trajectory_points点
+    const common::math::Vec2d& position) const {                                   // 二维向量的一个点
+  double dist_sqr_min = std::numeric_limits<double>::max();                        // 最大值
+  std::uint32_t index_min = 0;                                                     // 最小的索引值, 32位的无符号值
+  for (std::uint32_t i = 0; i < trajectory_points_.size(); ++i) {                  // 迭代所有的trajectory_points点
     const common::math::Vec2d curr_point(
         trajectory_points_[i].path_point().x(),
-        trajectory_points_[i].path_point().y());
+        trajectory_points_[i].path_point().y());                                   // 迭代一次就会生成一个一个二维的点
 
-    const double dist_sqr = curr_point.DistanceSquareTo(position); // 得到两点距离的平方
-    if (dist_sqr < dist_sqr_min) {
+    const double dist_sqr = curr_point.DistanceSquareTo(position);                 // 得到两点距离的平方, 给定的点到当前点的距离
+    if (dist_sqr < dist_sqr_min) {                                                 // 迭代的过程中找到最小的距离的平方和
       dist_sqr_min = dist_sqr;   // 保存一个最近的点
-      index_min = i;
+      index_min = i;                                                               // 保存对应的索引值
     }
   }
-  return index_min;
+  return index_min;                                                                // 返回轨迹点中离给定点 距离最小的索引值
 }
 
 void DiscretizedTrajectory::AppendTrajectoryPoint(
-    const TrajectoryPoint& trajectory_point) {
+    const TrajectoryPoint& trajectory_point) {                                     // 向轨迹点集中添加一个点
   if (!trajectory_points_.empty()) {
-    CHECK_GT(trajectory_point.relative_time(),
+    CHECK_GT(trajectory_point.relative_time(),                                     // 先做安全性检查
              trajectory_points_.back().relative_time());
-  }
+  }                                                                                // 再将这个轨迹点放到数组的最后面
   trajectory_points_.push_back(trajectory_point);  // 向轨迹数组中增加一个点
 }
 

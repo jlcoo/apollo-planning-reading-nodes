@@ -65,8 +65,8 @@ class ReferenceLineInfo {                                                       
   bool AddObstacleHelper(const Obstacle* obstacle);                             // 障碍物的帮助者, 这个是什么意思?
 
   PathDecision* path_decision();                                                // path的决策者(看选择那一条道路)
-  const PathDecision& path_decision() const;
-  const ReferenceLine& reference_line() const;
+  const PathDecision& path_decision() const;                                    // 通过const关键字重载返回只读的path决策的方法
+  const ReferenceLine& reference_line() const;                                  // 返回只读的参考线
 
   bool ReachedDestination() const;
 

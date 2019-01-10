@@ -106,7 +106,7 @@ bool ReferenceLine::Stitch(const ReferenceLine& other) {                        
     AERROR << "These reference lines are not connected";
     return false;
   }
-  const auto& accumulated_s = other.map_path().accumulated_s();
+  const auto& accumulated_s = other.map_path().accumulated_s();                    // 这个函数写得有点复杂
   auto lower = accumulated_s.begin();
   if (first_join) {
     lower = std::lower_bound(accumulated_s.begin(), accumulated_s.end(),
@@ -130,7 +130,7 @@ ReferencePoint ReferenceLine::GetNearestReferencePoint(                         
     const common::math::Vec2d& xy) const {
   double min_dist = std::numeric_limits<double>::max();
   int min_index = 0;
-  for (std::size_t i = 0; i < reference_points_.size(); ++i) {
+  for (std::size_t i = 0; i < reference_points_.size(); ++i) {                     // 迭代所有的点, 获得距离最短的点
     const double distance = DistanceXY(xy, reference_points_[i]);
     if (distance < min_dist) {
       min_dist = distance;
@@ -140,9 +140,9 @@ ReferencePoint ReferenceLine::GetNearestReferencePoint(                         
   return reference_points_[min_index];
 }
 // 收缩参考线
-bool ReferenceLine::Shrink(const common::math::Vec2d& point,
+bool ReferenceLine::Shrink(const common::math::Vec2d& point,                       // 前看看, 后看看
                            double look_backward, double look_forward) {
-  common::SLPoint sl;
+  common::SLPoint sl;                                                              // 定义一个sl坐标
   if (!XYToSL(point, &sl)) {
     AERROR << "Failed to project point: " << point.DebugString();
     return false;
@@ -157,7 +157,7 @@ bool ReferenceLine::Shrink(const common::math::Vec2d& point,
   size_t end_index = reference_points_.size();
   if (sl.s() + look_forward < Length()) {
     auto start_it = accumulated_s.begin();
-    std::advance(start_it, start_index);   // 随机访问
+    std::advance(start_it, start_index);   // 随机访问, std::advance第一个参数为迭代器的引用，第二个参数是偏移位置，n = 0 不移动，n > 0 迭代器+n， n <0 迭代器-n
     auto it_higher =
         std::upper_bound(start_it, accumulated_s.end(), sl.s() + look_forward);
     end_index = std::distance(accumulated_s.begin(), it_higher);
@@ -275,7 +275,7 @@ double ReferenceLine::FindMinDistancePoint(const ReferencePoint& p0,
     return dx * dx + dy * dy;
   };
 
-  return ::boost::math::tools::brent_find_minima(func_dist_square, s0, s1, 8)
+  return ::boost::math::tools::brent_find_minima(func_dist_square, s0, s1, 8)   // brent find minima(brent方法寻找极小值) 
       .first;
 }
 
@@ -287,7 +287,7 @@ ReferencePoint ReferenceLine::GetReferencePoint(const double x,
                                  const double y) {
     double dx = point.x() - x;
     double dy = point.y() - y;
-    return dx * dx + dy * dy;
+    return dx * dx + dy * dy;                                                   // 这个是一个函数对象
   };
 
   double d_min = func_distance_square(reference_points_.front(), x, y);
@@ -682,7 +682,7 @@ void ReferenceLine::AddSpeedLimit(const hdmap::SpeedControl& speed_control) {   
 void ReferenceLine::AddSpeedLimit(double start_s, double end_s,
                                   double speed_limit) {
   // assume no overlaps between speed limit regions.
-  speed_limit_.emplace_back(start_s, end_s, speed_limit);
+  speed_limit_.emplace_back(start_s, end_s, speed_limit);                          // 假设速度限制区域之间没有重叠
 }
 
 }  // namespace planning

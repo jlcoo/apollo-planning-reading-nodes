@@ -2,23 +2,23 @@ syntax = "proto2";
 
 package apollo.planning;
 
-message QpSplinePathConfig {
-  optional uint32 spline_order = 1 [default = 6];
-  optional double max_spline_length = 2 [default = 15.0];
-  optional double max_constraint_interval = 3 [default = 15.0];
-  optional double time_resolution = 4 [default = 0.1];
-  optional double regularization_weight = 5 [default = 0.001];
-  optional double first_spline_weight_factor = 6 [default = 10.0];
-  optional double derivative_weight = 7 [default = 0.0];
-  optional double second_derivative_weight = 8 [default = 0.0];
-  optional double third_derivative_weight = 9 [default = 100.0];
-  optional double reference_line_weight = 10 [default = 0.0];
-  optional uint32 num_output = 11 [default = 100];
-  optional double cross_lane_lateral_extension = 12 [default = 1.2];
-  optional double cross_lane_longitudinal_extension = 13 [default = 50.0];
-  optional double history_path_weight = 14 [default = 0.0];
-  optional double lane_change_mid_l = 15 [default = 0.6];
-  optional double point_constraint_s_position = 16 [default = 110.0];
-  optional double lane_change_lateral_shift = 17 [default = 1.0];
-  optional double uturn_speed_limit = 18 [default = 5.0];
+message QpSplinePathConfig {                                                   // 路径做平滑的配置项
+  optional uint32 spline_order = 1 [default = 6];                              // 使用的是4次平滑(4次spline)
+  optional double max_spline_length = 2 [default = 15.0];                      // spline的最大长度为20米
+  optional double max_constraint_interval = 3 [default = 15.0];                // 最大间隔为2.0米
+  optional double time_resolution = 4 [default = 0.1];                         // 时间的分辨率为0.1秒(100毫秒)
+  optional double regularization_weight = 5 [default = 0.001];                 // 最规划的权重为0.00001
+  optional double first_spline_weight_factor = 6 [default = 10.0];             // 第一次做spline的权重因子为0
+  optional double derivative_weight = 7 [default = 0.0];                       // 衍生的权重为500.0
+  optional double second_derivative_weight = 8 [default = 0.0];                // 二次微分的权重为1000.0
+  optional double third_derivative_weight = 9 [default = 100.0];               // 三次微分的权重为10.0
+  optional double reference_line_weight = 10 [default = 0.0];                  // 中心参考线的权重为100.0
+  optional uint32 num_output = 11 [default = 100];                             // 输出的点为100个点
+  optional double cross_lane_lateral_extension = 12 [default = 1.2];           // 交叉车道横向扩展0.5米
+  optional double cross_lane_longitudinal_extension = 13 [default = 50.0];     // 交叉车道纵向扩展100米
+  optional double history_path_weight = 14 [default = 0.0];                    // 上次path的权重为0.0
+  optional double lane_change_mid_l = 15 [default = 0.6];                      // 变道的中间值为0
+  optional double point_constraint_s_position = 16 [default = 110.0];          // s轴的点设置为110个
+  optional double lane_change_lateral_shift = 17 [default = 1.0];              // 变道时, 横向的移动会有1.5米
+  optional double uturn_speed_limit = 18 [default = 5.0];                      // 掉头的速度限制为7m/s
 }

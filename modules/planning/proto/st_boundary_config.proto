@@ -1,18 +1,18 @@
 syntax = "proto2";
 
 package apollo.planning;
-// 涉及到两种不同的Boundary， 一个是slBoundary, 另一个是stBoundary
-message StBoundaryConfig {
-  optional double boundary_buffer = 1 [ default = 0.1 ];
-  optional double high_speed_centric_acceleration_limit = 2 [ default = 1.2 ];
-  optional double low_speed_centric_acceleration_limit = 3 [ default = 1.4 ];
-  optional double high_speed_threshold = 4 [ default =  20.0 ];
-  optional double low_speed_threshold = 5 [ default = 7.0 ];
-  optional double minimal_kappa = 6 [ default = 0.00001 ];
-  optional double point_extension = 7 [ default = 1.0 ];
-  optional double lowest_speed = 8 [ default = 2.5 ];
-  optional uint32 num_points_to_avg_kappa = 9 [ default = 4 ];
-  optional double static_obs_nudge_speed_ratio = 10;
-  optional double dynamic_obs_nudge_speed_ratio = 11;
-  optional double centri_jerk_speed_coeff = 12;
+// 涉及到两种不同的Boundary， 一个是slBoundary, 另一个是stBoundary, 里面的值应该是因不同的优化器而不同的
+message StBoundaryConfig {                                                      // st边框的配置
+  optional double boundary_buffer = 1 [ default = 0.1 ];                        // boundary的边框大小为0.1
+  optional double high_speed_centric_acceleration_limit = 2 [ default = 1.2 ];  // 高速时加速度的上限为0.8
+  optional double low_speed_centric_acceleration_limit = 3 [ default = 1.4 ];   // 低速时加速度的上限为1.2
+  optional double high_speed_threshold = 4 [ default =  20.0 ];                 // 最高速度为12.58m/s
+  optional double low_speed_threshold = 5 [ default = 7.0 ];                    // 低速的阈值为7.5m/s
+  optional double minimal_kappa = 6 [ default = 0.00001 ];                      // 最小的曲率为0.00001
+  optional double point_extension = 7 [ default = 1.0 ];                        // 点扩展为1.0
+  optional double lowest_speed = 8 [ default = 2.5 ];                           // 最低的速度为2.5m/s
+  optional uint32 num_points_to_avg_kappa = 9 [ default = 4 ];                  // 计算曲率的点数为2个
+  optional double static_obs_nudge_speed_ratio = 10;                            // 静态障碍物忽略的比重为0.6
+  optional double dynamic_obs_nudge_speed_ratio = 11;                           // 动态障碍物忽略的比重为0.8
+  optional double centri_jerk_speed_coeff = 12;                                 // 这个参数是用来干嘛的?? 我不知道呀
 }
