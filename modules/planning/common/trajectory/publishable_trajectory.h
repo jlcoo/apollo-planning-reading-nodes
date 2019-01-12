@@ -34,19 +34,19 @@ class PublishableTrajectory : public DiscretizedTrajectory {
  public:
   PublishableTrajectory() = default;   // 默认构造函数
 
-  PublishableTrajectory(const double header_time,
+  PublishableTrajectory(const double header_time,                                 // 通过头部时间和离散的轨迹进行构造
                         const DiscretizedTrajectory& discretized_trajectory);
   /**
    * Create a publishable trajectory based on a trajectory protobuf
    */     // ADCTrajectory 来自于 protobuf
-  explicit PublishableTrajectory(const ADCTrajectory& trajectory_pb);
+  explicit PublishableTrajectory(const ADCTrajectory& trajectory_pb);             // 通过自动驾驶车辆的轨迹进行构造
 
-  double header_time() const;
+  double header_time() const;                                                     // 获取头部的时间
   // 填充轨迹
-  void PopulateTrajectoryProtobuf(ADCTrajectory* trajectory_pb) const;
+  void PopulateTrajectoryProtobuf(ADCTrajectory* trajectory_pb) const;            // 构造一个新的轨迹
 
  private:
-  double header_time_ = 0.0;
+  double header_time_ = 0.0;                                                      // 内部的成员变量
 };
 
 }  // namespace planning

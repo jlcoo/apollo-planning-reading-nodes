@@ -28,34 +28,34 @@
 namespace apollo {
 namespace planning {
 
-class SpeedData {
+class SpeedData {                                                             // 速度相关的数据
  public:
-  SpeedData() = default;
-  // SpeedPoint是pnc_point.proto文件中定义的
-  explicit SpeedData(std::vector<common::SpeedPoint> speed_points);
+  SpeedData() = default;                                                      // 默认的构造函数
+  // SpeedPoint是pnc_point.proto文件中定义的. 包含了s, t, v, a, da等信息
+  explicit SpeedData(std::vector<common::SpeedPoint> speed_points);           // speed data是由很多个点构成的
 
-  virtual ~SpeedData() = default;
+  virtual ~SpeedData() = default;                                             // 默认的析构函数
 
-  const std::vector<common::SpeedPoint>& speed_vector() const;
+  const std::vector<common::SpeedPoint>& speed_vector() const;                // 返回速度的向量
 
-  void set_speed_vector(std::vector<common::SpeedPoint> speed_points);
+  void set_speed_vector(std::vector<common::SpeedPoint> speed_points);        // 设置速度向量
 
-  void AppendSpeedPoint(const double s, const double time, const double v,
+  void AppendSpeedPoint(const double s, const double time, const double v,    // 通过路程s, 时间t, 速度v, 加速度a, 加速度的微分da进行构造一个速度点
                         const double a, const double da);
 
-  bool EvaluateByTime(const double time,
+  bool EvaluateByTime(const double time,                                      // 速度点就是通过一个时间t, 进行估计一个速度点(里面实际上是利用了线性插值)
                       common::SpeedPoint* const speed_point) const;
 
-  double TotalTime() const;
+  double TotalTime() const;                                                   // 返回总时间
 
-  bool Empty() const { return speed_vector_.empty(); }
+  bool Empty() const { return speed_vector_.empty(); }                        // 一个速度向量是否是空的
 
-  void Clear();
+  void Clear();                                                               // 清空速度的数组
 
-  virtual std::string DebugString() const;
+  virtual std::string DebugString() const;                                    // debug需要的字符串信息
 
  private:
-  std::vector<common::SpeedPoint> speed_vector_;   // 用一个vector放速度
+  std::vector<common::SpeedPoint> speed_vector_;                              // 用一个vector放速度点
 };
 
 }  // namespace planning

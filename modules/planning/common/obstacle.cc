@@ -167,7 +167,7 @@ common::math::Box2d Obstacle::GetBoundingBox(    // 获得bounding box
 }
 
 const common::math::Box2d& Obstacle::PerceptionBoundingBox() const {
-  return perception_bounding_box_;
+  return perception_bounding_box_;                                                // 其实就是直接返回这个边界框而已啦
 }
 
 const prediction::Trajectory& Obstacle::Trajectory() const {

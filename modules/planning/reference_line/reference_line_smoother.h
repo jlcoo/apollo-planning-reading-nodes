@@ -29,35 +29,35 @@
 
 namespace apollo {
 namespace planning {
-
+                                       // 一个锚点就是path上的点, 横向的边框和纵向的边框, 
 struct AnchorPoint {
   common::PathPoint path_point;        // PathPoint在pnc_point.proto文件中定义
   double lateral_bound = 0.0;          // 侧边框为0
   double longitudinal_bound = 0.0;     // 纵边框为0
   // enforce smoother to strictly follow this reference point
-  bool enforced = false;               // 强制执行参考点
+  bool enforced = false;               // 强制执行参考点, 让其变平滑
 };
-
-class ReferenceLineSmoother {
+// 参考线的平滑器中定义的都是一些接口
+class ReferenceLineSmoother {                                                       // 道路中心参考线的平滑器
  public:
-  explicit ReferenceLineSmoother(const ReferenceLineSmootherConfig& config)
+  explicit ReferenceLineSmoother(const ReferenceLineSmootherConfig& config)         // 通过平滑器的配置进行构造
       : config_(config) {}
 
   /**
    * Smoothing constraints   平滑约束就是设置锚点
    */
-  virtual void SetAnchorPoints(
+  virtual void SetAnchorPoints(                                                     // 锚点的数组就是平滑的约束点??
       const std::vector<AnchorPoint>& achor_points) = 0;
 
   /**
    * Smooth a given reference line
    */
-  virtual bool Smooth(const ReferenceLine&, ReferenceLine* const) = 0;
+  virtual bool Smooth(const ReferenceLine&, ReferenceLine* const) = 0;              // 输入一个中心参考线, 然后通过smooth函数进行平滑处理
 
-  virtual ~ReferenceLineSmoother() = default;
+  virtual ~ReferenceLineSmoother() = default;                                       // 默认的析构函数
 
  protected:
-  ReferenceLineSmootherConfig config_;
+  ReferenceLineSmootherConfig config_;                                              // 中心参考线平滑的配置项, 在reference_line_config.proto文件中定义
 };
 
 }  // namespace planning

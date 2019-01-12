@@ -46,31 +46,31 @@ namespace planning {
 
 using apollo::common::VehicleConfigHelper;    // 车配置助手
 using apollo::common::VehicleState;           // 车的状态
-using apollo::common::adapter::AdapterManager;// 
-using apollo::common::math::Vec2d;
-using apollo::common::time::Clock;
-using apollo::hdmap::HDMapUtil;
-using apollo::hdmap::LaneWaypoint;
-using apollo::hdmap::MapPathPoint;
-using apollo::hdmap::PncMap;
-using apollo::hdmap::RouteSegments;
+using apollo::common::adapter::AdapterManager;// 适配器的管理者
+using apollo::common::math::Vec2d;            // 二维的向量
+using apollo::common::time::Clock;            // 时间时钟
+using apollo::hdmap::HDMapUtil;               // 高精地图相关的配置项
+using apollo::hdmap::LaneWaypoint;            // 车道路网中的点
+using apollo::hdmap::MapPathPoint;            // path中的点, 这个是一个类(里面有航向角, vector<LaneWaypoint>(路网点的数组))
+using apollo::hdmap::PncMap;                  // pnc的地图
+using apollo::hdmap::RouteSegments;           // RouteSegments(routing的片段)
 
-ReferenceLineProvider::~ReferenceLineProvider() {
-  if (thread_ && thread_->joinable()) {
+ReferenceLineProvider::~ReferenceLineProvider() {                                    // 参考线提供者的析构函数
+  if (thread_ && thread_->joinable()) {                                              // 会等待所有线程都死去
     thread_->join();   // 等死
   }
 }
 // 在车道线的构造函数中, 生产参考线(车道线)Spline2dSolver
-ReferenceLineProvider::ReferenceLineProvider(const hdmap::HDMap *base_map) {
+ReferenceLineProvider::ReferenceLineProvider(const hdmap::HDMap *base_map) {         // 通过高精地图的base地图进行构造
   if (!FLAGS_use_navigation_mode) {
-    pnc_map_.reset(new hdmap::PncMap(base_map));
+    pnc_map_.reset(new hdmap::PncMap(base_map));                                     // 如果使用了导航模式, 就会新建一个base地图然后初始化pnc的地图
   }
-  CHECK(common::util::GetProtoFromFile(FLAGS_smoother_config_filename,
-                                       &smoother_config_))
+  CHECK(common::util::GetProtoFromFile(FLAGS_smoother_config_filename,               // 平滑器的配置文件为modules/planning/conf/qp_spline_smoother_config.pb.txt
+                                       &smoother_config_))                           // 获取protocol buf中的内容进行参数配置
       << "Failed to load smoother config file "
-      << FLAGS_smoother_config_filename;
-  if (smoother_config_.has_qp_spline()) {     // 看是用的那个平滑器
-    smoother_.reset(new QpSplineReferenceLineSmoother(smoother_config_));  // QP平滑
+      << FLAGS_smoother_config_filename;                                             // 失败的话就把错误信息打到log日志文件中
+  if (smoother_config_.has_qp_spline()) {      // 看是用的那个平滑器                    // 配置文件中设置的是qp(二次规划器)
+    smoother_.reset(new QpSplineReferenceLineSmoother(smoother_config_));  // QP平滑  // 创建一个新的对象
   } else if (smoother_config_.has_spiral()) { // 螺旋线
     smoother_.reset(new SpiralReferenceLineSmoother(smoother_config_));
   } else if (smoother_config_.has_cos_theta()) { // cos(theta)
@@ -82,21 +82,21 @@ ReferenceLineProvider::ReferenceLineProvider(const hdmap::HDMap *base_map) {
   is_initialized_ = true;
 }  // namespace planning
 
-bool ReferenceLineProvider::UpdateRoutingResponse(
+bool ReferenceLineProvider::UpdateRoutingResponse(                                    // 更新routing获得的值 
     const routing::RoutingResponse &routing) {
-  std::lock_guard<std::mutex> routing_lock(routing_mutex_);
-  routing_ = routing;
-  has_routing_ = true;
+  std::lock_guard<std::mutex> routing_lock(routing_mutex_);                           // 给routing加锁                 
+  routing_ = routing;                                                                 // 直接复制                                         
+  has_routing_ = true;                                                                // 设置标志位                              
   return true;
 }
 
 std::vector<routing::LaneWaypoint>
-ReferenceLineProvider::FutureRouteWaypoints() {
+ReferenceLineProvider::FutureRouteWaypoints() {                                       // 这是同步的一种机制
   std::lock_guard<std::mutex> lock(pnc_map_mutex_);
   return pnc_map_->FutureRouteWaypoints();   // 将来路径要行驶的点
 }
 
-void ReferenceLineProvider::UpdateVehicleState(
+void ReferenceLineProvider::UpdateVehicleState(                                       // 更新车辆的状态                          
     const VehicleState &vehicle_state) {
   std::lock_guard<std::mutex> lock(vehicle_state_mutex_);
   vehicle_state_ = vehicle_state;
@@ -112,34 +112,34 @@ bool ReferenceLineProvider::Start() {
   }  // 创建一个线程GenerateThread, 并且把this(ReferenceLineProvider对象)指针传递给它
   if (FLAGS_enable_reference_line_provider_thread) {
     thread_.reset(
-        new std::thread(&ReferenceLineProvider::GenerateThread, this));
+        new std::thread(&ReferenceLineProvider::GenerateThread, this));              // 多线程就要产生多个线程, 所以要调用GenerateThread函数
   }
   return true;
 }
 
 void ReferenceLineProvider::Stop() {
-  is_stop_ = true;
-  if (FLAGS_enable_reference_line_provider_thread && thread_ &&
+  is_stop_ = true;                                                                   // 停止位必须设置为true                            
+  if (FLAGS_enable_reference_line_provider_thread && thread_ &&                      // 在停止函数中等死
       thread_->joinable()) {
     thread_->join();
   }
 }
 
-void ReferenceLineProvider::UpdateReferenceLine(
+void ReferenceLineProvider::UpdateReferenceLine(                                     // 更新中心参考线                      
     const std::list<ReferenceLine> &reference_lines,         // 参考车道线
     const std::list<hdmap::RouteSegments> &route_segments) { // 高精地图片段
-  if (reference_lines.size() != route_segments.size()) {
+  if (reference_lines.size() != route_segments.size()) {                             // 中心参考线的个数要和route_segments的数量完全相等
     AERROR << "The calculated reference line size(" << reference_lines.size()
            << ") and route_segments size(" << route_segments.size()
            << ") are different";
     return;
   }  // 临界区加锁
-  std::lock_guard<std::mutex> lock(reference_lines_mutex_);
-  if (reference_lines_.size() != reference_lines.size()) {
+  std::lock_guard<std::mutex> lock(reference_lines_mutex_);                          // 一上来就要先加一个锁                
+  if (reference_lines_.size() != reference_lines.size()) {                           // 如果内部不相等就更新内部的参考线的条数
     reference_lines_ = reference_lines;
     route_segments_ = route_segments;
 
-  } else {
+  } else {                                                                           // 如果相等就进行迭代                         
     auto segment_iter = route_segments.begin();
     auto internal_iter = reference_lines_.begin();
     auto internal_segment_iter = route_segments_.begin();
@@ -159,29 +159,29 @@ void ReferenceLineProvider::UpdateReferenceLine(
               common::math::kMathEpsilon) {
         continue;
       }
-      *internal_iter = *iter;
+      *internal_iter = *iter;                                                        // 进行一个点一个点地更新
       *internal_segment_iter = *segment_iter;
     }
   }
   // update history
-  reference_line_history_.push(reference_lines_);
+  reference_line_history_.push(reference_lines_);                                    // 放到内部的单链表中
   route_segments_history_.push(route_segments_);
   // 关键字 constexpr 是C++11中引入的关键字，声明为constexpr类型的变量，编译器会验证该变量的值是否是一个常量表达式
   // constexpr 函数是在使用需要它的代码时，可以在编译时计算其返回值的函数
   // const 和 constexpr 变量之间的主要区别在于：const 变量的初始化可以延迟到运行时，而 constexpr 变量必须在编译时进行初始化。
   constexpr int kMaxHistoryNum = 3;      // 缓存3个点?
-  if (reference_line_history_.size() > kMaxHistoryNum) {
+  if (reference_line_history_.size() > kMaxHistoryNum) {                             // 只保存3组不同的中心参考线
     reference_line_history_.pop();       // 删除掉一个顶部的
     route_segments_history_.pop();
   }
 }
-
+                                                                                     // reference line的提供者, 用多线程来进行处理
 void ReferenceLineProvider::GenerateThread() {
   while (!is_stop_) {                          // 进入一个while死循环
     std::this_thread::yield();     // 当被抢占时, 主动让出时间片
     // boost线程中的yield方法：可以将本线程的CPU时间片放弃，并允许其他线程运行
     // yield方法其实就是::Sleep(0)
-    constexpr int32_t kSleepTime = 50;  // milliseconds, 50ms睡一次
+    constexpr int32_t kSleepTime = 50;  // milliseconds, 50ms睡一次                   // 20Hz一次
     std::this_thread::sleep_for(
         std::chrono::duration<double, std::milli>(kSleepTime));
     double start_time = Clock::NowInSeconds();
@@ -194,7 +194,7 @@ void ReferenceLineProvider::GenerateThread() {
     if (!CreateReferenceLine(&reference_lines, &segments)) {  // 生成一个参考路径线
       AERROR << "Fail to get reference line";
       continue;
-    }
+    }                                                                                // 不断地创建reference line, 然后不断地更新
     UpdateReferenceLine(reference_lines, segments); // 更新参考路径线
     double end_time = Clock::NowInSeconds();    // 得到上面算法的最后时间
     std::lock_guard<std::mutex> lock(reference_lines_mutex_); // guard加锁, 不用自己释放互斥量，在析构函数中自动释放
@@ -202,8 +202,8 @@ void ReferenceLineProvider::GenerateThread() {
   }
 }
 
-double ReferenceLineProvider::LastTimeDelay() {
-  if (FLAGS_enable_reference_line_provider_thread &&
+double ReferenceLineProvider::LastTimeDelay() {                                      // 上次时间上的延迟
+  if (FLAGS_enable_reference_line_provider_thread &&                                 // 如果是多线程就要加锁
       !FLAGS_use_navigation_mode) {
     std::lock_guard<std::mutex> lock(reference_lines_mutex_);
     return last_calculation_time_;
@@ -212,10 +212,10 @@ double ReferenceLineProvider::LastTimeDelay() {
   }
 }
 
-bool ReferenceLineProvider::GetReferenceLines(
+bool ReferenceLineProvider::GetReferenceLines(                                       // 获取参考线
     std::list<ReferenceLine> *reference_lines,
-    std::list<hdmap::RouteSegments> *segments) {
-  CHECK_NOTNULL(reference_lines);
+    std::list<hdmap::RouteSegments> *segments) {                                     // 获取routing的片段                           
+  CHECK_NOTNULL(reference_lines);                                                    // 做容错检查              
   CHECK_NOTNULL(segments);
 
   if (FLAGS_use_navigation_mode) {

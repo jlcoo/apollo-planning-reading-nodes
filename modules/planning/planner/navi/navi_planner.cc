@@ -64,7 +64,7 @@ namespace {
 constexpr uint32_t KDestLanePriority = 0;
 constexpr double kPathOptimizationFallbackClost = 2e4;
 constexpr double kSpeedOptimizationFallbackClost = 2e4;
-constexpr double kStraightForwardLineCost = 10.0;
+constexpr double kStraightForwardLineCost = 10.0;                               // cost的这些魔数为什么会这么设置呢?
 }  // namespace
 
 void NaviPlanner::RegisterTasks() {

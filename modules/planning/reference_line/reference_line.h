@@ -164,7 +164,7 @@ class ReferenceLine {                                                           
   void AddSpeedLimit(double start_s, double end_s, double speed_limit);              // 在一定范围内添加速度信息
 
   uint32_t GetPriority() const { return priority_; }                                 // 每条reference line都有一个优先级
-  void SetPriority(uint32_t priority) { priority_ = priority; }
+  void SetPriority(uint32_t priority) { priority_ = priority; }                      // 设置车道中心参考线的优先级
 
  private:
   /**
@@ -197,21 +197,21 @@ class ReferenceLine {                                                           
                                      const double x, const double y);
 
  private:
-  struct SpeedLimit {
-    double start_s = 0.0;
-    double end_s = 0.0;
-    double speed_limit = 0.0;  // unit m/s
-    SpeedLimit() = default;
-    SpeedLimit(double _start_s, double _end_s, double _speed_limit)
+  struct SpeedLimit {                                                                // 速度的限制
+    double start_s = 0.0;                                                            // 起点的s
+    double end_s = 0.0;                                                              // 终点的s
+    double speed_limit = 0.0;  // unit m/s                                           // 限速的单位是米每秒(m/s)
+    SpeedLimit() = default;                                                          // 默认的构造函数
+    SpeedLimit(double _start_s, double _end_s, double _speed_limit)                  // 构造一个限速的对象
         : start_s(_start_s), end_s(_end_s), speed_limit(_speed_limit) {}
   };
   /**
    * This speed limit overrides the lane speed limit
    **/
-  std::vector<SpeedLimit> speed_limit_;           // 速度限制
-  std::vector<ReferencePoint> reference_points_;  // ReferencePoint继承于MapPathPoint
-  hdmap::Path map_path_;                          // 高精地图的Path类
-  uint32_t priority_ = 0;
+  std::vector<SpeedLimit> speed_limit_;                                              // 速度限制
+  std::vector<ReferencePoint> reference_points_;                                     // ReferencePoint继承于MapPathPoint
+  hdmap::Path map_path_;                                                             // 高精地图的Path类
+  uint32_t priority_ = 0;                                                            // 优先级一开始初始化为0
 };
 
 }  // namespace planning

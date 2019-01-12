@@ -11,109 +11,109 @@ import "modules/common/proto/geometry.proto";
   It will not be refreshed in each planning cycle.
 */
 
-message ChangeLaneStatus {
-  enum Status {
-    IN_CHANGE_LANE = 1; // during change lane state
-    CHANGE_LANE_FAILED = 2; // change lane failed
-    CHANGE_LANE_SUCCESS = 3; // change lane failed
+message ChangeLaneStatus {                                             // 变道的状态
+  enum Status {                                                        // 三个状态
+    IN_CHANGE_LANE = 1; // during change lane state                    // 正在变道
+    CHANGE_LANE_FAILED = 2; // change lane failed                      // 变道失败
+    CHANGE_LANE_SUCCESS = 3; // change lane failed                     // 变道成功
   }
-  optional Status status = 1;
+  optional Status status = 1;                                          // 一个状态
   // the id of the route segment that the vehicle is driving on
-  optional string path_id = 2;
+  optional string path_id = 2;                                         // 车辆行驶路段的ID
   // the time stamp when the state started.
-  optional double timestamp = 3;
+  optional double timestamp = 3;                                       // 当状态开始时算起的时间戳
 }
 
-message StopTimer {
-  optional string obstacle_id = 1;
+message StopTimer {                                                    // 停止定时器
+  optional string obstacle_id = 1;                                     // 障碍物的id号
   // the timestamp when start stopping for the crosswalk
-  optional double stop_time = 2;
+  optional double stop_time = 2;                                       // 等待人行道的时间
 }
 
-message CrosswalkStatus {
-  optional string crosswalk_id = 1;
+message CrosswalkStatus {                                              // 人行道的状态
+  optional string crosswalk_id = 1;                                    // 人行道的id号
   // the timestamp when start stopping for the crosswalk
-  repeated StopTimer stop_timers = 2;
+  repeated StopTimer stop_timers = 2;                                  // 从开始等人行道的时间戳
 }
 
-message PullOverStatus {
-  enum Reason {
+message PullOverStatus {                                               // 靠边停车的意思
+  enum Reason {                                                        // 靠边停车的原因只能有一个就是到站了
     DESTINATION = 1; // upon arriving destination
   }
-  enum Status {
-    UNKNOWN = 1;
-    IN_OPERATION = 2;
-    DONE = 3;
-    DISABLED = 4;
+  enum Status {                                                        // 靠边停车的状态
+    UNKNOWN = 1;                                                       // 停车的状态不知道
+    IN_OPERATION = 2;                                                  // 正在靠边停车的过程中
+    DONE = 3;                                                          // 已经完成了靠边停车
+    DISABLED = 4;                                                      // 不能完成靠边停车
   }
 
-  optional bool in_pull_over = 1 [default=false];
-  optional Status status = 2;
-  optional apollo.common.PointENU inlane_dest_point = 3;
-  optional apollo.common.PointENU start_point = 4;
-  optional apollo.common.PointENU stop_point = 5;
-  optional double stop_point_heading = 6;
-  optional Reason reason = 7;
-  optional double status_set_time = 8;
+  optional bool in_pull_over = 1 [default=false];                      // 一般都不会靠边停车
+  optional Status status = 2;                                          // 靠边停车有四个状态, 选择四个状态之一
+  optional apollo.common.PointENU inlane_dest_point = 3;               // 在车道中的目的地的坐标(UTM坐标系)
+  optional apollo.common.PointENU start_point = 4;                     // 开始的坐标点
+  optional apollo.common.PointENU stop_point = 5;                      // 终点的坐标点
+  optional double stop_point_heading = 6;                              // 终点的航向角
+  optional Reason reason = 7;                                          // 靠边停车的原因
+  optional double status_set_time = 8;                                 // 状态的时间
 }
 
-message ReroutingStatus {
-  optional double last_rerouting_time = 1;
+message ReroutingStatus {                                              // 重新routing的状态
+  optional double last_rerouting_time = 1;                             // 上一次进行重新routing的时间
 }
 
 message RightOfWayStatus {
   // whether the vehicle has right of way in junction
-  map<string, bool> junction = 1;
+  map<string, bool> junction = 1;                                      // 车辆是否在汇流处进行了右转
 }
 
-message SidePassStatus {
+message SidePassStatus {                                               // 旁边绕行的状态
   // a sidepass sequence includes:
-  // driving -> wait -> sidepass -> driving
-  enum Status {
-    UNKNOWN = 0;
-    DRIVE = 1;
-    WAIT = 2;
-    SIDEPASS = 3;
+  // driving -> wait -> sidepass -> driving                            // 开车->等待->绕行->继续开车
+  enum Status {                                                        // 四种状态
+    UNKNOWN = 0;                                                       // 不知道是什么状态
+    DRIVE = 1;                                                         // 开车
+    WAIT = 2;                                                          // 等待
+    SIDEPASS = 3;                                                      // 绕行
   }
-  optional Status status = 1;
-  optional double wait_start_time = 2;
-  optional string pass_obstacle_id = 3;
-  optional apollo.planning.ObjectSidePass.Type pass_side = 4;
+  optional Status status = 1;                                          // 四个状态之一
+  optional double wait_start_time = 2;                                 // 等待开始执行的时间
+  optional string pass_obstacle_id = 3;                                // 要绕行障碍物的id号
+  optional apollo.planning.ObjectSidePass.Type pass_side = 4;          // 就是从左边绕行还是从右边绕行
 }
 
-message StopSignStatus {
-  enum Status {
-    UNKNOWN = 0;
-    DRIVE = 1;
-    STOP = 2;
-    WAIT = 3;
-    CREEP = 4;
-    STOP_DONE = 5;
+message StopSignStatus {                                               // 等待信号灯的状态
+  enum Status {                                                        // 有六种状态
+    UNKNOWN = 0;                                                       // 不知道的状态                    
+    DRIVE = 1;                                                         // 开车                   
+    STOP = 2;                                                          // 停车                                     
+    WAIT = 3;                                                          // 等待
+    CREEP = 4;                                                         // 爬行, 应该就是低速行驶                                   
+    STOP_DONE = 5;                                                     // 停止完成                                              
   }
-  message LaneWatchVehicles {
-    optional string lane_id = 1;
-    repeated string watch_vehicles = 2;
+  message LaneWatchVehicles {                                          // 一个lane(车道)上匹配到的所有车辆              
+    optional string lane_id = 1;                                       // 是那个车道, 即需要车道的id号                          
+    repeated string watch_vehicles = 2;                                // 匹配到的车辆信息
   }
 
-  optional string stop_sign_id = 1;
-  optional Status status = 2;
-  optional double stop_start_time = 3;
-  repeated LaneWatchVehicles lane_watch_vehicles = 4;
+  optional string stop_sign_id = 1;                                    // 停止信号的id号                   
+  optional Status status = 2;                                          // 车辆的状态                                                   
+  optional double stop_start_time = 3;                                 // 开始停止的时间  
+  repeated LaneWatchVehicles lane_watch_vehicles = 4;                  // 车道上匹配到的车辆       
 }
 
-message DestinationStatus {
-    optional bool has_passed_destination = 1 [default = false];
-}
+message DestinationStatus {                                            // 到达终点的状态        
+    optional bool has_passed_destination = 1 [default = false];        // 默认是没有到达终点   
+} 
 
-message PlanningStatus {
-  optional ChangeLaneStatus change_lane = 1;
-  optional CrosswalkStatus crosswalk = 2;
-  optional apollo.common.EngageAdvice engage_advice = 3;
-  optional ReroutingStatus rerouting = 4;
-  optional RightOfWayStatus right_of_way = 5;
-  optional SidePassStatus side_pass = 6;
-  optional StopSignStatus stop_sign = 7;
-  optional DestinationStatus destination  = 8;
-  optional PullOverStatus pull_over = 9;                // 这个状态是什么? 拉过来的意思?
+message PlanningStatus {                                               // planning的状态
+  optional ChangeLaneStatus change_lane = 1;                           // 变道的状态
+  optional CrosswalkStatus crosswalk = 2;                              // 过人行道的状态                     
+  optional apollo.common.EngageAdvice engage_advice = 3;               // engage_advice中engage是什么意思不知道?
+  optional ReroutingStatus rerouting = 4;                              // routing的状态, 上次routing的时间
+  optional RightOfWayStatus right_of_way = 5;                          // 靠右行驶的状态
+  optional SidePassStatus side_pass = 6;                               // 靠边绕行的状态
+  optional StopSignStatus stop_sign = 7;                               // 停止过程中的状态             
+  optional DestinationStatus destination  = 8;                         // 到达目的地的状态                                                   
+  optional PullOverStatus pull_over = 9;                               // 这个状态是什么? 拉过来的意思?, 靠边停车的状态
 }
 

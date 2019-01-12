@@ -34,7 +34,7 @@ message StopPoint {
   required Type type = 2 [default = HARD]; 
 }
 
-message PlanningTarget {
-  optional StopPoint stop_point = 1;
-  optional double cruise_speed = 2;
+message PlanningTarget {                                   // planning的字段
+  optional StopPoint stop_point = 1;                       // 停止点
+  optional double cruise_speed = 2;                        // 巡航的速度
 }

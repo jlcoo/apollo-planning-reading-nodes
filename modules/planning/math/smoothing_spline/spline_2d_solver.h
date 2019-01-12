@@ -34,32 +34,32 @@
 namespace apollo {
 namespace planning {
 // 2维spline的求解器
-class Spline2dSolver {
+class Spline2dSolver {                                                          // 二维spline的求解器
  public:
-  Spline2dSolver(const std::vector<double>& t_knots, const uint32_t order);
+  Spline2dSolver(const std::vector<double>& t_knots, const uint32_t order);     // 通过时间节点和几次方进行构造
 
-  void Reset(const std::vector<double>& t_knots, const uint32_t order);
+  void Reset(const std::vector<double>& t_knots, const uint32_t order);         // 重新复位时间节点和次方数
 
   // customize setup
-  Spline2dConstraint* mutable_constraint();
-  Spline2dKernel* mutable_kernel();
-  Spline2d* mutable_spline();
+  Spline2dConstraint* mutable_constraint();                                     // 用户设置二维的约束
+  Spline2dKernel* mutable_kernel();                                             // 用户设置二维的kernel函数
+  Spline2d* mutable_spline();                                                   // 用户设置二维的spline曲线
 
   // solve
-  bool Solve();
+  bool Solve();                                                                 // 求解过程
 
   // extract
-  const Spline2d& spline() const;
+  const Spline2d& spline() const;                                               // 获取spline的曲线
 
  private:
-  Spline2d spline_;
-  Spline2dKernel kernel_;
-  Spline2dConstraint constraint_;
-  std::unique_ptr<::qpOASES::SQProblem> sqp_solver_;
+  Spline2d spline_;                                                             // spline曲线
+  Spline2dKernel kernel_;                                                       // spline的核函数
+  Spline2dConstraint constraint_;                                               // spline的约束
+  std::unique_ptr<::qpOASES::SQProblem> sqp_solver_;                            // sqp的求解器
 
-  int last_num_constraint_ = 0;
-  int last_num_param_ = 0;
-  bool last_problem_success_ = false;
+  int last_num_constraint_ = 0;                                                 // 上一次约束的数量
+  int last_num_param_ = 0;                                                      // 上一次参数的数量
+  bool last_problem_success_ = false;                                           // 上一个问题是否已经求解成功
 };
 
 }  // namespace planning

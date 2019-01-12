@@ -79,12 +79,12 @@ message ObjectOvertake {
   optional double time_buffer = 4;  // minimum time buffer required before the obstacle reaches the intersect point.
 }
 
-message ObjectSidePass {
-  enum Type {
+message ObjectSidePass {                                               // 要绕行的物体
+  enum Type {                                                          // 要从左边绕行还是从右边绕行                
     LEFT = 1;
     RIGHT = 2;
   };
-  optional Type type = 1;
+  optional Type type = 1;                                              // 就是要从一个物体的那边绕行     
 }
 
 // unified object decision while estop

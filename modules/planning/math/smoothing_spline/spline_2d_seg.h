@@ -29,15 +29,15 @@
 namespace apollo {
 namespace planning {
 
-class Spline2dSeg {
+class Spline2dSeg {                                                      // 二维的spline曲线段
  public:
-  // order represent the number of parameters (not the highest order);
-  explicit Spline2dSeg(const uint32_t order);
-  explicit Spline2dSeg(const std::vector<double>& x_param,
+  // order represent the number of parameters (not the highest order);   // order表示的是参数的数量, 而不是最高的次序
+  explicit Spline2dSeg(const uint32_t order);                            // 通过参数的数量进行构造
+  explicit Spline2dSeg(const std::vector<double>& x_param,               // 通过x, y的参数进行构造
                        const std::vector<double>& y_param);
-  ~Spline2dSeg() = default;
+  ~Spline2dSeg() = default;                                              // 默认的析构函数
 
-  bool SetParams(const std::vector<double>& x_param,
+  bool SetParams(const std::vector<double>& x_param,                     // 设置x, y的参数
                  const std::vector<double>& y_param);
 
   std::pair<double, double> operator()(const double t) const;

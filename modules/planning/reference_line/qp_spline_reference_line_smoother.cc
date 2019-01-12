@@ -36,66 +36,66 @@
 namespace apollo {
 namespace planning {
 
-QpSplineReferenceLineSmoother::QpSplineReferenceLineSmoother(
+QpSplineReferenceLineSmoother::QpSplineReferenceLineSmoother(             // 通过一个中心参考线的平滑器配置项进行构造
     const ReferenceLineSmootherConfig& config)
     : ReferenceLineSmoother(config) {
   spline_solver_.reset(
       new Spline2dSolver(t_knots_, config.qp_spline().spline_order()));   // spline的二维求解器
 }
 
-void QpSplineReferenceLineSmoother::Clear() { t_knots_.clear(); }
+void QpSplineReferenceLineSmoother::Clear() { t_knots_.clear(); }         // clear是清除所有的时间节点
 
-bool QpSplineReferenceLineSmoother::Smooth(
+bool QpSplineReferenceLineSmoother::Smooth(                               // smooth函数就是进行平滑处理的
     const ReferenceLine& raw_reference_line,
     ReferenceLine* const smoothed_reference_line) {
-  Clear();
-  const double kEpsilon = 1e-6;
-  if (!Sampling()) {
+  Clear();                                                                // 先清除所有的时间节点
+  const double kEpsilon = 1e-6;                                           // 无穷小量
+  if (!Sampling()) {                                                      // 采样参考线中的平滑器的点
     AERROR << "Fail to sample reference line smoother points!";
     return false;
   }
 
-  spline_solver_->Reset(t_knots_, config_.qp_spline().spline_order());
+  spline_solver_->Reset(t_knots_, config_.qp_spline().spline_order());    // 函数设置时间节点, 和参数的个数
 
-  if (!AddConstraint()) {
+  if (!AddConstraint()) {                                                 // 然后添加约束项
     AERROR << "Add constraint for spline smoother failed";
     return false;
   }
 
-  if (!AddKernel()) {
+  if (!AddKernel()) {                                                     // 然后添加核函数
     AERROR << "Add kernel for spline smoother failed.";
     return false;
   }
 
-  if (!Solve()) {
+  if (!Solve()) {                                                         // 然后求解
     AERROR << "Solve spline smoother problem failed";
   }
-
+                                                                          // 最后将求解出来的splin曲线映射到中心参考线上(reference line)                     
   // mapping spline to reference line point
-  const double start_t = t_knots_.front();
-  const double end_t = t_knots_.back();
+  const double start_t = t_knots_.front();                                // 获得时间节点的起点
+  const double end_t = t_knots_.back();                                   // 获得时间节点的终点
 
   const double resolution =
-      (end_t - start_t) / (config_.num_of_total_points() - 1);
+      (end_t - start_t) / (config_.num_of_total_points() - 1);            // 获取最小采样的单位, 配置采样500个点
   double t = start_t;
-  std::vector<ReferencePoint> ref_points;
-  const auto& spline = spline_solver_->spline();
-  for (std::uint32_t i = 0; i < config_.num_of_total_points() && t < end_t;
+  std::vector<ReferencePoint> ref_points;                                 // 声明一个存储参考点的数组
+  const auto& spline = spline_solver_->spline();                          // 返回求解器的spline曲线
+  for (std::uint32_t i = 0; i < config_.num_of_total_points() && t < end_t; // 迭代所有点
        ++i, t += resolution) {
     const double heading =
-        std::atan2(spline.DerivativeY(t), spline.DerivativeX(t));
-    const double kappa = CurveMath::ComputeCurvature(
+        std::atan2(spline.DerivativeY(t), spline.DerivativeX(t));         // 获取航向角
+    const double kappa = CurveMath::ComputeCurvature(                     // 计算曲率
         spline.DerivativeX(t), spline.SecondDerivativeX(t),
         spline.DerivativeY(t), spline.SecondDerivativeY(t));
-    const double dkappa = CurveMath::ComputeCurvatureDerivative(
+    const double dkappa = CurveMath::ComputeCurvatureDerivative(          // 曲率的微分
         spline.DerivativeX(t), spline.SecondDerivativeX(t),
         spline.ThirdDerivativeX(t), spline.DerivativeY(t),
         spline.SecondDerivativeY(t), spline.ThirdDerivativeY(t));
 
-    std::pair<double, double> xy = spline(t);
+    std::pair<double, double> xy = spline(t);                             // spline返回的是一个点对(x和y的坐标)
     xy.first += ref_x_;
     xy.second += ref_y_;
-    common::SLPoint ref_sl_point;
+    common::SLPoint ref_sl_point;                                         // reference line需要投影到sl坐标系中                   
     if (!raw_reference_line.XYToSL({xy.first, xy.second}, &ref_sl_point)) {
       return false;
     }
@@ -103,10 +103,10 @@ bool QpSplineReferenceLineSmoother::Smooth(
         ref_sl_point.s() > raw_reference_line.Length()) {
       continue;
     }
-    ref_sl_point.set_s(std::max(ref_sl_point.s(), 0.0));
+    ref_sl_point.set_s(std::max(ref_sl_point.s(), 0.0));                  // MapPathPoint里面有vector<LaneWaypoint>             
     ReferencePoint rlp = raw_reference_line.GetReferencePoint(ref_sl_point.s());
     auto new_lane_waypoints = rlp.lane_waypoints();
-    for (auto& lane_waypoint : new_lane_waypoints) {
+    for (auto& lane_waypoint : new_lane_waypoints) {                      // 所以需要迭代所有的laneWaypoint             
       lane_waypoint.l = ref_sl_point.l();
     }
     ref_points.emplace_back(ReferencePoint(
@@ -115,7 +115,7 @@ bool QpSplineReferenceLineSmoother::Smooth(
         kappa, dkappa));
   }
 
-  ReferencePoint::RemoveDuplicates(&ref_points);
+  ReferencePoint::RemoveDuplicates(&ref_points);                          // 移除掉重复的参考点(好像没有做移除重复点的动作呀)
   if (ref_points.size() < 2) {
     AERROR << "Fail to generate smoothed reference line.";
     return false;
@@ -124,27 +124,27 @@ bool QpSplineReferenceLineSmoother::Smooth(
   return true;
 }
 
-bool QpSplineReferenceLineSmoother::Sampling() {
-  const double length = anchor_points_.back().path_point.s() -
+bool QpSplineReferenceLineSmoother::Sampling() {                                  // qp平滑器进行采样
+  const double length = anchor_points_.back().path_point.s() -                    // 获取长度
                         anchor_points_.front().path_point.s();
   uint32_t num_spline =
-      std::max(1u, static_cast<uint32_t>(
-                       length / config_.qp_spline().max_spline_length() + 0.5));
-  for (std::uint32_t i = 0; i <= num_spline; ++i) {
+      std::max(1u, static_cast<uint32_t>(                                         // 采样点的个数
+                       length / config_.qp_spline().max_spline_length() + 0.5));  // 加0.5是为了四舍五入
+  for (std::uint32_t i = 0; i <= num_spline; ++i) {                               // 每个时间点放到t_knots_这个数组中
     t_knots_.push_back(i * 1.0);
   }
   // normalize point xy
-  ref_x_ = anchor_points_.front().path_point.x();
+  ref_x_ = anchor_points_.front().path_point.x();                                 // 单位化xy的值       
   ref_y_ = anchor_points_.front().path_point.y();
   return true;
 }
 
-bool QpSplineReferenceLineSmoother::AddConstraint() {
+bool QpSplineReferenceLineSmoother::AddConstraint() {                             // 增加锚点
   // Add x, y boundary constraint
-  std::vector<double> headings;
-  std::vector<double> longitudinal_bound;
-  std::vector<double> lateral_bound;
-  std::vector<common::math::Vec2d> xy_points;
+  std::vector<double> headings;                                                   // 航向角                           
+  std::vector<double> longitudinal_bound;                                         // 纵向的bound(边框)
+  std::vector<double> lateral_bound;                                              // 横向的bound(边框)            
+  std::vector<common::math::Vec2d> xy_points;                                     // 二维坐标点
   for (const auto& point : anchor_points_) {
     const auto& path_point = point.path_point;
     headings.push_back(path_point.theta());
@@ -200,13 +200,13 @@ bool QpSplineReferenceLineSmoother::AddKernel() {
         config_.qp_spline().third_derivative_weight());
   }
 
-  kernel->AddRegularization(config_.qp_spline().regularization_weight());
+  kernel->AddRegularization(config_.qp_spline().regularization_weight());              // 所有的权值都必须进行正规化(变道0~1之间)
   return true;
 }
 
-bool QpSplineReferenceLineSmoother::Solve() { return spline_solver_->Solve(); }
+bool QpSplineReferenceLineSmoother::Solve() { return spline_solver_->Solve(); }        // 利用求解器求解
 
-void QpSplineReferenceLineSmoother::SetAnchorPoints(
+void QpSplineReferenceLineSmoother::SetAnchorPoints(                                   // 通过一个数组进行复制
     const std::vector<AnchorPoint>& anchor_points) {
   CHECK_GE(anchor_points.size(), 2);
   anchor_points_ = anchor_points;

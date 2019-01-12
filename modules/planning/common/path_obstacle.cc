@@ -94,31 +94,31 @@ double PathObstacle::MinRadiusStopDistance(
 }
 
 void PathObstacle::BuildReferenceLineStBoundary(
-    const ReferenceLine& reference_line, const double adc_start_s) {
+    const ReferenceLine& reference_line, const double adc_start_s) {                     // 通过中心参考线和adc(自动驾驶车辆)在s方向上的起点
   const auto& adc_param =
       VehicleConfigHelper::instance()->GetConfig().vehicle_param();                      // 获得车辆参数
   const double adc_width = adc_param.width();                                            // 车的宽度
-  if (obstacle_->IsStatic() ||
+  if (obstacle_->IsStatic() ||                                                           // 如果是静态障碍物或者障碍物没有轨迹点
       obstacle_->Trajectory().trajectory_point().empty()) {
     std::vector<std::pair<STPoint, STPoint>> point_pairs;                                // ST的点对
     double start_s = perception_sl_boundary_.start_s();                                  // 起点
     double end_s = perception_sl_boundary_.end_s();                                      // 终点
-    if (end_s - start_s < kStBoundaryDeltaS) {
+    if (end_s - start_s < kStBoundaryDeltaS) {                                           // 障碍物的最小单位为0.2米
       end_s = start_s + kStBoundaryDeltaS;
     }
-    if (!reference_line.IsBlockRoad(obstacle_->PerceptionBoundingBox(),
+    if (!reference_line.IsBlockRoad(obstacle_->PerceptionBoundingBox(),                  // 看看障碍物是否堵在路上
                                     adc_width)) {
-      return;
+      return;                                                                            // 如果不在路中间就直接返回, 不用考虑
     }
-    point_pairs.emplace_back(STPoint(start_s - adc_start_s, 0.0),
+    point_pairs.emplace_back(STPoint(start_s - adc_start_s, 0.0),                        // 如果堵在路中间, 就构造点对, 然后构造参考线的st坐标系下的boundary(边框)
                              STPoint(end_s - adc_start_s, 0.0));
     point_pairs.emplace_back(STPoint(start_s - adc_start_s, FLAGS_st_max_t),
                              STPoint(end_s - adc_start_s, FLAGS_st_max_t));
     reference_line_st_boundary_ = StBoundary(point_pairs);                              // 中心参考线在st坐标系下的边框(boundary)
-  } else {
+  } else {                                                                              // 如果是动态障碍物
     if (BuildTrajectoryStBoundary(reference_line, adc_start_s,                          // 动态障碍物必须通过起点, 参考线, 生成一个参考线的boundary(边框)
-                                  &reference_line_st_boundary_)) {
-      ADEBUG << "Found st_boundary for obstacle " << id_;
+                                  &reference_line_st_boundary_)) {                      // 调用下面的函数(进行动态障碍物的边框生成)
+      ADEBUG << "Found st_boundary for obstacle " << id_;                               // 输出障碍物的id好, 最大,最小的t(时间)和s(路程)
       ADEBUG << "st_boundary: min_t = " << reference_line_st_boundary_.min_t()
              << ", max_t = " << reference_line_st_boundary_.max_t()
              << ", min_s = " << reference_line_st_boundary_.min_s()
@@ -128,33 +128,33 @@ void PathObstacle::BuildReferenceLineStBoundary(
     }
   }
 }
-
+// 生成轨迹的st坐标下的边框
 bool PathObstacle::BuildTrajectoryStBoundary(
     const ReferenceLine& reference_line, const double adc_start_s,                      // 参考线, 起点
     StBoundary* const st_boundary) {                                                    // 生成一个st坐标系下的边界(doundary)
-  const auto& object_id = obstacle_->Id();
+  const auto& object_id = obstacle_->Id();                                              // 获取障碍物的id号
   const auto& perception = obstacle_->Perception();                                     // 感知的障碍物
-  if (!IsValidObstacle(perception)) {
+  if (!IsValidObstacle(perception)) {                                                   // 感知到的障碍物是否已经合法了
     AERROR << "Fail to build trajectory st boundary because object is not "
               "valid. PerceptionObstacle: "
            << perception.DebugString();
     return false;
   }
-  const double object_width = perception.width();                                       // 宽度
-  const double object_length = perception.length();                                     // 长度
-  const auto& trajectory_points = obstacle_->Trajectory().trajectory_point();           // 轨迹点
-  if (trajectory_points.empty()) {
+  const double object_width = perception.width();                                       // 感知到障碍物的宽度
+  const double object_length = perception.length();                                     // 感知到障碍物的长度
+  const auto& trajectory_points = obstacle_->Trajectory().trajectory_point();           // 获取动态障碍物的轨迹点
+  if (trajectory_points.empty()) {                                                      // 错误检查, 需要障碍物需要有轨迹(因为是动态障碍物)
     AWARN << "object " << object_id << " has no trajectory points";
-    return false;
+    return false;                                                                       // 动态障碍物没有轨迹的话, 就会生成轨迹的st坐标下的boundary(边框)失败
   }
-  const auto& adc_param =
+  const auto& adc_param =                                                               // 从VehicleConfigHelper的单例对象中获取车辆的参数
       VehicleConfigHelper::instance()->GetConfig().vehicle_param();
-  const double adc_length = adc_param.length();
-  const double adc_half_length = adc_length / 2.0;
-  const double adc_width = adc_param.width();
+  const double adc_length = adc_param.length();                                         // 自动驾驶车辆的长度
+  const double adc_half_length = adc_length / 2.0;                                      // 取长度的一半
+  const double adc_width = adc_param.width();                                           // 自动驾驶车辆的宽度
   common::math::Box2d min_box({0, 0}, 1.0, 1.0, 1.0);                                   // 初始化一个最小的box
   common::math::Box2d max_box({0, 0}, 1.0, 1.0, 1.0);                                   // 初始化一个最大的box
-  std::vector<std::pair<STPoint, STPoint>> polygon_points;                              // 一个多边形的点
+  std::vector<std::pair<STPoint, STPoint>> polygon_points;                              // 一个多边形的点(在st坐标系中的一个点对组成的多表现的点)
 
   SLBoundary last_sl_boundary;                                                          // 上一个sl的边框点
   int last_index = 0;                                                                   // 上一次的索引值
@@ -232,10 +232,10 @@ bool PathObstacle::BuildTrajectoryStBoundary(
     const double delta_t =
         second_traj_point.relative_time() - first_traj_point.relative_time();           // 时间戳
     double low_s = std::max(object_boundary.start_s() - adc_half_length, 0.0);
-    bool has_low = false;
+    bool has_low = false;                                                               // 初始化下界为false
     double high_s =
         std::min(object_boundary.end_s() + adc_half_length, FLAGS_st_max_s);
-    bool has_high = false;
+    bool has_high = false;                                                              // 初始化上界为false
     while (low_s + st_boundary_delta_s < high_s && !(has_low && has_high)) {            // 这里使用的是什么算法???
       if (!has_low) {
         auto low_ref = reference_line.GetReferencePoint(low_s);
@@ -250,7 +250,7 @@ bool PathObstacle::BuildTrajectoryStBoundary(
         high_s -= st_boundary_delta_s;
       }
     }
-    if (has_low && has_high) {
+    if (has_low && has_high) {                                                          // 上界和下界都存在的情况下
       low_s -= st_boundary_delta_s;
       high_s += st_boundary_delta_s;
       double low_t =
@@ -281,7 +281,7 @@ bool PathObstacle::BuildTrajectoryStBoundary(
                             [](const std::pair<STPoint, STPoint>& a,
                                const std::pair<STPoint, STPoint>& b) {
                               return std::fabs(a.first.t() - b.first.t()) <
-                                     kStBoundaryDeltaT;
+                                     kStBoundaryDeltaT;                          // 时间的采样的最小单位值
                             });
     polygon_points.erase(last, polygon_points.end());
     if (polygon_points.size() > 2) {
@@ -352,84 +352,84 @@ ObjectDecisionType PathObstacle::MergeLongitudinalDecision(                     
   return lhs;  // stop compiler complaining
 }
 
-const ObjectDecisionType& PathObstacle::LongitudinalDecision() const {
+const ObjectDecisionType& PathObstacle::LongitudinalDecision() const {            // 返回纵向的决策
   return longitudinal_decision_;
 }
 
-const ObjectDecisionType& PathObstacle::LateralDecision() const {
+const ObjectDecisionType& PathObstacle::LateralDecision() const {                 // 返回横向的决策
   return lateral_decision_;
 }
 
-bool PathObstacle::IsIgnore() const {
-  return IsLongitudinalIgnore() && IsLateralIgnore();
+bool PathObstacle::IsIgnore() const {                                             // 一个障碍物的决策能不能被忽略
+  return IsLongitudinalIgnore() && IsLateralIgnore();                             // 横向和纵向决策都能被忽略的话就能都被忽略
 }
 
-bool PathObstacle::IsLongitudinalIgnore() const {
+bool PathObstacle::IsLongitudinalIgnore() const {                                 // 纵向的决策
   return longitudinal_decision_.has_ignore();
 }
 
-bool PathObstacle::IsLateralIgnore() const {
+bool PathObstacle::IsLateralIgnore() const {                                      // 横向的决策
   return lateral_decision_.has_ignore();
 }
 
-ObjectDecisionType PathObstacle::MergeLateralDecision(
+ObjectDecisionType PathObstacle::MergeLateralDecision(                            // 两个不同的决策综合考虑再做决策
     const ObjectDecisionType& lhs, const ObjectDecisionType& rhs) {
-  if (lhs.object_tag_case() == ObjectDecisionType::OBJECT_TAG_NOT_SET) {
+  if (lhs.object_tag_case() == ObjectDecisionType::OBJECT_TAG_NOT_SET) {          // 如果有一个决策的tag没有设置的话, 就选择另外一个
     return rhs;
   }
   if (rhs.object_tag_case() == ObjectDecisionType::OBJECT_TAG_NOT_SET) {
     return lhs;
   }
   const auto lhs_val =
-      FindOrDie(s_lateral_decision_safety_sorter_, lhs.object_tag_case());
+      FindOrDie(s_lateral_decision_safety_sorter_, lhs.object_tag_case());        // 从字典中找一个值, 表示的是决策的优先级
   const auto rhs_val =
       FindOrDie(s_lateral_decision_safety_sorter_, rhs.object_tag_case());
   if (lhs_val < rhs_val) {
     return rhs;
-  } else if (lhs_val > rhs_val) {
+  } else if (lhs_val > rhs_val) {                                                 // 返回一个决策优先级更高的一个
     return lhs;
   } else {
-    if (lhs.has_ignore() || lhs.has_sidepass()) {
-      return rhs;
-    } else if (lhs.has_nudge()) {
-      DCHECK(lhs.nudge().type() == rhs.nudge().type())
+    if (lhs.has_ignore() || lhs.has_sidepass()) {                                 // 如果左边的决策可以忽略或者是绕行
+      return rhs;                                                                 // 那就返回右边的决策
+    } else if (lhs.has_nudge()) {                                                 // 如果左边的决策是微调
+      DCHECK(lhs.nudge().type() == rhs.nudge().type())                            // 同时向左边微调和同时向右边微调, 这是不可能的呀
           << "could not merge left nudge and right nudge";
-      return std::fabs(lhs.nudge().distance_l()) >
+      return std::fabs(lhs.nudge().distance_l()) >                                // 那边的微调距离比较大, 就像那边走
                      std::fabs(rhs.nudge().distance_l())
                  ? lhs
                  : rhs;
     }
   }
-  DCHECK(false) << "Does not have rule to merge decision: "
+  DCHECK(false) << "Does not have rule to merge decision: "                       // 还是返回左边的策略
                 << lhs.ShortDebugString()
                 << " and decision: " << rhs.ShortDebugString();
   return lhs;
 }
 
-bool PathObstacle::HasLateralDecision() const {
+bool PathObstacle::HasLateralDecision() const {                                   // 检查看到一个障碍物的横向决策
   return lateral_decision_.object_tag_case() !=
          ObjectDecisionType::OBJECT_TAG_NOT_SET;
 }
 
-bool PathObstacle::HasLongitudinalDecision() const {
+bool PathObstacle::HasLongitudinalDecision() const {                              // 检查看到一个障碍物的纵向决策
   return longitudinal_decision_.object_tag_case() !=
          ObjectDecisionType::OBJECT_TAG_NOT_SET;
 }
 
-bool PathObstacle::HasNonIgnoreDecision() const {
+bool PathObstacle::HasNonIgnoreDecision() const {                                 // 是否有不能忽略的决策
   return (HasLateralDecision() && !IsLateralIgnore()) ||
          (HasLongitudinalDecision() && !IsLongitudinalIgnore());
 }
 
-const Obstacle* PathObstacle::obstacle() const { return obstacle_; }
+const Obstacle* PathObstacle::obstacle() const { return obstacle_; }              // 返回道路上的障碍物
 
-void PathObstacle::AddLongitudinalDecision(const std::string& decider_tag,
+void PathObstacle::AddLongitudinalDecision(const std::string& decider_tag,        // 添加一个纵向的决策
                                            const ObjectDecisionType& decision) {
   DCHECK(IsLongitudinalDecision(decision))
       << "Decision: " << decision.ShortDebugString()
       << " is not a longitudinal decision";
   longitudinal_decision_ =
-      MergeLongitudinalDecision(longitudinal_decision_, decision);
+      MergeLongitudinalDecision(longitudinal_decision_, decision);                // 通过合并纵向的决策来获得纵向的策略
   ADEBUG << decider_tag << " added obstacle " << Id()
          << " longitudinal decision: " << decision.ShortDebugString()
          << ". The merged decision is: "
@@ -438,7 +438,7 @@ void PathObstacle::AddLongitudinalDecision(const std::string& decider_tag,
   decider_tags_.push_back(decider_tag);
 }
 
-void PathObstacle::AddLateralDecision(const std::string& decider_tag,
+void PathObstacle::AddLateralDecision(const std::string& decider_tag,            // 通过tag和具体的决策向横向中添加一个策略
                                       const ObjectDecisionType& decision) {
   DCHECK(IsLateralDecision(decision))
       << "Decision: " << decision.ShortDebugString()
@@ -471,31 +471,31 @@ const std::string PathObstacle::DebugString() const {
   return ss.str();
 }
 
-const SLBoundary& PathObstacle::PerceptionSLBoundary() const {
+const SLBoundary& PathObstacle::PerceptionSLBoundary() const {                  // 返回感知到障碍物的sl坐标下的边框(boundary)
   return perception_sl_boundary_;
 }
 
-void PathObstacle::SetStBoundary(const StBoundary& boundary) {
+void PathObstacle::SetStBoundary(const StBoundary& boundary) {                  // 设置st坐标下的边框(boundary)
   st_boundary_ = boundary;
 }
 
-void PathObstacle::SetStBoundaryType(const StBoundary::BoundaryType type) {
+void PathObstacle::SetStBoundaryType(const StBoundary::BoundaryType type) {     // 设置st边框的类型
   st_boundary_.SetBoundaryType(type);
 }
 
-void PathObstacle::EraseStBoundary() { st_boundary_ = StBoundary(); }
+void PathObstacle::EraseStBoundary() { st_boundary_ = StBoundary(); }           // 删除st坐标系下的boundary(边框)
 
-void PathObstacle::SetReferenceLineStBoundary(const StBoundary& boundary) {
+void PathObstacle::SetReferenceLineStBoundary(const StBoundary& boundary) {     // 设置中心参考线的st坐标系下的boundary
   reference_line_st_boundary_ = boundary;
 }
 
-void PathObstacle::SetReferenceLineStBoundaryType(
+void PathObstacle::SetReferenceLineStBoundaryType(                              // 设置中心参考线的st坐标系下boundary的类型
     const StBoundary::BoundaryType type) {
   reference_line_st_boundary_.SetBoundaryType(type);
 }
 
-void PathObstacle::EraseReferenceLineStBoundary() {
-  reference_line_st_boundary_ = StBoundary();
+void PathObstacle::EraseReferenceLineStBoundary() {                             // 删除中心参考线的boundary
+  reference_line_st_boundary_ = StBoundary();                                   // 默认构造函数构造一个对象返回(空对象)
 }
 
 bool PathObstacle::IsValidObstacle(

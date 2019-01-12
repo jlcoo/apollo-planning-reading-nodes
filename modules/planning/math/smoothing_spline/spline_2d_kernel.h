@@ -36,7 +36,7 @@ class Spline2dKernel {
                  const uint32_t spline_order);
 
   // customized input output
-  void AddRegularization(const double regularization_param);
+  void AddRegularization(const double regularization_param);                        // 添加正则化参数
   bool AddKernel(const Eigen::MatrixXd& kernel, const Eigen::MatrixXd& offset,
                  const double weight);
   bool AddKernel(const Eigen::MatrixXd& kernel, const double weight);
@@ -62,11 +62,11 @@ class Spline2dKernel {
   uint32_t find_index(const double x) const;
 
  private:
-  Eigen::MatrixXd kernel_matrix_;
-  Eigen::MatrixXd offset_;
-  std::vector<double> t_knots_;
-  uint32_t spline_order_;
-  uint32_t total_params_;
+  Eigen::MatrixXd kernel_matrix_;                                                  // 核函数矩阵
+  Eigen::MatrixXd offset_;                                                         // 偏移量
+  std::vector<double> t_knots_;                                                    // 时间节点的数组
+  uint32_t spline_order_;                                                          // spline曲线的次方数
+  uint32_t total_params_;                                                          // 总共的参数
 };
 
 }  // namespace planning

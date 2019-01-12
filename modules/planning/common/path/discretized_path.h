@@ -30,34 +30,34 @@ namespace planning {
 
 class DiscretizedPath {    // 离散道路
  public:
-  DiscretizedPath() = default;
+  DiscretizedPath() = default;                                                   // 默认的构造函数
+                                                                                 // 禁止隐式转换的构造函数
+  explicit DiscretizedPath(const std::vector<common::PathPoint>& path_points);   // 从PathPoint中得到数据(path point里面有三维空间坐标(x,y,z), theta, 路程s,曲率等信息)
 
-  explicit DiscretizedPath(const std::vector<common::PathPoint>& path_points);   // 从PathPoint中得到数据
+  virtual ~DiscretizedPath() = default;                                          // 默认的析构函数
 
-  virtual ~DiscretizedPath() = default;
+  void set_path_points(const std::vector<common::PathPoint>& path_points);       // 通过一个PathPoint的数组设置path里面的点
 
-  void set_path_points(const std::vector<common::PathPoint>& path_points);
+  double Length() const;                                                         // 获取长度信息
 
-  double Length() const;
+  const common::PathPoint& StartPoint() const;                                   // 获取一段path的起点
 
-  const common::PathPoint& StartPoint() const;
+  const common::PathPoint& EndPoint() const;                                     // 获取该path的终点
 
-  const common::PathPoint& EndPoint() const;
+  common::PathPoint Evaluate(const double path_s) const;                         // 通过一个path上的路程估计出一个path point
 
-  common::PathPoint Evaluate(const double path_s) const;
+  const std::vector<common::PathPoint>& path_points() const;                     // 返回一个path点组成的数组(注意这里是引用)
 
-  const std::vector<common::PathPoint>& path_points() const;
+  std::uint32_t NumOfPoints() const;                                             // 返回数组中的个数
 
-  std::uint32_t NumOfPoints() const;
-
-  virtual void Clear();
+  virtual void Clear();                                                          // 清空后数组
 
  protected:
-  std::vector<common::PathPoint>::const_iterator QueryLowerBound(
+  std::vector<common::PathPoint>::const_iterator QueryLowerBound(                // 通过path上的路程path_s返回小于s的所有点?
       const double path_s) const;
 // PathPoint是pnc_point.proto文件中定义的消息字段
-  std::vector<common::PathPoint> path_points_;    // PathPoint是什么数据结构?
-};
+  std::vector<common::PathPoint> path_points_;                                   // PathPoint是什么数据结构?(就是一些坐标, 曲率等信息)
+};                                                                               // 一个path里面有很多path点, 用一个数组进行保存
 
 }  // namespace planning
 }  // namespace apollo

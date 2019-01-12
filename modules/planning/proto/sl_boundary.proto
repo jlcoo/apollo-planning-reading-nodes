@@ -20,8 +20,8 @@ package apollo.planning;
 /////////////////////////////////////////////////////////////////
 // s代表长度， l代表宽度, frenet坐标系中的boundary设置
 message SLBoundary {                              // sl的边框由两个轴的终点和起点构成
-  optional double start_s = 1;
-  optional double end_s = 2;
-  optional double start_l = 3;
-  optional double end_l = 4;
+  optional double start_s = 1;                    // s路程方向的起点
+  optional double end_s = 2;                      // s路程方向的终点
+  optional double start_l = 3;                    // l横向(宽度)方向上的起点
+  optional double end_l = 4;                      // l横向(宽度)方向上的终点
 }

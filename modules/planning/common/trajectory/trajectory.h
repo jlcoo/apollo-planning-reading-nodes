@@ -26,20 +26,20 @@
 namespace apollo {
 namespace planning {
 // 基类, 评估函数, 起点,  
-class Trajectory {
+class Trajectory {                                                 // 轨迹点的基类
  public:
-  Trajectory() = default;
+  Trajectory() = default;                                          // 默认的构造函数
 
-  virtual ~Trajectory() = default;
+  virtual ~Trajectory() = default;                                 // 默认的虚的析构函数
 
-  virtual common::TrajectoryPoint Evaluate(
+  virtual common::TrajectoryPoint Evaluate(                        // 通过相对时间点进行插值处理, 得到断点或者是一个新的点
       const double relative_time) const = 0;
 
-  virtual common::TrajectoryPoint StartPoint() const = 0;
+  virtual common::TrajectoryPoint StartPoint() const = 0;          // 返回轨迹的起点
   // 获得时间长度
-  virtual double GetTemporalLength() const = 0;
+  virtual double GetTemporalLength() const = 0;                    // 返回时间的长度值
   // 获得空间长度
-  virtual double GetSpatialLength() const = 0;
+  virtual double GetSpatialLength() const = 0;                     // 返回空间的长度值, 即路程s的长度值
 };
 
 }  // namespace planning

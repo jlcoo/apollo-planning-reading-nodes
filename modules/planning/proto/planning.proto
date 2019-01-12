@@ -131,7 +131,7 @@ message ADCTrajectory {                                                         
   enum TrajectoryType {                                                            // 轨迹的类型
     UNKNOWN = 0;                                                                   // 不知道是啥轨迹
     NORMAL = 1;                                                                    // 正常的轨迹
-    PATH_FALLBACK = 2;                                                             // path路径反馈的轨迹
+    PATH_FALLBACK = 2;                                                             // path路径反馈的轨迹, 位移反馈和速度反馈(在做双闭环pid的时候可能会用到)
     SPEED_FALLBACK = 3;                                                            // 速度反馈的轨迹
   } 
   optional TrajectoryType trajectory_type = 21 [ default = UNKNOWN];               // 默认是不知道是什么类型

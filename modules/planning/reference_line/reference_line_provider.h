@@ -62,28 +62,28 @@ namespace planning {
  */    // 参考线的生成者
 class ReferenceLineProvider {
  public:
-  ReferenceLineProvider() = default;
-  explicit ReferenceLineProvider(const hdmap::HDMap* base_map);
+  ReferenceLineProvider() = default;                                                      // 默认的构造函数
+  explicit ReferenceLineProvider(const hdmap::HDMap* base_map);                           // 禁止隐式转换的构造函数
 
   /**
    * @brief Default destructor.
    */
-  ~ReferenceLineProvider();
+  ~ReferenceLineProvider();                                                               // 默认的析构函数
 
-  bool UpdateRoutingResponse(const routing::RoutingResponse& routing);
+  bool UpdateRoutingResponse(const routing::RoutingResponse& routing);                    // 更新routing的请求
 
-  void UpdateVehicleState(const common::VehicleState& vehicle_state);
+  void UpdateVehicleState(const common::VehicleState& vehicle_state);                     // 更新车辆的状态
 
-  bool Start();
+  bool Start();                                                                           // 开始
 
-  void Stop();
+  void Stop();                                                                            // 结束
 
-  bool GetReferenceLines(std::list<ReferenceLine>* reference_lines,
-                         std::list<hdmap::RouteSegments>* segments);
+  bool GetReferenceLines(std::list<ReferenceLine>* reference_lines,                       // 获取中心参考线
+                         std::list<hdmap::RouteSegments>* segments);                      // route的片段RouteSegments
 
-  double LastTimeDelay();
+  double LastTimeDelay();                                                                 // 上次时间的延迟
 
-  std::vector<routing::LaneWaypoint> FutureRouteWaypoints();
+  std::vector<routing::LaneWaypoint> FutureRouteWaypoints();                              // 同步的获取lane上的路点
 
  private:
   /**
@@ -91,73 +91,73 @@ class ReferenceLineProvider {
    * based on routing and current position. This is a thread safe function.
    * @return true if !reference_lines.empty() && reference_lines.size() ==
    *                 segments.size();
-   **/
+   **/ // 基于routing和当前的位置(来自pnc的地图)来创建一个中心参考线和相应的片段(route segments)                              
   bool CreateReferenceLine(std::list<ReferenceLine>* reference_lines,
                            std::list<hdmap::RouteSegments>* segments);
 
   /**
    * @brief store the computed reference line. This function can avoid
    * unnecessary copy if the reference lines are the same.
-   */
+   */  // 减少不必要的copy, 如果中心参考线一样的话
   void UpdateReferenceLine(
       const std::list<ReferenceLine>& reference_lines,
       const std::list<hdmap::RouteSegments>& route_segments);
 
-  void GenerateThread();
+  void GenerateThread();                                                                // 产生一个线程
   void IsValidReferenceLine();
-  void PrioritzeChangeLane(std::list<hdmap::RouteSegments>* route_segments);
+  void PrioritzeChangeLane(std::list<hdmap::RouteSegments>* route_segments);            // 优先考虑变道的信息
 
-  bool CreateRouteSegments(const common::VehicleState& vehicle_state,
+  bool CreateRouteSegments(const common::VehicleState& vehicle_state,                   // 创建route的片段
                            std::list<hdmap::RouteSegments>* segments);
 
-  bool IsReferenceLineSmoothValid(const ReferenceLine& raw,
+  bool IsReferenceLineSmoothValid(const ReferenceLine& raw,                             // 中心参考线是否足够平滑
                                   const ReferenceLine& smoothed) const;
 
-  bool SmoothReferenceLine(const ReferenceLine& raw_reference_line,
+  bool SmoothReferenceLine(const ReferenceLine& raw_reference_line,                     // 将原始的中心参考线平滑一下
                            ReferenceLine* reference_line);
 
-  bool SmoothPrefixedReferenceLine(const ReferenceLine& prefix_ref,
+  bool SmoothPrefixedReferenceLine(const ReferenceLine& prefix_ref,                     // 平滑中线参考线的前缀
                                    const ReferenceLine& raw_ref,
                                    ReferenceLine* reference_line);
 
-  void GetAnchorPoints(const ReferenceLine& reference_line,
+  void GetAnchorPoints(const ReferenceLine& reference_line,                             // 获得中心参考线锚点
                        std::vector<AnchorPoint>* anchor_points) const;
 
-  bool SmoothRouteSegment(const hdmap::RouteSegments& segments,
+  bool SmoothRouteSegment(const hdmap::RouteSegments& segments,                         // 平滑route的片段
                           ReferenceLine* reference_line);
 
   /**
    * @brief This function creates a smoothed forward reference line
    * based on the given segments.
    */
-  // 把新的refline, 拼接到旧的上面
+  // 把新的reference line, 拼接到旧的上面
   bool ExtendReferenceLine(const common::VehicleState& state,
                            hdmap::RouteSegments* segments,
                            ReferenceLine* reference_line);
 
-  AnchorPoint GetAnchorPoint(const ReferenceLine& reference_line,
+  AnchorPoint GetAnchorPoint(const ReferenceLine& reference_line,                      // 获得锚点
                              double s) const;
 
-  bool GetReferenceLinesFromRelativeMap(
-      const relative_map::MapMsg& relative_map,
-      std::list<ReferenceLine>* reference_lines,
-      std::list<hdmap::RouteSegments>* segments);
+  bool GetReferenceLinesFromRelativeMap(                                               // 从参考地图中获取参考线(reference line)
+      const relative_map::MapMsg& relative_map,                                        // 定位地图(relative map)
+      std::list<ReferenceLine>* reference_lines,                                       // 获取很多个中心参考线
+      std::list<hdmap::RouteSegments>* segments);                                      // 获取route的片段
 
   /**
    * @brief This function get adc lane info from navigation path and map
    * by vehicle state.  LatticePlanner
-   */
+   */  // 从导航path和地图中会获取自动驾驶车辆(adc)的车道信息
   bool GetNearestWayPointFromNavigationPath(
-      const common::VehicleState& state,
-      const std::unordered_set<std::string>& navigation_lane_ids,
-      hdmap::LaneWaypoint* waypoint);
+      const common::VehicleState& state,                                               // 先必须要获得车辆的状态
+      const std::unordered_set<std::string>& navigation_lane_ids,                      // 用hash表中获取导航的车道index的值
+      hdmap::LaneWaypoint* waypoint);                                                  // 返回的是lane way point(包含了sl的坐标和LaneInfoConstPtr的指针)
 
  private:
-  bool is_initialized_ = false;
-  bool is_stop_ = false;
-  std::unique_ptr<std::thread> thread_;
+  bool is_initialized_ = false;                                                        // 中心参考线是否已经被初始化
+  bool is_stop_ = false;                                                               // 是否已经停止了
+  std::unique_ptr<std::thread> thread_;                                                // reference line provider使用的线程
 
-  std::unique_ptr<ReferenceLineSmoother> smoother_;
+  std::unique_ptr<ReferenceLineSmoother> smoother_;                                    // 平滑器()
   ReferenceLineSmootherConfig smoother_config_;   // 里面配置了靠左行驶还是靠右行驶, 最大约束间隔(默认是5), 纵向边界(默认是1米), 横向边界(lateral boundary bound默认是0.1), 总的点数(默认是500), curb_shift(默认是0.2), driving_side(默认是靠右行驶) 
   // 输出线的分辨率是0.02， smootherconfig配置使用qp_spline还是spiral还是cos_theta这三种不同的平滑器. 
 

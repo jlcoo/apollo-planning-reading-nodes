@@ -31,14 +31,14 @@
 namespace apollo {
 namespace planning {
 // 二维的spline的约束
-class Spline2dConstraint {
+class Spline2dConstraint {                                                                   // 二维spline的约束
  public:
-  Spline2dConstraint(const std::vector<double>& t_knots, const uint32_t order);
+  Spline2dConstraint(const std::vector<double>& t_knots, const uint32_t order);              // 通过时间节点和次方数进行构造
 
   // direct method
-  bool AddInequalityConstraint(const Eigen::MatrixXd& constraint_matrix,
+  bool AddInequalityConstraint(const Eigen::MatrixXd& constraint_matrix,                     // 直接的方法, 添加不等式约束
                                const Eigen::MatrixXd& constraint_boundary);
-  bool AddEqualityConstraint(const Eigen::MatrixXd& constraint_matrix,
+  bool AddEqualityConstraint(const Eigen::MatrixXd& constraint_matrix,                       // 添加等式的约束
                              const Eigen::MatrixXd& constraint_boundary);
 
   // preset method

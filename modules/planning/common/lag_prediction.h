@@ -28,8 +28,8 @@
 
 namespace apollo {
 namespace planning {
-// 侧向预测
-class LagPrediction {
+// 滞后预测器, 预测的时候可能会考虑下几秒的动作
+class LagPrediction {                                             // 
  public:
   LagPrediction(uint32_t min_appear_num, uint32_t max_disappear_num);
   void GetLaggedPrediction(prediction::PredictionObstacles* obstacles) const;
