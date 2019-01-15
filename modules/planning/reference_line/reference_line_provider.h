@@ -161,7 +161,7 @@ class ReferenceLineProvider {
   ReferenceLineSmootherConfig smoother_config_;   // 里面配置了靠左行驶还是靠右行驶, 最大约束间隔(默认是5), 纵向边界(默认是1米), 横向边界(lateral boundary bound默认是0.1), 总的点数(默认是500), curb_shift(默认是0.2), driving_side(默认是靠右行驶) 
   // 输出线的分辨率是0.02， smootherconfig配置使用qp_spline还是spiral还是cos_theta这三种不同的平滑器. 
 
-  std::mutex pnc_map_mutex_;
+  std::mutex pnc_map_mutex_;                                                           // 要改变pnc地图的信息, 必须进行加锁处理
   std::unique_ptr<hdmap::PncMap> pnc_map_;   // pnc的map到底是什么地图呢? 基于hdmap,增加了routing的一些逻辑
 
   std::mutex vehicle_state_mutex_;
@@ -175,13 +175,13 @@ class ReferenceLineProvider {
   // ReferencePoint：　组成ReferenceLine的基本单位
   // ReferenceLine::Shrink：　基于（look_backward,　当前点，look_forward） 找到有效的refline, 裁剪到外面的line, 并更新　map_path_
 
-  std::mutex reference_lines_mutex_;
-  std::list<ReferenceLine> reference_lines_;
-  std::list<hdmap::RouteSegments> route_segments_;
-  double last_calculation_time_ = 0.0;
+  std::mutex reference_lines_mutex_;                                                  // 参考线保护的中心线所利用的互斥量
+  std::list<ReferenceLine> reference_lines_;                                          // 保存中心参考线的双链表
+  std::list<hdmap::RouteSegments> route_segments_;                                    // 高精地图的route segment(routing利用的片段)
+  double last_calculation_time_ = 0.0;                                                // 上次计算reference line的时间
 
-  std::queue<std::list<ReferenceLine>> reference_line_history_;
-  std::queue<std::list<hdmap::RouteSegments>> route_segments_history_;
+  std::queue<std::list<ReferenceLine>> reference_line_history_;                       // 将reference line的历史数据放到队列中
+  std::queue<std::list<hdmap::RouteSegments>> route_segments_history_;                // 将route segments的历史数据也放到队列中
 };
 
 }  // namespace planning

@@ -162,7 +162,7 @@ class Frame {                                                         // frame�
   apollo::common::monitor::MonitorLogger monitor_logger_;             // 日志监控者
 };
 
-class FrameHistory : public IndexedQueue<uint32_t, Frame> {
+class FrameHistory : public IndexedQueue<uint32_t, Frame> {           // 历史数据继承于一个引用队列, 而且是一个单例对象
  private:
   DECLARE_SINGLETON(FrameHistory);    // 单例对象
 };

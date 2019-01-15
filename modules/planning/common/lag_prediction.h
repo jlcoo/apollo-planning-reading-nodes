@@ -31,8 +31,8 @@ namespace planning {
 // 滞后预测器, 预测的时候可能会考虑下几秒的动作
 class LagPrediction {                                             // 
  public:
-  LagPrediction(uint32_t min_appear_num, uint32_t max_disappear_num);
-  void GetLaggedPrediction(prediction::PredictionObstacles* obstacles) const;
+  LagPrediction(uint32_t min_appear_num, uint32_t max_disappear_num);            // 通过出现的数量进行构造
+  void GetLaggedPrediction(prediction::PredictionObstacles* obstacles) const;    // 获取预测障碍物的轨迹
 
   struct LagInfo {
     uint32_t last_observed_seq = 0;                                // 上一个障碍物的seq

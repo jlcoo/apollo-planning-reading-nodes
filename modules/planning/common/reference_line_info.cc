@@ -287,7 +287,7 @@ PathObstacle* ReferenceLineInfo::AddObstacle(const Obstacle* obstacle) {        
 }
 
 bool ReferenceLineInfo::AddObstacles(                                               // 要一次添加很多个障碍物, 咋办?　那就封装一层AddObstacle就好了
-    const std::vector<const Obstacle*>& obstacles) {　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　// 存放obstacle指针的数组
+    const std::vector<const Obstacle*>& obstacles) {                                // 存放obstacle指针的数组
   if (FLAGS_use_multi_thread_to_add_obstacles) {                                    // 利用多线程来添加障碍物
     // std::future可用于异步任务中获取任务结果，但是它只是获取结果而已，真正的异步调用需要配合std::async, std::promise, std::packaged_task
     std::vector<std::future<bool>> futures;                                         // 一种同步机制

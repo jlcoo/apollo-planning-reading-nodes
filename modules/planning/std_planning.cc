@@ -184,6 +184,7 @@ void StdPlanning::RunOnce() {
   } else if (HDMapUtil::BaseMapPtr() == nullptr) {
     not_ready->set_reason("map not ready");
   }
+
   if (not_ready->has_reason()) {
     AERROR << not_ready->reason() << "; skip the planning cycle.";
     PublishPlanningPb(&not_ready_pb, start_timestamp);
@@ -230,6 +231,7 @@ void StdPlanning::RunOnce() {
   // 把RoutingResponse和vehicle_state传递给 reference_line_provider_
   const auto& latest_routing =
       AdapterManager::GetRoutingResponse()->GetLatestObserved();
+  ADEBUG << "Get routing:" << latest_routing.DebugString();
   if (IsDifferentRouting(last_routing_, latest_routing)) {
     last_routing_ = latest_routing;
     GetPlanningStatus()->Clear();

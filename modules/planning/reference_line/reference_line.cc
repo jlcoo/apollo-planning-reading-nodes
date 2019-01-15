@@ -147,7 +147,7 @@ bool ReferenceLine::Shrink(const common::math::Vec2d& point,                    
     AERROR << "Failed to project point: " << point.DebugString();
     return false;
   }
-  const auto& accumulated_s = map_path_.accumulated_s();
+  const auto& accumulated_s = map_path_.accumulated_s();                           // 积累的s
   size_t start_index = 0;
   if (sl.s() > look_backward) {
     auto it_lower = std::lower_bound(accumulated_s.begin(), accumulated_s.end(),

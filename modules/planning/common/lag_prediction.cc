@@ -125,11 +125,11 @@ void LagPrediction::GetLaggedPrediction(PredictionObstacles* obstacles) const {
 }
 
 void LagPrediction::AddObstacleToPrediction(
-    double delay_sec, const prediction::PredictionObstacle& history_obstacle,
+    double delay_sec, const prediction::PredictionObstacle& history_obstacle,             // 延迟的时间, 预测的障碍物(历史数据)
     prediction::PredictionObstacles* obstacles) const {
   CHECK_NOTNULL(obstacles);
 
-  auto* obstacle = obstacles->add_prediction_obstacle();
+  auto* obstacle = obstacles->add_prediction_obstacle();                                  // 添加障碍物
   if (obstacle == nullptr) {
     AERROR << "obstalce is nullptr.";
     return;
@@ -141,9 +141,9 @@ void LagPrediction::AddObstacleToPrediction(
   }
   obstacle->mutable_perception_obstacle()->CopyFrom(
       history_obstacle.perception_obstacle());
-  for (const auto& hist_trajectory : history_obstacle.trajectory()) {
+  for (const auto& hist_trajectory : history_obstacle.trajectory()) {                     // 迭代历史障碍物的轨迹
     auto* traj = obstacle->add_trajectory();
-    for (const auto& hist_point : hist_trajectory.trajectory_point()) {
+    for (const auto& hist_point : hist_trajectory.trajectory_point()) {                   // 迭代历史轨迹的点
       if (hist_point.relative_time() < delay_sec) {
         continue;
       }
@@ -161,8 +161,8 @@ void LagPrediction::AddObstacleToPrediction(
     obstacles->mutable_prediction_obstacle()->RemoveLast();
     return;
   }
-  obstacle->set_timestamp(history_obstacle.timestamp());
-  obstacle->set_predicted_period(history_obstacle.predicted_period());
+  obstacle->set_timestamp(history_obstacle.timestamp());                                  // 设置时间戳
+  obstacle->set_predicted_period(history_obstacle.predicted_period());                    // 设置预测的周期
 }
 
 }  // namespace planning
