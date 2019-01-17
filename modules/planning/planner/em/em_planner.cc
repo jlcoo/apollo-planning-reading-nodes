@@ -19,13 +19,13 @@
 namespace apollo {
 namespace planning {
 
-using common::Status;
-using common::TrajectoryPoint;
-
-Status EMPlanner::Init(const PlanningConfig& config) {
-  config_ = config;
-  scenario_manager_.Init();   //情景初始化
-  return Status::OK();
+using common::Status;                                                              // 模块的状态
+using common::TrajectoryPoint;                                                     // 离散轨迹上的点
+                                                                                   // PlanningConfig在planning_config.proto文件中定义
+Status EMPlanner::Init(const PlanningConfig& config) {                             // 通过planning的配置参数进行初始化
+  config_ = config;                                                                // 保存输入的配置参数
+  scenario_manager_.Init();                                                        // 情景初始化
+  return Status::OK();                                                             // 返回ok
 }
 
 Status EMPlanner::Plan(const TrajectoryPoint& planning_start_point,

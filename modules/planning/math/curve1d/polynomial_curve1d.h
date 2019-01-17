@@ -26,13 +26,13 @@
 namespace apollo {
 namespace planning {
 // 多项式的曲线
-class PolynomialCurve1d : public Curve1d {
+class PolynomialCurve1d : public Curve1d {                                // 一维的多项式曲线
  public:
-  PolynomialCurve1d() = default;
+  PolynomialCurve1d() = default;                                          // 默认的多项式曲线的构造函数和析构函数
   virtual ~PolynomialCurve1d() = default;
 
  protected:
-  double param_ = 0.0;
+  double param_ = 0.0;                                                    // 只有一个私有的保护成员变量param_
 };
 
 }  // namespace planning

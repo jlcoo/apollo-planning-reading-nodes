@@ -42,7 +42,7 @@ class PlanningContext {
 
   PlanningStatus* GetPlanningStatus() { return &planning_status_; }    // PlanningContext类的成员函数
 
- private:
+ private:                                                              // PlanningStatus, 最规划的状态
   PlanningStatus planning_status_;                                     // 变道, 跟车等9个状态
 
   // this is a sigleton class
@@ -50,7 +50,7 @@ class PlanningContext {
 };
 
 void DumpPlanningContext();
-
+// 会在std_planning.cc文件中调用
 inline PlanningStatus* GetPlanningStatus() {                // 在planning命名空间的函数
   return PlanningContext::instance()->GetPlanningStatus();  // 返回一个单例
 }

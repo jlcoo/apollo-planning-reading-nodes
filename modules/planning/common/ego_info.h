@@ -38,47 +38,47 @@
 namespace apollo {
 namespace planning {
 
-class EgoInfo {
+class EgoInfo {                                                                  // ego的信息
  public:
-  ~EgoInfo() = default;
+  ~EgoInfo() = default;                                                          // 默认的析构函数
 
-  bool Update(const common::TrajectoryPoint& start_point,
-              const common::VehicleState& vehicle_state,
-              const std::vector<const Obstacle*>& obstacles);
-  void Clear();
+  bool Update(const common::TrajectoryPoint& start_point,                        // 轨迹点
+              const common::VehicleState& vehicle_state,                         // 车辆的状态
+              const std::vector<const Obstacle*>& obstacles);                    // 障碍物的数量
+  void Clear();                                                                  // 清空ego的信息
 
-  common::TrajectoryPoint start_point() const { return start_point_; }
+  common::TrajectoryPoint start_point() const { return start_point_; }           // 轨迹的起点
 
-  common::VehicleState vehicle_state() const { return vehicle_state_; }
+  common::VehicleState vehicle_state() const { return vehicle_state_; }          // 车辆的状态
 
-  double front_clear_distance() const { return front_clear_distance_; }
+  double front_clear_distance() const { return front_clear_distance_; }          // 前方的距离
 
  private:
-  FRIEND_TEST(EgoInfoTest, EgoInfoSimpleTest);
+  FRIEND_TEST(EgoInfoTest, EgoInfoSimpleTest);                                   // 做简单的测试
 
-  void set_vehicle_state(const common::VehicleState& vehicle_state) {
-    vehicle_state_ = vehicle_state;
+  void set_vehicle_state(const common::VehicleState& vehicle_state) {            // 设置车辆的状态
+    vehicle_state_ = vehicle_state;                                              // 直接赋值
   }
 
-  void set_start_point(const common::TrajectoryPoint& start_point) {
-    start_point_ = start_point;
+  void set_start_point(const common::TrajectoryPoint& start_point) {             // 设置轨迹的起点
+    start_point_ = start_point;                                                  // 直接赋值
   }
 
-  void CalculateFrontObstacleClearDistance(
+  void CalculateFrontObstacleClearDistance(                                      // 计算前方障碍物到车辆的距离
       const std::vector<const Obstacle*>& obstacles);
 
   // stitched point (at stitching mode)  拼接模式
   // or real vehicle point (at non-stitching mode)
-  common::TrajectoryPoint start_point_;
+  common::TrajectoryPoint start_point_;                                          // 起点
 
   // ego vehicle state
-  common::VehicleState vehicle_state_;
+  common::VehicleState vehicle_state_;                                           // 车辆的状态
 
-  double front_clear_distance_ = std::numeric_limits<double>::max();   // 初始值为最大
+  double front_clear_distance_ = std::numeric_limits<double>::max();             // 初始值为最大
 
-  common::VehicleConfig ego_vehicle_config_;
+  common::VehicleConfig ego_vehicle_config_;                                     // 车辆的配置项
 
-  DECLARE_SINGLETON(EgoInfo);    // 单例模式
+  DECLARE_SINGLETON(EgoInfo);                                                    // 单例模式
 };
 
 }  // namespace planning

@@ -26,9 +26,9 @@
 namespace apollo {
 namespace planning {
 
-QuinticPolynomialCurve1d::QuinticPolynomialCurve1d(
-    const std::array<double, 3>& start, const std::array<double, 3>& end,
-    const double param)
+QuinticPolynomialCurve1d::QuinticPolynomialCurve1d(                                            // 5次多项式的曲线
+    const std::array<double, 3>& start, const std::array<double, 3>& end,                      // 开始的约束和结束的约束
+    const double param)                                                                        // param就是参数的长度
     : QuinticPolynomialCurve1d(start[0], start[1], start[2], end[0], end[1],
                                end[2], param) {}
 
@@ -47,12 +47,12 @@ QuinticPolynomialCurve1d::QuinticPolynomialCurve1d(
 
 QuinticPolynomialCurve1d::QuinticPolynomialCurve1d(
     const QuinticPolynomialCurve1d& other) {
-  param_ = other.param_;
+  param_ = other.param_;                                                                      // 一个5次多项式主要是参数的个数
   coef_ = other.coef_;
   return;
 }
 
-double QuinticPolynomialCurve1d::Evaluate(const uint32_t order,
+double QuinticPolynomialCurve1d::Evaluate(const uint32_t order,                               // order就是表明次数， 但是0的意思是使用了所有的多项式的参数求和m, 1表示前5项的值
                                           const double p) const {
   switch (order) {
     case 0: {
@@ -86,30 +86,30 @@ double QuinticPolynomialCurve1d::Evaluate(const uint32_t order,
   }
 }
 
-void QuinticPolynomialCurve1d::ComputeCoefficients(
+void QuinticPolynomialCurve1d::ComputeCoefficients(                                         // 起点的3个约束项和终点的3个约束项
     const double x0, const double dx0, const double ddx0, const double x1,
     const double dx1, const double ddx1, const double p) {
   CHECK_GT(p, 0.0);
 
-  coef_[0] = x0;
+  coef_[0] = x0;                                                                            // 前三项的约束
   coef_[1] = dx0;
   coef_[2] = ddx0 / 2.0;
 
-  const double p2 = p * p;
+  const double p2 = p * p;                                                                  // p的意思应该是param的意思(x)
   const double p3 = p * p2;
 
   // the direct analytical method is at least 6 times faster than using matrix
   // inversion.
-  const double c0 = (x1 - 0.5 * p2 * ddx0 - dx0 * p - x0) / p3;
+  const double c0 = (x1 - 0.5 * p2 * ddx0 - dx0 * p - x0) / p3;                             // 计算后三项的参数值
   const double c1 = (dx1 - ddx0 * p - dx0) / p2;
   const double c2 = (ddx1 - ddx0) / p;
 
-  coef_[3] = 0.5 * (20.0 * c0 - 8.0 * c1 + c2);
+  coef_[3] = 0.5 * (20.0 * c0 - 8.0 * c1 + c2);                                             // 这几个魔数就是直接分析么？(the direct analytical method)
   coef_[4] = (-15.0 * c0 + 7.0 * c1 - c2) / p;
   coef_[5] = (6.0 * c0 - 3.0 * c1 + 0.5 * c2) / p2;
 }
 
-std::string QuinticPolynomialCurve1d::ToString() const {
+std::string QuinticPolynomialCurve1d::ToString() const {                                    // 转换为字符串
   return apollo::common::util::StrCat(
       apollo::common::util::PrintIter(coef_, "\t"), param_, "\n");
 }

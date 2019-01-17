@@ -29,24 +29,24 @@ namespace planning {
 // 在prediction中也有一个ScenarioManager的类
 class ScenarioManager final {   // final修饰的类不能被派生
  public:
-  ScenarioManager() = default;
+  ScenarioManager() = default;                                                       // 默认的构造函数
   // 初始化 --> 注册 --> 更新
-  bool Init();
+  bool Init();                                                                       // 初始化
 
-  Scenario* mutable_scenario() { return scenario_.get(); }
+  Scenario* mutable_scenario() { return scenario_.get(); }                           // 获取可以修改的场景
 
-  void Update(const common::TrajectoryPoint& ego_point, const Frame& frame);
+  void Update(const common::TrajectoryPoint& ego_point, const Frame& frame);         // 通过ego的轨迹和一帧数据进行更新场景
 
  private:
-  void RegisterScenarios();
+  void RegisterScenarios();                                                          // 私有的函数, 进行场景的注册
 
-  ScenarioConfig::ScenarioType DecideCurrentScenario(
+  ScenarioConfig::ScenarioType DecideCurrentScenario(                                // 根据当前ego的位置(轨迹点)和一帧数据决定应该执行那种场景
       const common::TrajectoryPoint& ego_point, const Frame& frame);
 
-  common::util::Factory<ScenarioConfig::ScenarioType, Scenario>
+  common::util::Factory<ScenarioConfig::ScenarioType, Scenario>                      // 一个场景的类型对应着一个场景
       scenario_factory_;                  // 场景的工厂模式
 
-  std::unique_ptr<Scenario> scenario_;    // 有一个唯一的Scenario类
+  std::unique_ptr<Scenario> scenario_;                                               // 有一个唯一的Scenario类
 };
 
 }  // namespace planning

@@ -46,21 +46,21 @@ namespace planning {
  * @brief EMPlanner is an expectation maximization planner.
  */
 // EMPlanner类继承于PlannerWithReferenceLine这个类
-class EMPlanner : public PlannerWithReferenceLine {
+class EMPlanner : public PlannerWithReferenceLine {                                     // EM规划器, 最大期望的planner
  public:
   /**
    * @brief Constructor
    */
-  EMPlanner() = default;
+  EMPlanner() = default;                                                                // 默认的构造函数
 
   /**
    * @brief Destructor
    */
-  virtual ~EMPlanner() = default;
+  virtual ~EMPlanner() = default;                                                       // 默认的析构函数
 
-  std::string Name() override { return "EM"; }
+  std::string Name() override { return "EM"; }                                          // 规划器的名字
 
-  common::Status Init(const PlanningConfig& config) override;
+  common::Status Init(const PlanningConfig& config) override;                           // 通过planning的配置选项， 进行初始化
 
   /**
    * @brief Override function Plan in parent class Planner.
@@ -68,9 +68,9 @@ class EMPlanner : public PlannerWithReferenceLine {
    * @param frame Current planning frame.
    * @return OK if planning succeeds; error otherwise.
    */
-  apollo::common::Status Plan(
-      const common::TrajectoryPoint& planning_init_point,
-      Frame* frame) override;
+  apollo::common::Status Plan(                                                          // EM planner进行规划的代码
+      const common::TrajectoryPoint& planning_init_point,                               // 轨迹的初始化点
+      Frame* frame) override;                                                           // 数据框(一帧的数据)
 };
 
 }  // namespace planning

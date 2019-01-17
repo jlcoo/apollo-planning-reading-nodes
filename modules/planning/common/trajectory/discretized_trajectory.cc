@@ -68,18 +68,18 @@ TrajectoryPoint DiscretizedTrajectory::Evaluate(                                
 
 std::uint32_t DiscretizedTrajectory::QueryLowerBoundPoint(                          // 通过一个时间点找到该时间点的下界
     const double relative_time) const {
-  CHECK(!trajectory_points_.empty());
+  CHECK(!trajectory_points_.empty());                                               // 检查离散的轨迹点
   // 时间间隔比我还要长
-  if (relative_time >= trajectory_points_.back().relative_time()) {
+  if (relative_time >= trajectory_points_.back().relative_time()) {                 // 要索引的时间点特别长， 直接返回当前这段轨迹的最后面的点
     return trajectory_points_.size() - 1;
   }
-  auto func = [](const TrajectoryPoint& tp, const double relative_time) {
-    return tp.relative_time() < relative_time;
+  auto func = [](const TrajectoryPoint& tp, const double relative_time) {           // 轨迹点的时间比相对时间点还小
+    return tp.relative_time() < relative_time;                                      // lamda的函数对象
   };
-  auto it_lower =
+  auto it_lower =                                                                   // std::lower_bound会返回第一个大于或等于目标值的迭代器
       std::lower_bound(trajectory_points_.begin(), trajectory_points_.end(),
                        relative_time, func);
-  return std::distance(trajectory_points_.begin(), it_lower);                      // 返回迭代器离起点的距离
+  return std::distance(trajectory_points_.begin(), it_lower);                      // 返回迭代器离起点的距离， 第几个跌带器(即索引值)
 }
 
 std::uint32_t DiscretizedTrajectory::QueryNearestPoint(
@@ -96,7 +96,7 @@ std::uint32_t DiscretizedTrajectory::QueryNearestPoint(
       dist_sqr_min = dist_sqr;   // 保存一个最近的点
       index_min = i;                                                               // 保存对应的索引值
     }
-  }
+  }      // index_min对应的就是最近轨迹点的索引
   return index_min;                                                                // 返回轨迹点中离给定点 距离最小的索引值
 }
 

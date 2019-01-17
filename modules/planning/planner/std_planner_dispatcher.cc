@@ -22,7 +22,7 @@ namespace apollo {
 namespace planning {
 // 标准的std planner还是用的EMplanner的规划器
 std::unique_ptr<Planner> StdPlannerDispatcher::DispatchPlanner() {
-  return planner_factory_.CreateObject(PlanningConfig::EM);   //产生一个EM的Planner对象
+  return planner_factory_.CreateObject(PlanningConfig::EM);                    //产生一个EM的Planner对象
  //  enum PlanningConfig_PlannerType {
 	// PlanningConfig_PlannerType_RTK = 0,
 	// PlanningConfig_PlannerType_EM = 1,  PlanningConfig::EM为1

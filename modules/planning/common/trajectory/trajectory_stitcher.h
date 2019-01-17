@@ -33,25 +33,25 @@
 namespace apollo {
 namespace planning {
 // 拼接trajectory
-class TrajectoryStitcher {
+class TrajectoryStitcher {                                                             // 轨迹的合并类
  public:
-  TrajectoryStitcher() = delete;
+  TrajectoryStitcher() = delete;                                                       // 简单的封装接口, 不用构造函数, 直接用static的函数
 
-  static void TransformLastPublishedTrajectory(const double x_diff,
+  static void TransformLastPublishedTrajectory(const double x_diff,                    // 从上次最新发布的轨迹中转换
       const double y_diff, const double theta_diff,
-      PublishableTrajectory* prev_trajectory);  // 转换为上一个轨迹
+      PublishableTrajectory* prev_trajectory);                                         // 转换为上一个轨迹
 
-  static std::vector<common::TrajectoryPoint> ComputeStitchingTrajectory(
-      const common::VehicleState& vehicle_state, const double current_timestamp,
+  static std::vector<common::TrajectoryPoint> ComputeStitchingTrajectory(              // 计算有没有可以合并的轨迹
+      const common::VehicleState& vehicle_state, const double current_timestamp,       // 根据车辆的状态, 当前的时间戳， 做一个planning所需的时间， 上次发布的轨迹
       const double planning_cycle_time,
       const PublishableTrajectory* prev_trajectory);
 
  private:     // 计算位置投影
-  static std::pair<double, double> ComputePositionProjection(const double x,
-      const double y, const common::TrajectoryPoint& matched_trajectory_point);
+  static std::pair<double, double> ComputePositionProjection(const double x,           // 计算轨迹点的投影
+      const double y, const common::TrajectoryPoint& matched_trajectory_point);        // x,y的坐标， 两条轨迹合并时的轨迹点
               // 重新初始化?
-  static std::vector<common::TrajectoryPoint> ComputeReinitStitchingTrajectory(
-      const common::VehicleState& vehicle_state);
+  static std::vector<common::TrajectoryPoint> ComputeReinitStitchingTrajectory(        // TrajectoryPoint中是有x,y,z的信息呀
+      const common::VehicleState& vehicle_state);                                      // 车辆的状态
 };
 
 }  // namespace planning

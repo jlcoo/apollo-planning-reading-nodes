@@ -161,7 +161,7 @@ class Frame {                                                         // frame�
   ReferenceLineProvider *reference_line_provider_ = nullptr;          // 参考线的提供者, 会把ReferenceLine保存在list中
   apollo::common::monitor::MonitorLogger monitor_logger_;             // 日志监控者
 };
-
+// 数据的历史数据放到的是planning的历史空间中
 class FrameHistory : public IndexedQueue<uint32_t, Frame> {           // 历史数据继承于一个引用队列, 而且是一个单例对象
  private:
   DECLARE_SINGLETON(FrameHistory);    // 单例对象

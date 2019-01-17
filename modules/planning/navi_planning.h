@@ -128,12 +128,12 @@ class NaviPlanning : public PlanningBase {
 
   class VehicleConfig {     // 车辆的配置参数
    public:
-    double x_ = 0.0;
-    double y_ = 0.0;
-    double theta_ = 0.0;
-    bool is_valid_ = false;
+    double x_ = 0.0;                                                          // x方向的坐标
+    double y_ = 0.0;                                                          // y方向的坐标
+    double theta_ = 0.0;                                                      // 航向角theta
+    bool is_valid_ = false;                                                   // 是否合法
   };
-  VehicleConfig last_vehicle_config_;
+  VehicleConfig last_vehicle_config_;                                         // 最新的车辆配置
 
   VehicleConfig ComputeVehicleConfigFromLocalization(
       const localization::LocalizationEstimate& localization) const;

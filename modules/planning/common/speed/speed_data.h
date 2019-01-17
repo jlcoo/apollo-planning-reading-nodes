@@ -27,7 +27,7 @@
 
 namespace apollo {
 namespace planning {
-
+// SpeedData是一个带有数组的类
 class SpeedData {                                                             // 速度相关的数据
  public:
   SpeedData() = default;                                                      // 默认的构造函数

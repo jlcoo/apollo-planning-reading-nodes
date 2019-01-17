@@ -42,37 +42,37 @@
 namespace apollo {
 namespace planning {
 // 动态规划的路网图
-class DPRoadGraph {
+class DPRoadGraph {                                                                          // dp需要的路网图， 撒点就在这个类中？
  public:
-  explicit DPRoadGraph(const DpPolyPathConfig &config,
-                       const ReferenceLineInfo &reference_line_info,
-                       const SpeedData &speed_data);
+  explicit DPRoadGraph(const DpPolyPathConfig &config,                                       // dp多项式的配置项
+                       const ReferenceLineInfo &reference_line_info,                         // 中心参考线的信息
+                       const SpeedData &speed_data);                                         // 速度的信息
 
-  ~DPRoadGraph() = default;
+  ~DPRoadGraph() = default;                                                                  // 默认的析构函数
   // 找到路径的通道
-  bool FindPathTunnel(const common::TrajectoryPoint &init_point,
-                      const std::vector<const PathObstacle *> &obstacles,
+  bool FindPathTunnel(const common::TrajectoryPoint &init_point,                             // 从初始化的轨迹点中
+                      const std::vector<const PathObstacle *> &obstacles,                    // 考虑有障碍物的情况，寻找一个可行的通道
                       PathData *const path_data);
 
-  void SetDebugLogger(apollo::planning_internal::Debug *debug) {
-    planning_debug_ = debug;
+  void SetDebugLogger(apollo::planning_internal::Debug *debug) {                             // 设置debug的logger信息
+    planning_debug_ = debug;                                                                 // 直接赋值过去
   }
 
  private:
   /**
    * an private inner struct for the dp algorithm
-   */   // dp算法的私有的struct数据结构
-  struct DPRoadGraphNode {   // DP 路网中的一个点
-   public:
-    DPRoadGraphNode() = default;   // 默认的数据结构
+   */                                                                                        // dp算法的私有的struct数据结构
+  struct DPRoadGraphNode {                                                                   // DP 路网中的一个点
+   public:                                                                                   // 图中的一个点
+    DPRoadGraphNode() = default;                                                             // 默认的数据结构
 
-    DPRoadGraphNode(const common::SLPoint point_sl,    // sl坐标点
-                    const DPRoadGraphNode *node_prev)  // 图中点的前驱
-        : sl_point(point_sl), min_cost_prev_node(node_prev) {}
+    DPRoadGraphNode(const common::SLPoint point_sl,                                          // sl坐标点
+                    const DPRoadGraphNode *node_prev)                                        // 图中点的前驱
+        : sl_point(point_sl), min_cost_prev_node(node_prev) {}                               // 前驱的最小节点
 
-    DPRoadGraphNode(const common::SLPoint point_sl,
+    DPRoadGraphNode(const common::SLPoint point_sl,                                          // 通过一个sl节点， 前驱的一个节点和可比较的代价函数值进行比较
                     const DPRoadGraphNode *node_prev,
-                    const ComparableCost &cost)        // 代价函数
+                    const ComparableCost &cost)                                              // 代价函数
         : sl_point(point_sl), min_cost_prev_node(node_prev), min_cost(cost) {}
 
     void UpdateCost(const DPRoadGraphNode *node_prev,

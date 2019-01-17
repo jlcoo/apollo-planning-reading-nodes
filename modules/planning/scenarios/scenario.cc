@@ -23,7 +23,7 @@
 namespace apollo {
 namespace planning {
 
-ScenarioConfig::ScenarioType Scenario::scenario_type() const {
+ScenarioConfig::ScenarioType Scenario::scenario_type() const {                 // 场景的类型只申明了一个返回场景的类型
   return scenario_type_;
 }
 

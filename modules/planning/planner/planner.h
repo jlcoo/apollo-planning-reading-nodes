@@ -67,7 +67,7 @@ class Planner {
 
  protected:                            // planning基类中使用到了聚合的思想
   PlanningConfig config_;              // planning配置项, 就是planning_config.pb.txt这个配置文件
-  ScenarioManager scenario_manager_;   // 场景管理项, 来自Preception
+  ScenarioManager scenario_manager_;   // 场景管理项, 来自Prediction
   Scenario* scenario_;                 // 场景, from planning/scenario, 情景
 };
 // 用到了三重继承, 继承有点点深吧？， 继承于Planner, planner提供一些接口和数据成员
@@ -93,7 +93,7 @@ class PlannerWithReferenceLine : public Planner {   // 继承该类
   virtual apollo::common::Status PlanOnReferenceLine(
       const common::TrajectoryPoint& planning_init_point, Frame* frame,   // TrajectoryPoint(轨迹的点)， Frame(是一个)
       ReferenceLineInfo* reference_line_info) {                           // ReferenceLineInfo(是) 计算得到的车道中心线的信息
-    CHECK_NOTNULL(frame);
+    CHECK_NOTNULL(frame);                                                 // 检查一帧数据不为空指针
     return apollo::common::Status::OK();
   }
 };

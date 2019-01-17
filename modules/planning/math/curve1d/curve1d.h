@@ -28,18 +28,18 @@ namespace planning {
 
 // Base type for various types of 1-dimensional curves   
 
-class Curve1d {  // 一维的曲线
+class Curve1d {                                                   // 一维的曲线
  public:
-  Curve1d() = default;
+  Curve1d() = default;                                            // 默认的构造和析构函数
 
   virtual ~Curve1d() = default;
 
-  virtual double Evaluate(const std::uint32_t order,
+  virtual double Evaluate(const std::uint32_t order,             // 曲线的评判函数， 第一个参数是次方(我的理解应该是第几个参数吧?)， 第二个参数是Param
                           const double param) const = 0;
 
-  virtual double ParamLength() const = 0;
+  virtual double ParamLength() const = 0;                        // 参数的长度
 
-  virtual std::string ToString() const = 0;
+  virtual std::string ToString() const = 0;                      // 将转换为string的信息进行debug
 };
 
 }  // namespace planning
