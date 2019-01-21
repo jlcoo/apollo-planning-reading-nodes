@@ -39,14 +39,14 @@ namespace planning {
  * @brief DpStSpeedOptimizer does ST graph speed planning with dynamic
  * programming algorithm.
  */
-class DpStSpeedOptimizer : public SpeedOptimizer {
+class DpStSpeedOptimizer : public SpeedOptimizer {                                       // 做速度动态规划是在st坐标系中
  public:
-  DpStSpeedOptimizer();
+  DpStSpeedOptimizer();                                                                  // 构造函数
 
-  bool Init(const PlanningConfig& config) override;
+  bool Init(const PlanningConfig& config) override;                                      // 进行初始化处理(通过planning的配置项进行初始化)
 
  private:
-  apollo::common::Status Process(const SLBoundary& adc_sl_boundary,
+  apollo::common::Status Process(const SLBoundary& adc_sl_boundary,                      // st坐标下dp图中的处理求解
                                  const PathData& path_data,
                                  const common::TrajectoryPoint& init_point,
                                  const ReferenceLine& reference_line,
@@ -54,18 +54,18 @@ class DpStSpeedOptimizer : public SpeedOptimizer {
                                  PathDecision* const path_decision,
                                  SpeedData* const speed_data) override;
 
-  bool SearchStGraph(const StBoundaryMapper& boundary_mapper,
+  bool SearchStGraph(const StBoundaryMapper& boundary_mapper,                            // 搜索st图中的点
                      const SpeedLimitDecider& speed_limit_decider,
                      const PathData& path_data, SpeedData* speed_data,
                      PathDecision* path_decision,
                      planning_internal::STGraphDebug* debug) const;
 
  private:
-  common::TrajectoryPoint init_point_;
-  const ReferenceLine* reference_line_ = nullptr;
-  SLBoundary adc_sl_boundary_;
-  DpStSpeedConfig dp_st_speed_config_;
-  StBoundaryConfig st_boundary_config_;
+  common::TrajectoryPoint init_point_;                                                   // 起点
+  const ReferenceLine* reference_line_ = nullptr;                                        // 参考线的空指针
+  SLBoundary adc_sl_boundary_;                                                           // 自动驾驶车辆在sl坐标系下的边框
+  DpStSpeedConfig dp_st_speed_config_;                                                   // 动态规划的配置参数
+  StBoundaryConfig st_boundary_config_;                                                  // st边框的配置参数
 };
 
 }  // namespace planning

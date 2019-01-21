@@ -37,32 +37,32 @@
 namespace apollo {
 namespace planning {
 
-class SpeedLimitDecider {
+class SpeedLimitDecider {                                                          // 速度限制的决策者
  public:
-  SpeedLimitDecider(const SLBoundary& adc_sl_boundary,
-                    const StBoundaryConfig& config,
-                    const ReferenceLine& reference_line,
-                    const PathData& path_data);
+  SpeedLimitDecider(const SLBoundary& adc_sl_boundary,                             // 自动驾驶车辆在sl坐标系中的边框
+                    const StBoundaryConfig& config,                                // st的boundary配置者
+                    const ReferenceLine& reference_line,                           // 中心参考线
+                    const PathData& path_data);                                    // path上的数据
 
-  virtual ~SpeedLimitDecider() = default;
+  virtual ~SpeedLimitDecider() = default;                                          // 析构函数
 
-  virtual apollo::common::Status GetSpeedLimits(
-      const IndexedList<std::string, PathObstacle>& path_obstacles,
+  virtual apollo::common::Status GetSpeedLimits(                                   // 获取速度的限制, 输出是一个SpeedLimit的指针
+      const IndexedList<std::string, PathObstacle>& path_obstacles,                // 输入是path上的障碍物
       SpeedLimit* const speed_limit_data) const;
 
  private:
-  FRIEND_TEST(SpeedLimitDeciderTest, get_centric_acc_limit);
-  double GetCentricAccLimit(const double kappa) const;
+  FRIEND_TEST(SpeedLimitDeciderTest, get_centric_acc_limit);                       // 做测试(获得中心点的加速度限制??)
+  double GetCentricAccLimit(const double kappa) const;                             // 通过kappa获得加速度
 
-  void GetAvgKappa(const std::vector<common::PathPoint>& path_points,
+  void GetAvgKappa(const std::vector<common::PathPoint>& path_points,              // 输入path上的点, 获得对应点上的Kappa值(曲率值)
                    std::vector<double>* kappa) const;
 
  private:
-  const SLBoundary& adc_sl_boundary_;
-  const StBoundaryConfig& st_boundary_config_;
-  const ReferenceLine& reference_line_;
-  const PathData& path_data_;
-  const apollo::common::VehicleParam& vehicle_param_;
+  const SLBoundary& adc_sl_boundary_;                                              // 自动驾驶车辆的sl boundary(边框)
+  const StBoundaryConfig& st_boundary_config_;                                     // st 边框(boundary)的配置
+  const ReferenceLine& reference_line_;                                            // 中心参考线
+  const PathData& path_data_;                                                      // path上的数据
+  const apollo::common::VehicleParam& vehicle_param_;                              // 车辆的参数
 };
 
 }  // namespace planning

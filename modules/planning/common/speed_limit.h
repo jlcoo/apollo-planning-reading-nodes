@@ -27,23 +27,23 @@
 namespace apollo {
 namespace planning {
 // 速度限制
-class SpeedLimit {
+class SpeedLimit {                                                                 // 限速信息的类
  public:
-  SpeedLimit() = default;
+  SpeedLimit() = default;                                                          // 默认的构造函数
 
-  void AppendSpeedLimit(const double s, const double v);
+  void AppendSpeedLimit(const double s, const double v);                           // 增加一个限速点(s, v)
 
-  const std::vector<std::pair<double, double>>& speed_limit_points() const;
+  const std::vector<std::pair<double, double>>& speed_limit_points() const;        // 返回所有的限速点对
 
-  double GetSpeedLimitByS(const double s) const;
+  double GetSpeedLimitByS(const double s) const;                                   // 通过s获得在s处的速度限制
 
-  void Clear();
+  void Clear();                                                                    // 清空限速的点对数组
 
  private:   // 离起点的距离和速度的限制
   // use a vector to represent speed limit
   // the first number is s, the second number is v
   // It means at distance s from the start point, the speed limit is v.
-  std::vector<std::pair<double, double>> speed_limit_points_;
+  std::vector<std::pair<double, double>> speed_limit_points_;                      // 内部的点对数组
 };
 
 }  // namespace planning

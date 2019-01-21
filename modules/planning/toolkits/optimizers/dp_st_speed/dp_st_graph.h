@@ -41,62 +41,62 @@
 namespace apollo {
 namespace planning {
 
-class DpStGraph {
+class DpStGraph {                                                                           // st坐标系下的图
  public:
-  DpStGraph(const StGraphData& st_graph_data, const DpStSpeedConfig& dp_config,
-            const std::vector<const PathObstacle*>& obstacles,
-            const common::TrajectoryPoint& init_point,
-            const SLBoundary& adc_sl_boundary);
+  DpStGraph(const StGraphData& st_graph_data, const DpStSpeedConfig& dp_config,             // 速度做动态规划的st图中的数据, 速度动态规划的配置参数
+            const std::vector<const PathObstacle*>& obstacles,                              // path上的障碍物
+            const common::TrajectoryPoint& init_point,                                      // 初始点(轨迹的起点)
+            const SLBoundary& adc_sl_boundary);                                             // 自动驾驶车辆的sl坐标系中的boundary
 
-  apollo::common::Status Search(SpeedData* const speed_data);
+  apollo::common::Status Search(SpeedData* const speed_data);                               // 要搜索的速度数据
 
  private:
-  apollo::common::Status InitCostTable();
+  apollo::common::Status InitCostTable();                                                   // 初始化代价函数
 
-  apollo::common::Status RetrieveSpeedProfile(SpeedData* const speed_data);
+  apollo::common::Status RetrieveSpeedProfile(SpeedData* const speed_data);                 // 纠正速度的曲线
 
-  apollo::common::Status CalculateTotalCost();
-  void CalculateCostAt(const uint32_t r, const uint32_t c);
+  apollo::common::Status CalculateTotalCost();                                              // 计算一共的代价函数值
+  void CalculateCostAt(const uint32_t r, const uint32_t c);                                 // 计算代价值
 
-  float CalculateEdgeCost(const STPoint& first, const STPoint& second,
+  float CalculateEdgeCost(const STPoint& first, const STPoint& second,                      // 计算一条边的代价值
                            const STPoint& third, const STPoint& forth,
-                           const float speed_limit);
+                           const float speed_limit);                                        // 速度额限制
   float CalculateEdgeCostForSecondCol(const uint32_t row,
-                                       const float speed_limit);
+                                       const float speed_limit);                            // 二次什么?
   float CalculateEdgeCostForThirdCol(const uint32_t curr_r,
                                       const uint32_t pre_r,
                                       const float speed_limit);
 
-  void GetRowRange(const StGraphPoint& point, int* highest_row,
+  void GetRowRange(const StGraphPoint& point, int* highest_row,                             // 获取行的range(范围)
                    int* lowest_row);
 
  private:
-  const StGraphData& st_graph_data_;
+  const StGraphData& st_graph_data_;                                                        // st图中的数据
 
   // dp st configuration
-  DpStSpeedConfig dp_st_speed_config_;
+  DpStSpeedConfig dp_st_speed_config_;                                                      // st动态规划的配置参数
 
   // obstacles based on the current reference line
-  const std::vector<const PathObstacle*>& obstacles_;
+  const std::vector<const PathObstacle*>& obstacles_;                                       // 在当前中心参考线上的障碍物
 
   // vehicle configuration parameter
-  const common::VehicleParam& vehicle_param_ =
+  const common::VehicleParam& vehicle_param_ =                                              // 车辆的配置参数
       common::VehicleConfigHelper::GetConfig().vehicle_param();
 
   // initial status
-  common::TrajectoryPoint init_point_;
+  common::TrajectoryPoint init_point_;                                                      // 轨迹的起点
 
   // cost utility with configuration;
-  DpStCost dp_st_cost_;
+  DpStCost dp_st_cost_;                                                                     // 代价函数的配置
 
-  const SLBoundary& adc_sl_boundary_;
+  const SLBoundary& adc_sl_boundary_;                                                       // 自动驾驶车辆的sl边框
 
-  float unit_s_ = 0.0;
-  float unit_t_ = 0.0;
+  float unit_s_ = 0.0;                                                                      // s距离
+  float unit_t_ = 0.0;                                                                      // 时间t
 
-  // cost_table_[t][s]
+  // cost_table_[t][s]                                                                      // 动态规划的二维数组
   // row: s, col: t --- NOTICE: Please do NOT change.
-  std::vector<std::vector<StGraphPoint>> cost_table_;
+  std::vector<std::vector<StGraphPoint>> cost_table_;                                       // 二维数组， 里面的的是st的点
 };
 
 }  // namespace planning

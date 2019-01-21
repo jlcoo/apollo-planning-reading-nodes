@@ -37,29 +37,29 @@
 namespace apollo {
 namespace planning {
 
-class StBoundaryMapper {
+class StBoundaryMapper {                                                              // st边框的映射者
  public:
-  StBoundaryMapper(const SLBoundary& adc_sl_boundary,
-                   const StBoundaryConfig& config,
-                   const ReferenceLine& reference_line,
-                   const PathData& path_data, const double planning_distance,
-                   const double planning_time, const bool is_change_lane);
+  StBoundaryMapper(const SLBoundary& adc_sl_boundary,                                 // 自动驾驶车辆的sl边框
+                   const StBoundaryConfig& config,                                    // st坐标系的配置
+                   const ReferenceLine& reference_line,                               // 中心参考线
+                   const PathData& path_data, const double planning_distance,         // path(路程的数据)
+                   const double planning_time, const bool is_change_lane);            // 做planning的时间
 
-  virtual ~StBoundaryMapper() = default;
+  virtual ~StBoundaryMapper() = default;                                              // 默认的析构函数
 
-  apollo::common::Status CreateStBoundary(PathDecision* path_decision) const;
+  apollo::common::Status CreateStBoundary(PathDecision* path_decision) const;         // 创建一个st的边框
 
-  apollo::common::Status CreateStBoundaryWithHistory(
+  apollo::common::Status CreateStBoundaryWithHistory(                                 // 具有历史决策的st边框
       const ObjectDecisions& history_decisions,
       PathDecision* path_decision) const;
 
-  apollo::common::Status CreateStBoundary(
+  apollo::common::Status CreateStBoundary(                                            // 通过障碍物和外部决策创建一个st的边框
       PathObstacle* path_obstacle,
       const ObjectDecisionType& external_decision) const;
 
  private:
-  FRIEND_TEST(StBoundaryMapperTest, check_overlap_test);
-  bool CheckOverlap(const apollo::common::PathPoint& path_point,
+  FRIEND_TEST(StBoundaryMapperTest, check_overlap_test);                              // 检查overlap的测试
+  bool CheckOverlap(const apollo::common::PathPoint& path_point,                      // path中的点
                     const apollo::common::math::Box2d& obs_box,
                     const double buffer) const;
 
@@ -68,28 +68,28 @@ class StBoundaryMapper {
    * If return true, upper_points.size() > 1 and
    * upper_points.size() = lower_points.size()
    */
-  bool GetOverlapBoundaryPoints(
+  bool GetOverlapBoundaryPoints(                                                     // 创建一个有上界点和下界点的st boundary
       const std::vector<apollo::common::PathPoint>& path_points,
-      const Obstacle& obstacle, std::vector<STPoint>* upper_points,
+      const Obstacle& obstacle, std::vector<STPoint>* upper_points,                  // 障碍物， 上界点， 下界点
       std::vector<STPoint>* lower_points) const;
 
-  apollo::common::Status MapWithoutDecision(PathObstacle* path_obstacle) const;
+  apollo::common::Status MapWithoutDecision(PathObstacle* path_obstacle) const;      // 不带决策的map
 
-  bool MapStopDecision(PathObstacle* stop_obstacle,
+  bool MapStopDecision(PathObstacle* stop_obstacle,                                  // 停止的决策
                        const ObjectDecisionType& decision) const;
 
   apollo::common::Status MapWithDecision(
       PathObstacle* path_obstacle, const ObjectDecisionType& decision) const;
 
  private:
-  const SLBoundary& adc_sl_boundary_;
-  const StBoundaryConfig& st_boundary_config_;
-  const ReferenceLine& reference_line_;
-  const PathData& path_data_;
-  const apollo::common::VehicleParam& vehicle_param_;
-  const double planning_distance_;
-  const double planning_time_;
-  bool is_change_lane_ = false;
+  const SLBoundary& adc_sl_boundary_;                                                // 自动驾驶车辆的sl边框
+  const StBoundaryConfig& st_boundary_config_;                                       // 边框的配置
+  const ReferenceLine& reference_line_;                                              // 中心参考线
+  const PathData& path_data_;                                                        // path的数据(data)
+  const apollo::common::VehicleParam& vehicle_param_;                                // 车辆的参数
+  const double planning_distance_;                                                   // 做planning的距离
+  const double planning_time_;                                                       // 做planning的时间
+  bool is_change_lane_ = false;                                                      // 是否进行变道
 };
 
 }  // namespace planning

@@ -39,11 +39,11 @@ namespace planning {
 using apollo::common::PathPoint;
 using apollo::common::Status;
 
-SpeedLimitDecider::SpeedLimitDecider(const SLBoundary& adc_sl_boundary,
+SpeedLimitDecider::SpeedLimitDecider(const SLBoundary& adc_sl_boundary,                       // 速度限速的决策者会用到自动驾驶车辆的boundary, st boundary, 中心参考线, path 上面的数据
                                      const StBoundaryConfig& config,
                                      const ReferenceLine& reference_line,
                                      const PathData& path_data)
-    : adc_sl_boundary_(adc_sl_boundary),
+    : adc_sl_boundary_(adc_sl_boundary),                                                      // 听过初始化列表函数, 构造新的对象
       st_boundary_config_(config),
       reference_line_(reference_line),
       path_data_(path_data),
@@ -51,30 +51,30 @@ SpeedLimitDecider::SpeedLimitDecider(const SLBoundary& adc_sl_boundary,
 }
 
 void SpeedLimitDecider::GetAvgKappa(
-    const std::vector<common::PathPoint>& path_points,
+    const std::vector<common::PathPoint>& path_points,                                        // 扩展新的曲率(Kappa)
     std::vector<double>* kappa) const {
-  CHECK_NOTNULL(kappa);
-  const int kHalfNumPoints = st_boundary_config_.num_points_to_avg_kappa() / 2;
-  CHECK_GT(kHalfNumPoints, 0);
-  kappa->clear();
+  CHECK_NOTNULL(kappa);                                                                       // 容错处理
+  const int kHalfNumPoints = st_boundary_config_.num_points_to_avg_kappa() / 2;               // 获取一半的点
+  CHECK_GT(kHalfNumPoints, 0);                                                                // 确定是有点的
+  kappa->clear();                                                                             // 将数组清空并重新复制
   kappa->resize(path_points.size());
   double sum = 0.0;
   int start = 0;
   int end = 0;
   while (end < static_cast<int>(path_points.size()) &&
          end - start < kHalfNumPoints + 1) {
-    sum += path_points[end].kappa();
+    sum += path_points[end].kappa();                                                          // 迭代前半部分Kappa的所有值
     ++end;
   }
 
-  int iter = 0;
+  int iter = 0;                                                                               // 迭代器
   while (iter < static_cast<int>(path_points.size())) {
-    kappa->at(iter) = sum / (end - start);
+    kappa->at(iter) = sum / (end - start);                                                    // 重新赋值
     if (start < iter - kHalfNumPoints) {
       sum -= path_points[start].kappa();
       ++start;
     }
-    if (end < static_cast<int>(path_points.size())) {
+    if (end < static_cast<int>(path_points.size())) {                                         // 太多的强制类型转换
       sum += path_points[end].kappa();
       ++end;
     }
@@ -82,20 +82,20 @@ void SpeedLimitDecider::GetAvgKappa(
   }
 }
 
-Status SpeedLimitDecider::GetSpeedLimits(
+Status SpeedLimitDecider::GetSpeedLimits(                                                     // 获得速度限制
     const IndexedList<std::string, PathObstacle>& path_obstacles,
     SpeedLimit* const speed_limit_data) const {
-  CHECK_NOTNULL(speed_limit_data);
+  CHECK_NOTNULL(speed_limit_data);                                                            // 有效性检查
 
-  std::vector<double> avg_kappa;
+  std::vector<double> avg_kappa;                                                              // 获取曲率值
   GetAvgKappa(path_data_.discretized_path().path_points(), &avg_kappa);
   const auto& discretized_path_points =
-      path_data_.discretized_path().path_points();
-  const auto& frenet_path_points = path_data_.frenet_frame_path().points();
-  for (uint32_t i = 0; i < discretized_path_points.size(); ++i) {
-    const double path_s = discretized_path_points.at(i).s();
-    const double frenet_point_s = frenet_path_points.at(i).s();
-    if (frenet_point_s > reference_line_.Length()) {
+      path_data_.discretized_path().path_points();                                            // 获取所有离散path上的点
+  const auto& frenet_path_points = path_data_.frenet_frame_path().points();                   // 将path data数据中的frenet坐标(sl坐标)下的所有点都取出来
+  for (uint32_t i = 0; i < discretized_path_points.size(); ++i) {                             // 迭代离散路径上的所有点
+    const double path_s = discretized_path_points.at(i).s();                                  // 获得path上的s点
+    const double frenet_point_s = frenet_path_points.at(i).s();                               // 获得sl坐标系下的s点
+    if (frenet_point_s > reference_line_.Length()) {                                          // 超出参考轨迹的值
       AWARN << "path length [" << frenet_point_s
             << "] is LARGER than reference_line_ length ["
             << reference_line_.Length() << "]. Please debug before proceeding.";
@@ -103,23 +103,23 @@ Status SpeedLimitDecider::GetSpeedLimits(
     }
 
     // (1) speed limit from map
-    double speed_limit_on_reference_line =
-        reference_line_.GetSpeedLimitFromS(frenet_point_s);
+    double speed_limit_on_reference_line =                                                    // 从map中获取一个限制的速度
+        reference_line_.GetSpeedLimitFromS(frenet_point_s);                                   // 给定一个s点就可以获取参考线上的速度限制
 
-    // (2) speed limit from path curvature
+    // (2) speed limit from path curvature                                                    // 从path的曲线中获取一个速度限制
     //  -- 2.1: limit by centripetal force (acceleration)
-    const double centri_acc_speed_limit =
+    const double centri_acc_speed_limit =                                                     // 向心力下的加速度
         std::sqrt(GetCentricAccLimit(std::fabs(avg_kappa[i])) /
                   std::fmax(std::fabs(avg_kappa[i]),
                             st_boundary_config_.minimal_kappa()));
 
     // -- 2.2: limit by centripetal jerk
-    double centri_jerk_speed_limit = std::numeric_limits<double>::max();
+    double centri_jerk_speed_limit = std::numeric_limits<double>::max();                      // 向心力下的加速度的开方
     if (i + 1 < discretized_path_points.size()) {
-      const double ds = discretized_path_points.at(i + 1).s() -
+      const double ds = discretized_path_points.at(i + 1).s() -                               // 获得s的偏差
                         discretized_path_points.at(i).s();
       DCHECK_GE(ds, 0.0);
-      const double kEpsilon = 1e-9;
+      const double kEpsilon = 1e-9;                                                           // 无穷小量
       const double centri_jerk =
           std::fabs(avg_kappa[i + 1] - avg_kappa[i]) / (ds + kEpsilon);
       centri_jerk_speed_limit = std::fmax(
@@ -127,12 +127,12 @@ Status SpeedLimitDecider::GetSpeedLimits(
     }
 
     // (3) speed limit from nudge obstacles
-    double nudge_obstacle_speed_limit = std::numeric_limits<double>::max();
-    for (const auto* const_path_obstacle : path_obstacles.Items()) {
-      if (const_path_obstacle->obstacle()->IsVirtual()) {
+    double nudge_obstacle_speed_limit = std::numeric_limits<double>::max();                   // 从忽略的障碍物中获得限速信息
+    for (const auto* const_path_obstacle : path_obstacles.Items()) {                          // 迭代所有的障碍物
+      if (const_path_obstacle->obstacle()->IsVirtual()) {                                     // 如果是虚拟障碍物的话， 就跳过
         continue;
       }
-      if (!const_path_obstacle->LateralDecision().has_nudge()) {
+      if (!const_path_obstacle->LateralDecision().has_nudge()) {                              // 如果是nudge, 继续迭代
         continue;
       }
 
@@ -141,33 +141,33 @@ Status SpeedLimitDecider::GetSpeedLimits(
        *    start_s   end_s
        * ------|  adc   |---------------
        * ------------|  obstacle |------
-       */
+       */                                                                                     // 自动驾驶车辆已经发生了重叠
       if (frenet_point_s + vehicle_param_.front_edge_to_center() <
               const_path_obstacle->PerceptionSLBoundary().start_s() ||
           frenet_point_s - vehicle_param_.back_edge_to_center() >
-              const_path_obstacle->PerceptionSLBoundary().end_s()) {
+              const_path_obstacle->PerceptionSLBoundary().end_s()) {                          // 跳过
         continue;
       }
       constexpr double kRange = 1.0;  // meters
       const auto& nudge = const_path_obstacle->LateralDecision().nudge();
 
       // Please notice the differences between adc_l and frenet_point_l
-      const double frenet_point_l = frenet_path_points.at(i).l();
+      const double frenet_point_l = frenet_path_points.at(i).l();                             // 自动驾驶车辆的l和frenet坐标系下的l是不同的
 
       // obstacle is on the right of ego vehicle (at path point i)
-      bool is_close_on_left =
+      bool is_close_on_left =                                                                 // 障碍物在自动驾驶车辆的右边
           (nudge.type() == ObjectNudge::LEFT_NUDGE) &&
           (frenet_point_l - vehicle_param_.right_edge_to_center() - kRange <
            const_path_obstacle->PerceptionSLBoundary().end_l());
 
       // obstacle is on the left of ego vehicle (at path point i)
-      bool is_close_on_right =
+      bool is_close_on_right =                                                                // 障碍物在自动驾驶车辆的左边
           (nudge.type() == ObjectNudge::RIGHT_NUDGE) &&
           (const_path_obstacle->PerceptionSLBoundary().start_l() - kRange <
            frenet_point_l + vehicle_param_.left_edge_to_center());
 
-      if (is_close_on_left || is_close_on_right) {
-        double nudge_speed_ratio = 1.0;
+      if (is_close_on_left || is_close_on_right) {                                            // 障碍物和自动驾驶车辆靠得很近
+        double nudge_speed_ratio = 1.0;                                                       // 优化的比率
         if (const_path_obstacle->obstacle()->IsStatic()) {
           nudge_speed_ratio =
               st_boundary_config_.static_obs_nudge_speed_ratio();
@@ -182,12 +182,12 @@ Status SpeedLimitDecider::GetSpeedLimits(
     }
 
     double curr_speed_limit = 0.0;
-    if (FLAGS_enable_nudge_slowdown) {
+    if (FLAGS_enable_nudge_slowdown) {                                                       // FLAGS_enable_nudge_slowdown设置为true
       curr_speed_limit =
           std::fmax(st_boundary_config_.lowest_speed(),
                     common::util::MinElement(std::vector<double>{
                         speed_limit_on_reference_line, centri_acc_speed_limit,
-                        centri_jerk_speed_limit, nudge_obstacle_speed_limit}));
+                        centri_jerk_speed_limit, nudge_obstacle_speed_limit}));              // 获得当前的速度限制
     } else {
       curr_speed_limit =
           std::fmax(st_boundary_config_.lowest_speed(),
@@ -196,51 +196,51 @@ Status SpeedLimitDecider::GetSpeedLimits(
                         centri_jerk_speed_limit}));
     }
 
-    speed_limit_data->AppendSpeedLimit(path_s, curr_speed_limit);
+    speed_limit_data->AppendSpeedLimit(path_s, curr_speed_limit);                           // 追加到限速下
   }
   return Status::OK();
 }
 
-double SpeedLimitDecider::GetCentricAccLimit(const double kappa) const {
+double SpeedLimitDecider::GetCentricAccLimit(const double kappa) const {                    // 获得向心加速度
   // this function uses a linear model with upper and lower bound to determine
   // centric acceleration limit
-
+                                                                                            // 使用上界和下界的线性模型计算向心加速度
   // suppose acc = k1 * v + k2
   // consider acc = v ^ 2 * kappa
   // we determine acc by the two functions above, with uppper and lower speed
   // bounds
-  const double v_high = st_boundary_config_.high_speed_threshold();
-  const double v_low = st_boundary_config_.low_speed_threshold();
+  const double v_high = st_boundary_config_.high_speed_threshold();                         // 获取速度的上界
+  const double v_low = st_boundary_config_.low_speed_threshold();                           // 获取速度的下界
 
   const double h_v_acc =
-      st_boundary_config_.high_speed_centric_acceleration_limit();
+      st_boundary_config_.high_speed_centric_acceleration_limit();                          // 获取向心加速度的上界
   const double l_v_acc =
-      st_boundary_config_.low_speed_centric_acceleration_limit();
+      st_boundary_config_.low_speed_centric_acceleration_limit();                           // 获得向心加速度的下界
 
   if (std::fabs(v_high - v_low) < 1.0) {
-    AERROR << "High speed and low speed threshold are too close to each other. "
+    AERROR << "High speed and low speed threshold are too close to each other. "            // 两个阈值的差距不能太小
               "Please check config file."
            << " Current high speed threshold = " << v_high
            << ", current low speed threshold = " << v_low;
     return h_v_acc;
   }
   const double kMinKappaEpsilon = 1e-9;
-  if (kappa < kMinKappaEpsilon) {
+  if (kappa < kMinKappaEpsilon) {                                                           // 曲率太小的话, 向心加速度就会很大
     return h_v_acc;
   }
 
   const double k1 = (h_v_acc - l_v_acc) / (v_high - v_low);
   const double k2 = h_v_acc - v_high * k1;
 
-  const double v = (k1 + std::sqrt(k1 * k1 + 4.0 * kappa * k2)) / (2.0 * kappa);
+  const double v = (k1 + std::sqrt(k1 * k1 + 4.0 * kappa * k2)) / (2.0 * kappa);            // 通过曲率计算出对应的速度
   ADEBUG << "v = " << v;
 
-  if (v > v_high) {
+  if (v > v_high) {                                                                         // 速度太快, 向心加速度就应该比较大才对
     return h_v_acc;
   } else if (v < v_low) {
     return l_v_acc;
   } else {
-    return v * k1 + k2;
+    return v * k1 + k2;                                                                     // 返回真实值
   }
 }
 

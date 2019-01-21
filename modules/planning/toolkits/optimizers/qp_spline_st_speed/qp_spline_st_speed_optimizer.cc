@@ -37,12 +37,12 @@
 namespace apollo {
 namespace planning {
 
-using apollo::common::ErrorCode;
-using apollo::common::Status;
-using apollo::common::TrajectoryPoint;
-using apollo::planning_internal::STGraphDebug;
+using apollo::common::ErrorCode;                                                     // 错误码
+using apollo::common::Status;                                                        // 状态码
+using apollo::common::TrajectoryPoint;                                               // 轨迹点
+using apollo::planning_internal::STGraphDebug;                                       // st图中的debug信息
 
-QpSplineStSpeedOptimizer::QpSplineStSpeedOptimizer()
+QpSplineStSpeedOptimizer::QpSplineStSpeedOptimizer()                                 // 构造函数
     : SpeedOptimizer("QpSplineStSpeedOptimizer") {}
 
 bool QpSplineStSpeedOptimizer::Init(const PlanningConfig& config) {

@@ -32,14 +32,14 @@
 namespace apollo {
 namespace planning {
 
-class PolyStSpeedOptimizer : public SpeedOptimizer {
+class PolyStSpeedOptimizer : public SpeedOptimizer {                                    // st坐标的速度优化器
  public:
-  PolyStSpeedOptimizer();
+  PolyStSpeedOptimizer();                                                               // 默认的构造函数
 
-  bool Init(const PlanningConfig& config) override;
+  bool Init(const PlanningConfig& config) override;                                     // 初始化函数
 
  private:
-  common::Status Process(const SLBoundary& adc_sl_boundary,
+  common::Status Process(const SLBoundary& adc_sl_boundary,                             // 处理过程
                          const PathData& path_data,
                          const apollo::common::TrajectoryPoint& init_point,
                          const ReferenceLine& reference_line,
@@ -47,8 +47,8 @@ class PolyStSpeedOptimizer : public SpeedOptimizer {
                          PathDecision* const path_decision,
                          SpeedData* const speed_data) override;
 
-  PolyStSpeedConfig poly_st_speed_config_;
-  StBoundaryConfig st_boundary_config_;
+  PolyStSpeedConfig poly_st_speed_config_;                                              // 配置参数
+  StBoundaryConfig st_boundary_config_;                                                 // st的配置参数
 };
 
 }  // namespace planning

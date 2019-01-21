@@ -35,7 +35,7 @@
 namespace apollo {
 namespace planning {
 
-class QpSplinePathOptimizer : public PathOptimizer {
+class QpSplinePathOptimizer : public PathOptimizer {                                      // path上进行QP的优化
  public:
   QpSplinePathOptimizer();
   bool Init(const PlanningConfig& config) override;

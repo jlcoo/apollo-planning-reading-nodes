@@ -29,25 +29,25 @@
 namespace apollo {
 namespace planning {
 
-class PathDecider : public Task {
+class PathDecider : public Task {                                                // 路径决策者直接从task中继承而来
  public:
-  PathDecider();
-  ~PathDecider() = default;
+  PathDecider();                                                                 // 构造函数
+  ~PathDecider() = default;                                                      // 默认的析构函数
 
-  apollo::common::Status Execute(
+  apollo::common::Status Execute(                                                // 执行path的决策者
       Frame *frame, ReferenceLineInfo *reference_line_info) override;
 
  private:
-  apollo::common::Status Process(const PathData &path_data,
-                                 PathDecision *const path_decision);
+  apollo::common::Status Process(const PathData &path_data,                      // 处理path中的data(数据)
+                                 PathDecision *const path_decision);             // 添加上path上的决策(decision)
 
-  bool MakeObjectDecision(const PathData &path_data,
+  bool MakeObjectDecision(const PathData &path_data,                             // 做对象的决策
                           PathDecision *const path_decision);
 
-  bool MakeStaticObstacleDecision(const PathData &path_data,
+  bool MakeStaticObstacleDecision(const PathData &path_data,                     // 做静态障碍物的决策
                                   PathDecision *const path_decision);
 
-  ObjectStop GenerateObjectStopDecision(
+  ObjectStop GenerateObjectStopDecision(                                         // 做停止障碍物的决策
       const PathObstacle &path_obstacle) const;
 };
 

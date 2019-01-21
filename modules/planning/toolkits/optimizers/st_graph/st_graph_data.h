@@ -32,26 +32,26 @@
 namespace apollo {
 namespace planning {
 
-class StGraphData {
+class StGraphData {                                                                 // st图中的一个类
  public:
-  StGraphData(const std::vector<const StBoundary*>& st_boundaries,
-              const apollo::common::TrajectoryPoint& init_point,
-              const SpeedLimit& speed_limit, const double path_data_length);
-  StGraphData() = default;
+  StGraphData(const std::vector<const StBoundary*>& st_boundaries,                  // st坐标系中的边框
+              const apollo::common::TrajectoryPoint& init_point,                    // 初始化的点
+              const SpeedLimit& speed_limit, const double path_data_length);        // 限速和路径中的长度
+  StGraphData() = default;                                                          // 默认的构造函数
 
-  const std::vector<const StBoundary*>& st_boundaries() const;
+  const std::vector<const StBoundary*>& st_boundaries() const;                      // 返回st的boundary
 
-  const apollo::common::TrajectoryPoint& init_point() const;
+  const apollo::common::TrajectoryPoint& init_point() const;                        // 返回轨迹的起始点
 
-  const SpeedLimit& speed_limit() const;
+  const SpeedLimit& speed_limit() const;                                            // 返回限速信息
 
-  double path_data_length() const;
+  double path_data_length() const;                                                  // 返回path数据的长度
 
  private:
-  std::vector<const StBoundary*> st_boundaries_;
-  apollo::common::TrajectoryPoint init_point_;
+  std::vector<const StBoundary*> st_boundaries_;                                    // st的边框
+  apollo::common::TrajectoryPoint init_point_;                                      // 起点
 
-  SpeedLimit speed_limit_;
+  SpeedLimit speed_limit_;                                                          // 限速信息
   double path_data_length_ = 0.0;
 };
 

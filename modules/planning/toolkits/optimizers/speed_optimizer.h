@@ -32,25 +32,25 @@
 namespace apollo {
 namespace planning {
 // 速度优化器和路径优化器
-class SpeedOptimizer : public Task {
+class SpeedOptimizer : public Task {                                                       // 速度优化器继承于task这个任务
  public:
-  explicit SpeedOptimizer(const std::string& name);
-  virtual ~SpeedOptimizer() = default;
-  apollo::common::Status Execute(
+  explicit SpeedOptimizer(const std::string& name);                                        // 禁止隐式转换的构造函数
+  virtual ~SpeedOptimizer() = default;                                                     // 默认的析构函数
+  apollo::common::Status Execute(                                                          // 任务的执行函数
       Frame* frame, ReferenceLineInfo* reference_line_info) override;
 
  protected:
-  virtual apollo::common::Status Process(
+  virtual apollo::common::Status Process(                                                  // 进行处理, 只是在内部调用
       const SLBoundary& adc_sl_boundary, const PathData& path_data,
       const common::TrajectoryPoint& init_point,
       const ReferenceLine& reference_line,
       const SpeedData& reference_speed_data, PathDecision* const path_decision,
-      SpeedData* const speed_data) = 0;
+      SpeedData* const speed_data) = 0;                                                    // 声明一个纯虚函数
 
-  void RecordSTGraphDebug(const StGraphData& st_graph_data,
+  void RecordSTGraphDebug(const StGraphData& st_graph_data,                                // 记录下st坐标下的debug信息
                           planning_internal::STGraphDebug* stGraphDebug) const;
 
-  void RecordDebugInfo(const SpeedData& speed_data);
+  void RecordDebugInfo(const SpeedData& speed_data);                                       // 记录下速度规划相关的信息
 };
 
 }  // namespace planning

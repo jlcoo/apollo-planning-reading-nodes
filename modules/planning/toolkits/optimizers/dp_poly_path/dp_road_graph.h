@@ -71,50 +71,50 @@ class DPRoadGraph {                                                             
         : sl_point(point_sl), min_cost_prev_node(node_prev) {}                               // 前驱的最小节点
 
     DPRoadGraphNode(const common::SLPoint point_sl,                                          // 通过一个sl节点， 前驱的一个节点和可比较的代价函数值进行比较
-                    const DPRoadGraphNode *node_prev,
+                    const DPRoadGraphNode *node_prev,                                        // dp图中的前向点
                     const ComparableCost &cost)                                              // 代价函数
-        : sl_point(point_sl), min_cost_prev_node(node_prev), min_cost(cost) {}
+        : sl_point(point_sl), min_cost_prev_node(node_prev), min_cost(cost) {}               // 初始化列表
 
-    void UpdateCost(const DPRoadGraphNode *node_prev,
-                    const QuinticPolynomialCurve1d &curve,
-                    const ComparableCost &cost) {    
-      if (cost <= min_cost) {                        // 如果代价比最小的小就更新
+    void UpdateCost(const DPRoadGraphNode *node_prev,                                        // 更新代价函数, 图中前一个点《 
+                    const QuinticPolynomialCurve1d &curve,                                   // 5次多项式曲线
+                    const ComparableCost &cost) {                                            // 可比较的代价函数， 代价函数的值越小越好
+      if (cost <= min_cost) {                                                                // 如果代价比最小的小就更新
         min_cost = cost;
-        min_cost_prev_node = node_prev;
-        min_cost_curve = curve;
+        min_cost_prev_node = node_prev;                                                      // 保存最小代价的前向节点(图中的结点)
+        min_cost_curve = curve;                                                              // 保存最小代价的曲线
       }
     }
 
-    common::SLPoint sl_point;
-    const DPRoadGraphNode *min_cost_prev_node = nullptr;
-    ComparableCost min_cost = {true, true, true,
-                               std::numeric_limits<float>::infinity(),             // 初始化为无穷大
+    common::SLPoint sl_point;                                                                // 一个sl坐标系中的一个点
+    const DPRoadGraphNode *min_cost_prev_node = nullptr;                                     // 指向最小节点的路网图中的一个点
+    ComparableCost min_cost = {true, true, true,                                             // 三个cost都利用, 而且安全的代价值设置为无穷大， 平滑的代价值设置为无穷大
+                               std::numeric_limits<float>::infinity(),                       // 初始化为无穷大
                                std::numeric_limits<float>::infinity()};
-    QuinticPolynomialCurve1d min_cost_curve;
-  };
+    QuinticPolynomialCurve1d min_cost_curve;                                                 // 一个5次多项式的曲线
+  };                                                                                         // 这就是DP路网图中的一个节点
 
-  bool GenerateMinCostPath(const std::vector<const PathObstacle *> &obstacles,     // 主要是通过障碍物
-                           std::vector<DPRoadGraphNode> *min_cost_path);           // min_cost_path这个vector的指针应该是一个输出对象吧
+  bool GenerateMinCostPath(const std::vector<const PathObstacle *> &obstacles,               // 主要是通过障碍物
+                           std::vector<DPRoadGraphNode> *min_cost_path);                     // min_cost_path这个vector的指针应该是一个输出对象吧
   // dp采样的接口
-  bool SamplePathWaypoints(
-      const common::TrajectoryPoint &init_point,
-      std::vector<std::vector<common::SLPoint>> *const points);
+  bool SamplePathWaypoints(                                                                  // 采样path(路网中的way point)的路网点
+      const common::TrajectoryPoint &init_point,                                             // 轨迹的初始化起点
+      std::vector<std::vector<common::SLPoint>> *const points);                              // 输出是二维的数组, 数组中的内容是SL坐标系下的点
 
-  bool CalculateFrenetPoint(const common::TrajectoryPoint &traj_point,
+  bool CalculateFrenetPoint(const common::TrajectoryPoint &traj_point,                       // 计算frenet坐标系下的点, 将一个轨迹点转换为一个frenet坐标系下的点
                             common::FrenetFramePoint *const frenet_frame_point);
 
-  bool IsValidCurve(const QuinticPolynomialCurve1d &curve) const;
+  bool IsValidCurve(const QuinticPolynomialCurve1d &curve) const;                            // 判断一个5次多项式的曲线是否是合法的
 
-  void GetCurveCost(TrajectoryCost trajectory_cost,
+  void GetCurveCost(TrajectoryCost trajectory_cost,                                          // 获得曲线的代价值, 一个轨迹的代价TrajectoryCost
                     const QuinticPolynomialCurve1d &curve, const float start_s,
                     const float end_s, const uint32_t curr_level,
-                    const uint32_t total_level, ComparableCost *cost);
+                    const uint32_t total_level, ComparableCost *cost);                       // 计算轨迹的代价函数的值
 
-  void UpdateNode(const std::list<DPRoadGraphNode> &prev_nodes,
+  void UpdateNode(const std::list<DPRoadGraphNode> &prev_nodes,                              // 更新的路网中图的点
                   const uint32_t level, const uint32_t total_level,
                   TrajectoryCost *trajectory_cost, DPRoadGraphNode *front,
                   DPRoadGraphNode *cur_node);
-  bool HasSidepass();
+  bool HasSidepass();                                                                        // 是否可以绕行
 
  private:
   DpPolyPathConfig config_;                             // dp多边型的配置, 在dp_poly_path_config.proto文件中定义

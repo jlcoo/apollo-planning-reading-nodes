@@ -116,7 +116,7 @@ double SpeedProfileCost::CalculatePointCost(
   cost += config_.speed_weight() * std::pow((v - speed_limit), 2);
   cost += config_.jerk_weight() * std::pow(da, 2);
   ADEBUG << "t = " << t << ", s = " << s << ", v = " << v << ", a = " << a
-         << ", da = " << da << ", cost = " << cost;
+         << ", da = " << da << ", cost = " << cost;                                       // 时间， 位移, 速度， 加速度， 加速度的一次微分， cost(代价函数值)
 
   return cost;
 }

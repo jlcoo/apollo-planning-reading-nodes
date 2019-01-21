@@ -32,19 +32,19 @@
 namespace apollo {
 namespace planning {
 
-class PathOptimizer : public Task {
+class PathOptimizer : public Task {                                                   // path的优化器
  public:
-  explicit PathOptimizer(const std::string &name);
-  virtual ~PathOptimizer() = default;
+  explicit PathOptimizer(const std::string &name);                                    // 禁止隐式转换的构造函数
+  virtual ~PathOptimizer() = default;                                                 // 默认的析构函数
   apollo::common::Status Execute(
-      Frame *frame, ReferenceLineInfo *reference_line_info) override;
+      Frame *frame, ReferenceLineInfo *reference_line_info) override;                 // 执行函数
 
  protected:
-  virtual apollo::common::Status Process(
+  virtual apollo::common::Status Process(                                             // 处理过程
       const SpeedData &speed_data, const ReferenceLine &reference_line,
       const common::TrajectoryPoint &init_point, PathData *const path_data) = 0;
 
-  void RecordDebugInfo(const PathData &path_data);
+  void RecordDebugInfo(const PathData &path_data);                                    // debug的信息
 };
 
 }  // namespace planning

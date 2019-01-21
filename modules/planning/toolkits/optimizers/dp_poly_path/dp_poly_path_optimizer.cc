@@ -61,7 +61,7 @@ Status DpPolyPathOptimizer::Process(const SpeedData &speed_data,                
           path_data)) {                                                             // path的数据
     AERROR << "Failed to find tunnel in road graph";                                // 无法在路网图中找到通路
     return Status(ErrorCode::PLANNING_ERROR, "dp_road_graph path generation");      // 返货planning错误的状态
-  }
+  }                                                                                 // dp的输出放到path_data中
 
   return Status::OK();                                                              // 成功了就返回OK
 }

@@ -32,24 +32,24 @@
 namespace apollo {
 namespace planning {
 // task 类型名字
-class Task {
+class Task {                                                                 // task是所有优化器的基类
  public:
-  explicit Task(const std::string& name);            // task构造函数
-  virtual ~Task() = default;
+  explicit Task(const std::string& name);                                    // task构造函数
+  virtual ~Task() = default;                                                 // 默认的析构函数
   virtual const std::string& Name() const;
 
-  virtual apollo::common::Status Execute(
+  virtual apollo::common::Status Execute(                                    // 优化任务的执行函数和执行逻辑
       Frame* frame, ReferenceLineInfo* reference_line_info);
 
-  virtual bool Init(const PlanningConfig& config);
+  virtual bool Init(const PlanningConfig& config);                           // 任务的初始化函数
 
  protected:
-  bool is_init_ = false;
-  Frame* frame_ = nullptr;                           // frame 包含了一次planner的所有信息
-  ReferenceLineInfo* reference_line_info_ = nullptr; // ReferenceLineInfo包含了中心参考线的所有信息
+  bool is_init_ = false;                                                     // 是否进行初始化
+  Frame* frame_ = nullptr;                                                   // frame 包含了一次planner的所有信息
+  ReferenceLineInfo* reference_line_info_ = nullptr;                         // ReferenceLineInfo包含了中心参考线的所有信息
 
  private:
-  const std::string name_;
+  const std::string name_;                                                   // 每个任务都有一个自己私有的名字
 };
 
 }  // namespace planning

@@ -28,12 +28,12 @@ Status EMPlanner::Init(const PlanningConfig& config) {                          
   return Status::OK();                                                             // 返回ok
 }
 
-Status EMPlanner::Plan(const TrajectoryPoint& planning_start_point,
+Status EMPlanner::Plan(const TrajectoryPoint& planning_start_point,                // EM 规划器进行planning的计算， 输入是一帧数据和planning的起点
                        Frame* frame) {
-  scenario_manager_.Update(planning_start_point, *frame);
-  scenario_ = scenario_manager_.mutable_scenario();
-  scenario_->Init(config_);  // init will be skipped if it was called before
-  return scenario_->Process(planning_start_point, frame);
+  scenario_manager_.Update(planning_start_point, *frame);                          // 更新场景
+  scenario_ = scenario_manager_.mutable_scenario();                                // 获得可写的场景
+  scenario_->Init(config_);  // init will be skipped if it was called before       // 通过配置项初始化场景
+  return scenario_->Process(planning_start_point, frame);                          // 然后在场景中进行处理特定场景的planning处理
 }
 
 }  // namespace planning

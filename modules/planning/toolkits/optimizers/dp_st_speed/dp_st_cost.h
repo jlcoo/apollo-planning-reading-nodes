@@ -37,21 +37,21 @@
 namespace apollo {
 namespace planning {
 
-class DpStCost {
+class DpStCost {                                                                               // st图中计算代价函数值
  public:
-  explicit DpStCost(const DpStSpeedConfig& dp_st_speed_config,
-                    const std::vector<const PathObstacle*>& obstacles,
-                    const common::TrajectoryPoint& init_point);
+  explicit DpStCost(const DpStSpeedConfig& dp_st_speed_config,                                 // dp图中的动态规划的配置项
+                    const std::vector<const PathObstacle*>& obstacles,                         // 保存障碍物的数组
+                    const common::TrajectoryPoint& init_point);                                // 轨迹的起点
 
-  float GetObstacleCost(const StGraphPoint& point);
+  float GetObstacleCost(const StGraphPoint& point);                                            // 获得障碍物的代价函数值
 
-  float GetReferenceCost(const STPoint& point,
+  float GetReferenceCost(const STPoint& point,                                                 // 参考线的代价函数值
                           const STPoint& reference_point) const;
 
-  float GetSpeedCost(const STPoint& first, const STPoint& second,
+  float GetSpeedCost(const STPoint& first, const STPoint& second,                              // 速度的代价函数值
                       const float speed_limit) const;
 
-  float GetAccelCostByTwoPoints(const float pre_speed, const STPoint& first,
+  float GetAccelCostByTwoPoints(const float pre_speed, const STPoint& first,                   // 加速度的代价函数值
                                  const STPoint& second);
   float GetAccelCostByThreePoints(const STPoint& first, const STPoint& second,
                                    const STPoint& third);
@@ -68,27 +68,27 @@ class DpStCost {
                                  const STPoint& third, const STPoint& fourth);
 
  private:
-  float GetAccelCost(const float accel);
+  float GetAccelCost(const float accel);                                                      // 给定一个浮点数获得代价函数值
   float JerkCost(const float jerk);
 
-  void AddToKeepClearRange(const std::vector<const PathObstacle*>& obstacles);
+  void AddToKeepClearRange(const std::vector<const PathObstacle*>& obstacles);                // 保持keep clear的范围
   static void SortAndMergeRange(
-      std::vector<std::pair<float, float>>* keep_clear_range_);
-  bool InKeepClearRange(float s) const;
+      std::vector<std::pair<float, float>>* keep_clear_range_);                               // 排序并合并范围
+  bool InKeepClearRange(float s) const;                                                       // 是否在keep clear这个范围内
 
-  const DpStSpeedConfig& config_;
-  const std::vector<const PathObstacle*>& obstacles_;
-  const common::TrajectoryPoint& init_point_;
+  const DpStSpeedConfig& config_;                                                             // 配置参数项
+  const std::vector<const PathObstacle*>& obstacles_;                                         // 障碍物的数组
+  const common::TrajectoryPoint& init_point_;                                                 // 轨迹的起点
 
-  float unit_t_ = 0.0;
+  float unit_t_ = 0.0;                                                                        // 时间的分辨率
 
-  std::unordered_map<std::string, int> boundary_map_;
-  std::vector<std::vector<std::pair<float, float>>> boundary_cost_;
+  std::unordered_map<std::string, int> boundary_map_;                                         // 用一个hash表做边界的映射
+  std::vector<std::vector<std::pair<float, float>>> boundary_cost_;                           // boundary的代价值
 
-  std::vector<std::pair<float, float>> keep_clear_range_;
+  std::vector<std::pair<float, float>> keep_clear_range_;                                     // keep clear的点对
 
-  std::array<float, 200> accel_cost_;
-  std::array<float, 400> jerk_cost_;
+  std::array<float, 200> accel_cost_;                                                         // 200个浮点型的数组(用于保存加速度)
+  std::array<float, 400> jerk_cost_;                                                          // 400个浮点型的数组(用于保存加速度的微分)
 };
 
 }  // namespace planning

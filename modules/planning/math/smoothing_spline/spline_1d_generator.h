@@ -61,34 +61,34 @@
 namespace apollo {
 namespace planning {
 
-class Spline1dGenerator {
+class Spline1dGenerator {                                                           // 一维的spline产生器
  public:
-  Spline1dGenerator(const std::vector<double>& x_knots, const uint32_t order);
+  Spline1dGenerator(const std::vector<double>& x_knots, const uint32_t order);      // 默认的构造函数
 
-  void Reset(const std::vector<double>& x_knots, const uint32_t order);
+  void Reset(const std::vector<double>& x_knots, const uint32_t order);             // 复位元素
 
   // add constraint through pss_constraint
-  Spline1dConstraint* mutable_spline_constraint();
+  Spline1dConstraint* mutable_spline_constraint();                                  // 添加约束项
 
   // add kernel through pss_kernel
-  Spline1dKernel* mutable_spline_kernel();
+  Spline1dKernel* mutable_spline_kernel();                                          // 添加核函数
 
   // solve
-  bool Solve();
+  bool Solve();                                                                     // 进行求解
 
   // output
-  const Spline1d& spline() const;
+  const Spline1d& spline() const;                                                   // 获得输出
 
  private:
-  Spline1d spline_;
-  Spline1dConstraint spline_constraint_;
-  Spline1dKernel spline_kernel_;
+  Spline1d spline_;                                                                 // 一维的spline曲线
+  Spline1dConstraint spline_constraint_;                                            // 一维的约束项
+  Spline1dKernel spline_kernel_;                                                    // 一维的核函数
 
-  std::unique_ptr<::qpOASES::SQProblem> sqp_solver_;
+  std::unique_ptr<::qpOASES::SQProblem> sqp_solver_;                                // sQP问题的求解器
 
-  int last_num_constraint_ = 0;
-  int last_num_param_ = 0;
-  bool last_problem_success_ = false;
+  int last_num_constraint_ = 0;                                                     // 上一次约束的个数
+  int last_num_param_ = 0;                                                          // 参数个数
+  bool last_problem_success_ = false;                                               // 上一个问题是否成功解决
 };
 
 }  // namespace planning

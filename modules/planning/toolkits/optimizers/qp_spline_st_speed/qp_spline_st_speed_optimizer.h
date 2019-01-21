@@ -38,14 +38,14 @@
 namespace apollo {
 namespace planning {
 
-class QpSplineStSpeedOptimizer : public SpeedOptimizer {
+class QpSplineStSpeedOptimizer : public SpeedOptimizer {                              // 二次规划的速度优化器
  public:
-  QpSplineStSpeedOptimizer();
+  QpSplineStSpeedOptimizer();                                                         // 默认的构造函数
 
-  bool Init(const PlanningConfig& config) override;
+  bool Init(const PlanningConfig& config) override;                                   // 初始化函数
 
  private:
-  common::Status Process(const SLBoundary& adc_sl_boundary,
+  common::Status Process(const SLBoundary& adc_sl_boundary,                           // 会在excute函数中会调用执行
                          const PathData& path_data,
                          const apollo::common::TrajectoryPoint& init_point,
                          const ReferenceLine& reference_line,
@@ -53,9 +53,9 @@ class QpSplineStSpeedOptimizer : public SpeedOptimizer {
                          PathDecision* const path_decision,
                          SpeedData* const speed_data) override;
 
-  QpStSpeedConfig qp_st_speed_config_;
-  StBoundaryConfig st_boundary_config_;
-  std::unique_ptr<Spline1dGenerator> spline_generator_;
+  QpStSpeedConfig qp_st_speed_config_;                                                // qp的配置参数
+  StBoundaryConfig st_boundary_config_;                                               // st boundary的配置项
+  std::unique_ptr<Spline1dGenerator> spline_generator_;                               // spline曲线的生成器
 };
 
 }  // namespace planning

@@ -158,7 +158,7 @@ common::TrajectoryPoint Obstacle::GetPointAtTime(                               
   }
 }
 
-common::math::Box2d Obstacle::GetBoundingBox(    // 获得bounding box
+common::math::Box2d Obstacle::GetBoundingBox(                                     // 获得bounding box
     const common::TrajectoryPoint& point) const {
   return common::math::Box2d({point.path_point().x(), point.path_point().y()},
                              point.path_point().theta(),

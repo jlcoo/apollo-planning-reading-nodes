@@ -42,28 +42,28 @@ namespace planning {
 // 做一维的spline
 class Spline1d {
  public:
-  Spline1d(const std::vector<double>& x_knots, const uint32_t order);
+  Spline1d(const std::vector<double>& x_knots, const uint32_t order);                   // spline曲线的值
 
   // @brief: given x return f(x) value, derivative, second order derivative and
   // the third order;
-  double operator()(const double x) const;
-  double Derivative(const double x) const;
-  double SecondOrderDerivative(const double x) const;
-  double ThirdOrderDerivative(const double x) const;
+  double operator()(const double x) const;                                              // 返回f(x)的值
+  double Derivative(const double x) const;                                              // 一次微分
+  double SecondOrderDerivative(const double x) const;                                   // 二次微分
+  double ThirdOrderDerivative(const double x) const;                                    // 三次微分
 
   // @brief: set spline segments
-  bool SetSplineSegs(const Eigen::MatrixXd& param_matrix, const uint32_t order);
+  bool SetSplineSegs(const Eigen::MatrixXd& param_matrix, const uint32_t order);        // 设置spline的片段
 
-  const std::vector<double>& x_knots() const;
-  uint32_t spline_order() const;
-
- private:
-  uint32_t FindIndex(const double x) const;
+  const std::vector<double>& x_knots() const;                                           // x的节点个数
+  uint32_t spline_order() const;                                                        // spline的次方数
 
  private:
-  std::vector<Spline1dSeg> splines_;
-  std::vector<double> x_knots_;
-  uint32_t spline_order_;
+  uint32_t FindIndex(const double x) const;                                             // 通过一个值找到对应的insdex的引用值
+
+ private:
+  std::vector<Spline1dSeg> splines_;                                                    // spline通过一个一个片段组成
+  std::vector<double> x_knots_;                                                         // x的节点值(放到一个数组中)
+  uint32_t spline_order_;                                                               // spline的次方数
 };
 
 }  // namespace planning

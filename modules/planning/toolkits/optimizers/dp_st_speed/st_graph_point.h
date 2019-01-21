@@ -28,41 +28,41 @@
 namespace apollo {
 namespace planning {
 
-class StGraphPoint {
+class StGraphPoint {                                                               // st动态规划的数组中的点
  public:
-  std::uint32_t index_s() const;
-  std::uint32_t index_t() const;
+  std::uint32_t index_s() const;                                                   // 路程s的索引
+  std::uint32_t index_t() const;                                                   // 时间t的索引
 
-  const STPoint& point() const;
-  const StGraphPoint* pre_point() const;
+  const STPoint& point() const;                                                    // 获取一个st的坐标
+  const StGraphPoint* pre_point() const;                                           // 前一个st的图中的点
 
-  float reference_cost() const;
-  float obstacle_cost() const;
-  float total_cost() const;
+  float reference_cost() const;                                                    // 中心道路参考线的cost
+  float obstacle_cost() const;                                                     // 障碍物的cost
+  float total_cost() const;                                                        // 总费用
 
-  void Init(const std::uint32_t index_t, const std::uint32_t index_s,
+  void Init(const std::uint32_t index_t, const std::uint32_t index_s,              // 初始化st图
             const STPoint& st_point);
 
   // given reference speed profile, reach the cost, including position
-  void SetReferenceCost(const float reference_cost);
+  void SetReferenceCost(const float reference_cost);                               // 设置中心道路参考线上的代价函数值
 
   // given obstacle info, get the cost;
-  void SetObstacleCost(const float obs_cost);
+  void SetObstacleCost(const float obs_cost);                                      // 设置障碍物代价函数值
 
   // total cost
-  void SetTotalCost(const float total_cost);
+  void SetTotalCost(const float total_cost);                                       // 总共的cost代表了什么呢???
 
-  void SetPrePoint(const StGraphPoint& pre_point);
+  void SetPrePoint(const StGraphPoint& pre_point);                                 // 设置前向点
 
  private:
-  STPoint point_;
-  const StGraphPoint* pre_point_ = nullptr;
-  std::uint32_t index_s_ = 0;
-  std::uint32_t index_t_ = 0;
+  STPoint point_;                                                                  // st坐标系中的一点
+  const StGraphPoint* pre_point_ = nullptr;                                        // 前向点设置为空指针
+  std::uint32_t index_s_ = 0;                                                      // s的索引值
+  std::uint32_t index_t_ = 0;                                                      // t的索引值
 
-  float reference_cost_ = 0.0;
-  float obstacle_cost_ = 0.0;
-  float total_cost_ = std::numeric_limits<float>::infinity();
+  float reference_cost_ = 0.0;                                                     // 参考线的代价函数
+  float obstacle_cost_ = 0.0;                                                      // 障碍物的代价函数
+  float total_cost_ = std::numeric_limits<float>::infinity();                      // 总共的代价函数值
 };
 
 }  // namespace planning

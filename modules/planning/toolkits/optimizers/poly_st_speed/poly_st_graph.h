@@ -43,7 +43,7 @@
 namespace apollo {
 namespace planning {
 
-class PolyStGraph {
+class PolyStGraph {                                                                // ST 坐标系下的多项式的图
  public:
   explicit PolyStGraph(const PolyStSpeedConfig &config,
                        const ReferenceLineInfo *reference_line_info,

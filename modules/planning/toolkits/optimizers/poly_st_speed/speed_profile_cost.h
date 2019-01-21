@@ -41,7 +41,7 @@ class SpeedProfileCost {
                             const SpeedLimit &speed_limit,
                             const common::TrajectoryPoint &init_point);
 
-  double Calculate(const QuarticPolynomialCurve1d &curve, const double end_time,
+  double Calculate(const QuarticPolynomialCurve1d &curve, const double end_time,          // speed 曲线计算cost的函数, 5次多项式曲线
                    const double curr_min_cost) const;
 
  private:

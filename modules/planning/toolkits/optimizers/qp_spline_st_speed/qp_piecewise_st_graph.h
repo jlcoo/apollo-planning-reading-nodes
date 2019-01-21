@@ -41,9 +41,9 @@
 namespace apollo {
 namespace planning {
 
-class QpPiecewiseStGraph {
+class QpPiecewiseStGraph {                                                                     // qp的分段st的图
  public:
-  explicit QpPiecewiseStGraph(const QpStSpeedConfig& qp_st_speed_config);
+  explicit QpPiecewiseStGraph(const QpStSpeedConfig& qp_st_speed_config);                      // 
 
   void SetDebugLogger(planning_internal::STGraphDebug* st_graph_debug);
 

@@ -46,7 +46,7 @@ class PlanningContext {
   PlanningStatus planning_status_;                                     // 变道, 跟车等9个状态
 
   // this is a sigleton class
-  DECLARE_SINGLETON(PlanningContext);   // planning情景的单例模式
+  DECLARE_SINGLETON(PlanningContext);                                  // planning情景的单例模式
 };
 
 void DumpPlanningContext();

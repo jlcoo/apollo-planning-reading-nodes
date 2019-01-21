@@ -27,15 +27,15 @@ namespace planning {
 
 using apollo::common::Status;
 
-Task::Task(const std::string& name) : name_(name) {}
+Task::Task(const std::string& name) : name_(name) {}                             // 构造名字
 
-const std::string& Task::Name() const { return name_; }  // 任务的名字
+const std::string& Task::Name() const { return name_; }                          // 任务的名字
 
-bool Task::Init(const PlanningConfig&) { return true; }
+bool Task::Init(const PlanningConfig&) { return true; }                          // 是否已经进行了初始化工作
 
 Status Task::Execute(Frame* frame, ReferenceLineInfo* reference_line_info) {
-  frame_ = frame;                                // task就是最名字的复制, 道路中心线的复制
-  reference_line_info_ = reference_line_info;
+  frame_ = frame;                                                                // task就是最名字的复制, 道路中心线的复制
+  reference_line_info_ = reference_line_info;                                    // 这个执行函数execute更像一个init函数的功能
   return Status::OK();
 }
 

@@ -38,10 +38,10 @@ namespace apollo {
 namespace planning {
 namespace {
 
-constexpr double kMaxBound = 1e3;
+constexpr double kMaxBound = 1e3;                                                              // 最大的boundary为1000
 }
 
-using apollo::common::time::Clock;
+using apollo::common::time::Clock;                                                             // 时间点
 using Eigen::MatrixXd;
 
 Spline1dGenerator::Spline1dGenerator(const std::vector<double>& x_knots,
