@@ -35,65 +35,65 @@
 namespace apollo {
 namespace planning {
 namespace {
-constexpr double kEpsilon = 1e-6;
+constexpr double kEpsilon = 1e-6;                                                           // 匿名空间, 只有在当前文件中其作用
 }
 
-using apollo::common::ErrorCode;
-using apollo::common::Status;
+using apollo::common::ErrorCode;                                                            // 错误的代码号
+using apollo::common::Status;                                                               // 模块的状态
 
 PolyStGraph::PolyStGraph(const PolyStSpeedConfig &config,
                          const ReferenceLineInfo *reference_line_info,
                          const SpeedLimit &speed_limit)
     : config_(config),
-      reference_line_info_(reference_line_info),
+      reference_line_info_(reference_line_info),                                            // 利用初始化列表进行构造函数
       reference_line_(reference_line_info->reference_line()),
       speed_limit_(speed_limit) {}
 
-bool PolyStGraph::FindStTunnel(
+bool PolyStGraph::FindStTunnel(                                                             // 找到图中的一个通道
     const common::TrajectoryPoint &init_point,
-    const std::vector<const PathObstacle *> &obstacles,
+    const std::vector<const PathObstacle *> &obstacles,                                     // path上的障碍物
     SpeedData *const speed_data) {
-  CHECK_NOTNULL(speed_data);
+  CHECK_NOTNULL(speed_data);                                                                // 容错, 检查指针不为空
 
   // set init point
-  init_point_ = init_point;
-  unit_s_ = std::fmax(0.1, init_point_.v() / 4.0);
+  init_point_ = init_point;                                                                 // 设置起点
+  unit_s_ = std::fmax(0.1, init_point_.v() / 4.0);                                          // 进行细化的s刻度
 
   // sample end points
-  std::vector<std::vector<STPoint>> points;
-  if (!SampleStPoints(&points)) {
+  std::vector<std::vector<STPoint>> points;                                                 // 采样的点
+  if (!SampleStPoints(&points)) {                                                           // 采样的点放到一个二维数组中
     AERROR << "Fail to sample st points.";
     return false;
   }
 
-  PolyStGraphNode min_cost_node;
-  if (!GenerateMinCostSpeedProfile(points, obstacles, &min_cost_node)) {
+  PolyStGraphNode min_cost_node;                                                            // 最小代价的点
+  if (!GenerateMinCostSpeedProfile(points, obstacles, &min_cost_node)) {                    // 产生一个最小的代价点
     AERROR << "Fail to search min cost speed profile.";
     return false;
   }
-  ADEBUG << "min_cost_node s = " << min_cost_node.st_point.s()
+  ADEBUG << "min_cost_node s = " << min_cost_node.st_point.s()                              // debug一下最小代价点的s(路程)和时间点(t)
          << ", t = " << min_cost_node.st_point.t();
-  speed_data->Clear();
+  speed_data->Clear();                                                                      // 速度的数据全部清空
   constexpr double delta_t = 0.1;  // output resolution, in seconds
-  const auto curve = min_cost_node.speed_profile;
-  for (double t = 0.0; t < planning_time_; t += delta_t) {
+  const auto curve = min_cost_node.speed_profile;                                           // 最小节点的速度曲线
+  for (double t = 0.0; t < planning_time_; t += delta_t) {                                  // 时间的分辨率设置为0.1s
     const double s = curve.Evaluate(0, t);
     const double v = curve.Evaluate(1, t);
     const double a = curve.Evaluate(2, t);
-    const double da = curve.Evaluate(3, t);
-    speed_data->AppendSpeedPoint(s, t, v, a, da);
+    const double da = curve.Evaluate(3, t);                                                 // 通过5次多项式计算一些值(速度， 路程， 加速度， 加速度的微分)
+    speed_data->AppendSpeedPoint(s, t, v, a, da);                                           // 新增一个速度的点
   }
   return true;
 }
 
-bool PolyStGraph::GenerateMinCostSpeedProfile(
-    const std::vector<std::vector<STPoint>> &points,
-    const std::vector<const PathObstacle *> &obstacles,
-    PolyStGraphNode *const min_cost_node) {
-  CHECK_NOTNULL(min_cost_node);
-  PolyStGraphNode start_node = {STPoint(0.0, 0.0), init_point_.v(),
+bool PolyStGraph::GenerateMinCostSpeedProfile(                                              // 生成一个最小代价函数值对应的速度的曲线
+    const std::vector<std::vector<STPoint>> &points,                                        // 二维的数组
+    const std::vector<const PathObstacle *> &obstacles,                                     // 障碍物的数组
+    PolyStGraphNode *const min_cost_node) {                                                 // 最小代价对应的结点
+  CHECK_NOTNULL(min_cost_node);                                                             // 检查坐标
+  PolyStGraphNode start_node = {STPoint(0.0, 0.0), init_point_.v(),                         // 起点
                                 init_point_.a()};
-  SpeedProfileCost cost(config_, obstacles, speed_limit_, init_point_);
+  SpeedProfileCost cost(config_, obstacles, speed_limit_, init_point_);                     // 速度曲线的代价配置
   double min_cost = std::numeric_limits<double>::max();
   for (const auto &level : points) {
     for (const auto &st_point : level) {

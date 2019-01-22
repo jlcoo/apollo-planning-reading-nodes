@@ -162,7 +162,7 @@ Status LaneFollowScenario::Process(const TrajectoryPoint& planning_start_point, 
   for (auto& reference_line_info : frame->reference_line_info()) {                             // 一个frame里面的中心参考线
     if (disable_low_priority_path) {                                                           // 不会使能低优先级的path
       reference_line_info.SetDrivable(false);                                                  // 该参考线不能开
-    }
+    }                                                                                          // 会迭代一帧中所有的轨迹参考线
     if (!reference_line_info.IsDrivable()) {                                                   // 不能开的话就继续进行迭代
       continue;
     }

@@ -38,21 +38,21 @@
 namespace apollo {
 namespace planning {
 
-using apollo::common::ErrorCode;
-using apollo::common::Status;
-using apollo::common::TrajectoryPoint;
-using apollo::planning_internal::STGraphDebug;
+using apollo::common::ErrorCode;                                                              // 错误码
+using apollo::common::Status;                                                                 // 模块的状态
+using apollo::common::TrajectoryPoint;                                                        // 轨迹点
+using apollo::planning_internal::STGraphDebug;                                                // st图中的debug信息
 
 PolyStSpeedOptimizer::PolyStSpeedOptimizer()
-    : SpeedOptimizer("PolyStSpeedOptimizer") {}
+    : SpeedOptimizer("PolyStSpeedOptimizer") {}                                               // 构造函数
 
-bool PolyStSpeedOptimizer::Init(const PlanningConfig& config) {
-  if (is_init_) {
+bool PolyStSpeedOptimizer::Init(const PlanningConfig& config) {                               // 初始化函数
+  if (is_init_) {                                                                             // 已经初始化后, 不能重复初始化
     AERROR << "Duplicated Init.";
     return false;
   }
   poly_st_speed_config_ =
-      config.lane_follow_scenario_config().poly_st_speed_config();
+      config.lane_follow_scenario_config().poly_st_speed_config();                            // 获得配置参数
   st_boundary_config_ = poly_st_speed_config_.st_boundary_config();
   is_init_ = true;
   return true;
@@ -64,7 +64,7 @@ Status PolyStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
                                      const ReferenceLine& reference_line,
                                      const SpeedData& reference_speed_data,
                                      PathDecision* const path_decision,
-                                     SpeedData* const speed_data) {
+                                     SpeedData* const speed_data) {                           // 进行处理(做优化器的处理)
   if (reference_line_info_->ReachedDestination()) {
     return Status::OK();
   }
@@ -73,30 +73,30 @@ Status PolyStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
     return Status(ErrorCode::PLANNING_ERROR, "Not init.");
   }
 
-  if (path_data.discretized_path().NumOfPoints() == 0) {
+  if (path_data.discretized_path().NumOfPoints() == 0) {                                      // 离散的路径的没有点
     std::string msg("Empty path data");
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  StBoundaryMapper boundary_mapper(adc_sl_boundary, st_boundary_config_,
+  StBoundaryMapper boundary_mapper(adc_sl_boundary, st_boundary_config_,                      // 做障碍物的boundary和decision进行绑定
                                    reference_line, path_data,
                                    poly_st_speed_config_.total_path_length(),
                                    poly_st_speed_config_.total_time(),
                                    reference_line_info_->IsChangeLanePath());
 
   for (const auto* path_obstacle : path_decision->path_obstacles().Items()) {
-    DCHECK(path_obstacle->HasLongitudinalDecision());
+    DCHECK(path_obstacle->HasLongitudinalDecision());                                         // 检查是否与横向的策略
   }
   // step 1 get boundaries
-  path_decision->EraseStBoundaries();
+  path_decision->EraseStBoundaries();                                                         // 获取boundary的边框
   if (boundary_mapper.CreateStBoundary(path_decision).code() ==
       ErrorCode::PLANNING_ERROR) {
     return Status(ErrorCode::PLANNING_ERROR,
                   "Mapping obstacle for qp st speed optimizer failed!");
   }
 
-  for (const auto* obstacle : path_decision->path_obstacles().Items()) {
+  for (const auto* obstacle : path_decision->path_obstacles().Items()) {                      // 迭代path障碍物上的所有条目
     auto id = obstacle->Id();
     auto* mutable_obstacle = path_decision->Find(id);
 
@@ -108,7 +108,7 @@ Status PolyStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
     }
   }
 
-  SpeedLimitDecider speed_limit_decider(adc_sl_boundary, st_boundary_config_,
+  SpeedLimitDecider speed_limit_decider(adc_sl_boundary, st_boundary_config_,                // 限速的决策者
                                         reference_line, path_data);
   SpeedLimit speed_limits;
   if (speed_limit_decider.GetSpeedLimits(path_decision->path_obstacles(),
@@ -119,13 +119,13 @@ Status PolyStSpeedOptimizer::Process(const SLBoundary& adc_sl_boundary,
 
   // step 2 perform graph search
   // make a poly_st_graph and perform search here.
-  PolyStGraph poly_st_graph(poly_st_speed_config_, reference_line_info_,
+  PolyStGraph poly_st_graph(poly_st_speed_config_, reference_line_info_,                     // 多项式的图, 在这个图中进行搜索
                             speed_limits);
-  auto ret = poly_st_graph.FindStTunnel(
+  auto ret = poly_st_graph.FindStTunnel(                                                     // 在st空间中的图中获取一个通路
       init_point,
       reference_line_info_->path_decision()->path_obstacles().Items(),
       speed_data);
-  if (!ret) {
+  if (!ret) {                                                                                // 没有的通路的话就报错
     return Status(ErrorCode::PLANNING_ERROR,
                   "Fail to find st tunnel in PolyStGraph.");
   }

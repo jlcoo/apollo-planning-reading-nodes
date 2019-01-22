@@ -34,9 +34,9 @@
 namespace apollo {
 namespace planning {
 
-class SpeedProfileCost {
+class SpeedProfileCost {                                                                  // 速度曲线的代价函数类
  public:
-  explicit SpeedProfileCost(const PolyStSpeedConfig &config,
+  explicit SpeedProfileCost(const PolyStSpeedConfig &config,                              // 禁止隐式转换的构造函数
                             const std::vector<const PathObstacle *> &obstacles,
                             const SpeedLimit &speed_limit,
                             const common::TrajectoryPoint &init_point);
@@ -45,13 +45,13 @@ class SpeedProfileCost {
                    const double curr_min_cost) const;
 
  private:
-  double CalculatePointCost(const QuarticPolynomialCurve1d &curve,
+  double CalculatePointCost(const QuarticPolynomialCurve1d &curve,                        // 计算一个点的代价函数值
                             const double t) const;
 
-  const PolyStSpeedConfig config_;
-  const std::vector<const PathObstacle *> &obstacles_;
-  const SpeedLimit &speed_limit_;
-  const common::TrajectoryPoint &init_point_;
+  const PolyStSpeedConfig config_;                                                        // st多项式的配置项的配置参数
+  const std::vector<const PathObstacle *> &obstacles_;                                    // path上的障碍物
+  const SpeedLimit &speed_limit_;                                                         // 速度的限制
+  const common::TrajectoryPoint &init_point_;                                             // 轨迹的起点
 };
 
 }  // namespace planning

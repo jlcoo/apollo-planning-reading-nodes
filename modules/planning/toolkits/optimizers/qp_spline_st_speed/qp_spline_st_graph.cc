@@ -32,18 +32,18 @@
 namespace apollo {
 namespace planning {
 
-using apollo::common::ErrorCode;
-using apollo::common::SpeedPoint;
-using apollo::common::Status;
-using apollo::common::VehicleParam;
-using apollo::planning_internal::STGraphDebug;
+using apollo::common::ErrorCode;                                                        // 错误码
+using apollo::common::SpeedPoint;                                                       // 速度点
+using apollo::common::Status;                                                           // 状态值
+using apollo::common::VehicleParam;                                                     // 车辆的参数
+using apollo::planning_internal::STGraphDebug;                                          // debug的信息
 
 QpSplineStGraph::QpSplineStGraph(Spline1dGenerator* spline_generator,
                                  const QpStSpeedConfig& qp_st_speed_config,
                                  const VehicleParam& veh_param,
                                  const bool is_change_lane)
     : spline_generator_(spline_generator),
-      qp_st_speed_config_(qp_st_speed_config),
+      qp_st_speed_config_(qp_st_speed_config),                                          // 初始化列表
       is_change_lane_(is_change_lane),
       t_knots_resolution_(
           qp_st_speed_config_.total_time() /
@@ -51,29 +51,29 @@ QpSplineStGraph::QpSplineStGraph(Spline1dGenerator* spline_generator,
   Init();
 }
 
-void QpSplineStGraph::Init() {
+void QpSplineStGraph::Init() {                                                          // 初始化函数
   // init knots
-  double curr_t = 0.0;
+  double curr_t = 0.0;                                                                  // 当前时间点
   uint32_t num_spline =
-      qp_st_speed_config_.qp_spline_config().number_of_discrete_graph_t() - 1;
-  for (uint32_t i = 0; i <= num_spline; ++i) {
+      qp_st_speed_config_.qp_spline_config().number_of_discrete_graph_t() - 1;          // spline的个数点
+  for (uint32_t i = 0; i <= num_spline; ++i) {                                          // 初始化时间节点
     t_knots_.push_back(curr_t);
     curr_t += t_knots_resolution_;
   }
 
-  uint32_t num_evaluated_t = 10 * num_spline + 1;
+  uint32_t num_evaluated_t = 10 * num_spline + 1;                                       // 计算的点细化10倍(即得到的曲线更加平滑)
 
   // init evaluated t positions
   curr_t = 0;
   t_evaluated_resolution_ =
-      qp_st_speed_config_.total_time() / (num_evaluated_t - 1);
-  for (uint32_t i = 0; i < num_evaluated_t; ++i) {
+      qp_st_speed_config_.total_time() / (num_evaluated_t - 1);                         // 评估的时间节点值
+  for (uint32_t i = 0; i < num_evaluated_t; ++i) {                                      // 初始化评估的节点
     t_evaluated_.push_back(curr_t);
     curr_t += t_evaluated_resolution_;
   }
 }
 
-void QpSplineStGraph::SetDebugLogger(
+void QpSplineStGraph::SetDebugLogger(                                                   // 设置debug的日志接口
     planning_internal::STGraphDebug* st_graph_debug) {
   if (st_graph_debug) {
     st_graph_debug->Clear();
@@ -81,65 +81,65 @@ void QpSplineStGraph::SetDebugLogger(
   }
 }
 
-Status QpSplineStGraph::Search(const StGraphData& st_graph_data,
-                               const std::pair<double, double>& accel_bound,
-                               const SpeedData& reference_speed_data,
+Status QpSplineStGraph::Search(const StGraphData& st_graph_data,                        // st图中的数据
+                               const std::pair<double, double>& accel_bound,            // 加速度的boundary
+                               const SpeedData& reference_speed_data,                   // 速度信息(道路中心线相关的??)
                                SpeedData* const speed_data) {
-  constexpr double kBounadryEpsilon = 1e-2;
+  constexpr double kBounadryEpsilon = 1e-2;                                             // boundary的无穷下设置为0.01
   for (auto boundary : st_graph_data.st_boundaries()) {
     if (boundary->IsPointInBoundary({0.0, 0.0}) ||
         (std::fabs(boundary->min_t()) < kBounadryEpsilon &&
-         std::fabs(boundary->min_s()) < kBounadryEpsilon)) {
-      speed_data->Clear();
-      const double t_output_resolution = FLAGS_trajectory_time_min_interval;
+         std::fabs(boundary->min_s()) < kBounadryEpsilon)) {                            // 起点在零点
+      speed_data->Clear();                                                              // 清空数据的data数据
+      const double t_output_resolution = FLAGS_trajectory_time_min_interval;            // 轨迹的时间间隔为0.02秒
       double time = 0.0;
-      while (time < qp_st_speed_config_.total_time() + t_output_resolution) {
-        speed_data->AppendSpeedPoint(0.0, time, 0.0, 0.0, 0.0);
+      while (time < qp_st_speed_config_.total_time() + t_output_resolution) {           // 迭代时间序列
+        speed_data->AppendSpeedPoint(0.0, time, 0.0, 0.0, 0.0);                         // 将速度全部设置为0
         time += t_output_resolution;
       }
-      return Status::OK();
+      return Status::OK();                                                              // 然后返回OK
     }
   }
 
-  cruise_.clear();
-  reference_dp_speed_points_ = speed_data->speed_vector();
+  cruise_.clear();                                                                      // 将巡航的点都清空
+  reference_dp_speed_points_ = speed_data->speed_vector();                              // 获取原来的速度点
 
-  init_point_ = st_graph_data.init_point();
+  init_point_ = st_graph_data.init_point();                                             // st图中的起点
   ADEBUG << "init point:" << init_point_.DebugString();
 
   // reset spline generator
   spline_generator_->Reset(
-      t_knots_, qp_st_speed_config_.qp_spline_config().spline_order());
+      t_knots_, qp_st_speed_config_.qp_spline_config().spline_order());                 // 复位spline的产生器
 
   if (!AddConstraint(st_graph_data.init_point(), st_graph_data.speed_limit(),
-                     st_graph_data.st_boundaries(), accel_bound)
+                     st_graph_data.st_boundaries(), accel_bound)                        // 添加约束项
            .ok()) {
-    const std::string msg = "Add constraint failed!";
+    const std::string msg = "Add constraint failed!";                                   // 添加约束失败
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  if (!AddKernel(st_graph_data.st_boundaries(), st_graph_data.speed_limit())
+  if (!AddKernel(st_graph_data.st_boundaries(), st_graph_data.speed_limit())            // 添加新的核函数
            .ok()) {
     const std::string msg = "Add kernel failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  if (!Solve().ok()) {
+  if (!Solve().ok()) {                                                                  // 求解器进行求解
     const std::string msg = "Solve qp problem failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
   // extract output
-  speed_data->Clear();
-  const Spline1d& spline = spline_generator_->spline();
+  speed_data->Clear();                                                                  // 清空speed的数据
+  const Spline1d& spline = spline_generator_->spline();                                 // 生成新的spline曲线
 
-  const double t_output_resolution = FLAGS_trajectory_time_min_interval;
+  const double t_output_resolution = FLAGS_trajectory_time_min_interval;                // 输出的时间间隔为0.02秒
   double time = 0.0;
-  while (time < qp_st_speed_config_.total_time() + t_output_resolution) {
-    double s = spline(time);
+  while (time < qp_st_speed_config_.total_time() + t_output_resolution) {               // 保证获取到最后一个点
+    double s = spline(time);                                                            // 获得spline相关的信息并保存
     double v = std::max(0.0, spline.Derivative(time));
     double a = spline.SecondOrderDerivative(time);
     double da = spline.ThirdOrderDerivative(time);
@@ -365,9 +365,9 @@ Status QpSplineStGraph::AddCruiseReferenceLineKernel(const double weight) {
   return Status::OK();
 }
 
-Status QpSplineStGraph::AddFollowReferenceLineKernel(
+Status QpSplineStGraph::AddFollowReferenceLineKernel(                                    // 添加一个跟车的核函数
     const std::vector<const StBoundary*>& boundaries, const double weight) {
-  auto* spline_kernel = spline_generator_->mutable_spline_kernel();
+  auto* spline_kernel = spline_generator_->mutable_spline_kernel();                      // 获取spline的核函数
   std::vector<double> ref_s;
   std::vector<double> filtered_evaluate_t;
   for (size_t i = 0; i < t_evaluated_.size(); ++i) {
@@ -522,18 +522,18 @@ const SpeedData QpSplineStGraph::GetHistorySpeed() const {
   return last_reference_line_info->speed_data();
 }
 
-Status QpSplineStGraph::EstimateSpeedUpperBound(
-    const common::TrajectoryPoint& init_point, const SpeedLimit& speed_limit,
+Status QpSplineStGraph::EstimateSpeedUpperBound(                                           // 计算速度的上界
+    const common::TrajectoryPoint& init_point, const SpeedLimit& speed_limit,              // 起点, 限速信息, 输出为速度的上界
     std::vector<double>* speed_upper_bound) const {
-  DCHECK_NOTNULL(speed_upper_bound);
+  DCHECK_NOTNULL(speed_upper_bound);                                                       // 检查速度上界的指针是否为空指针
 
-  speed_upper_bound->clear();
+  speed_upper_bound->clear();                                                              // 上界为空
 
   // use v to estimate position: not accurate, but feasible in cyclic
   // processing. We can do the following process multiple times and use
   // previous cycle's results for better estimation.
-  const double v = init_point.v();
-  auto last_speed_data = GetHistorySpeed();
+  const double v = init_point.v();                                                         // 获得起点的速度                
+  auto last_speed_data = GetHistorySpeed();                                                // 获得历史数据
 
   if (static_cast<double>(t_evaluated_.size() +
                           speed_limit.speed_limit_points().size()) <
@@ -602,16 +602,16 @@ Status QpSplineStGraph::EstimateSpeedUpperBound(
     }
   }
 
-  if (is_change_lane_) {
+  if (is_change_lane_) {                                                                   // 是否是进行变道
     for (uint32_t k = 0; k < t_evaluated_.size(); ++k) {
       speed_upper_bound->at(k) *=
-          (1.0 + FLAGS_change_lane_speed_relax_percentage);
+          (1.0 + FLAGS_change_lane_speed_relax_percentage);                                // FLAGS_change_lane_speed_relax_percentage设置为0.05
     }
   }
 
   const double kTimeBuffer = 1.0;
   const double kSpeedBuffer = 0.1;
-  for (uint32_t k = 0; k < t_evaluated_.size() && t_evaluated_[k] < kTimeBuffer;
+  for (uint32_t k = 0; k < t_evaluated_.size() && t_evaluated_[k] < kTimeBuffer;           // 设置上界点
        ++k) {
     speed_upper_bound->at(k) =
         std::fmax(init_point_.v() + kSpeedBuffer, speed_upper_bound->at(k));

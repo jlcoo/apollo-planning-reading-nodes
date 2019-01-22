@@ -34,32 +34,32 @@
 namespace apollo {
 namespace planning {
 // 片段的线性产生器
-class PiecewiseLinearGenerator {
+class PiecewiseLinearGenerator {                                                       // piecewise的线性产生器
  public:
   // x = f(t)
-  PiecewiseLinearGenerator(const uint32_t num_of_segments,
+  PiecewiseLinearGenerator(const uint32_t num_of_segments,                             // 构造函数
                            const double unit_segment);
-  virtual ~PiecewiseLinearGenerator() = default;
+  virtual ~PiecewiseLinearGenerator() = default;                                       // 默认的析构函数
 
-  PiecewiseLinearConstraint* mutable_constraint();
+  PiecewiseLinearConstraint* mutable_constraint();                                     // 获取可以改变的约束项
 
-  PiecewiseLinearKernel* mutable_kernel();
+  PiecewiseLinearKernel* mutable_kernel();                                             // 可以改变的内核项
 
   // solve
-  bool Solve();
+  bool Solve();                                                                        // 求解器进行求解
 
   // results
-  Eigen::MatrixXd params() const { return qp_solver_->params(); }
+  Eigen::MatrixXd params() const { return qp_solver_->params(); }                      // 获得求解器的参数
 
  private:
-  const uint32_t num_of_segments_;
-  const double unit_segment_;
-  const double total_t_;
+  const uint32_t num_of_segments_;                                                     // 分段的段数
+  const double unit_segment_;                                                          // 每个段的单位
+  const double total_t_;                                                               // 总时间
 
-  PiecewiseLinearConstraint constraint_;
-  PiecewiseLinearKernel kernel_;
+  PiecewiseLinearConstraint constraint_;                                               // 线性约束
+  PiecewiseLinearKernel kernel_;                                                       // 核函数
 
-  std::unique_ptr<apollo::common::math::QpSolver> qp_solver_;
+  std::unique_ptr<apollo::common::math::QpSolver> qp_solver_;                          // 求解器
 };
 
 }  // namespace planning

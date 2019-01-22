@@ -42,19 +42,19 @@ constexpr double kMaxBound = 1e3;                                               
 }
 
 using apollo::common::time::Clock;                                                             // 时间点
-using Eigen::MatrixXd;
+using Eigen::MatrixXd;                                                                         // eigen库中的x维度的矩阵
 
-Spline1dGenerator::Spline1dGenerator(const std::vector<double>& x_knots,
+Spline1dGenerator::Spline1dGenerator(const std::vector<double>& x_knots,                       // spline生成器的构造函数
                                      const uint32_t spline_order)
     : spline_(x_knots, spline_order),
       spline_constraint_(x_knots, spline_order),
-      spline_kernel_(x_knots, spline_order) {}
+      spline_kernel_(x_knots, spline_order) {}                                                 // 初始化spline曲线, spline的约束项, spline的核函数
 
-void Spline1dGenerator::Reset(const std::vector<double>& x_knots,
+void Spline1dGenerator::Reset(const std::vector<double>& x_knots,                              // 对spline曲线进行复位
                               const uint32_t spline_order) {
-  spline_ = Spline1d(x_knots, spline_order);
-  spline_constraint_ = Spline1dConstraint(x_knots, spline_order);
-  spline_kernel_ = Spline1dKernel(x_knots, spline_order);
+  spline_ = Spline1d(x_knots, spline_order);                                                   // 新建一个曲线
+  spline_constraint_ = Spline1dConstraint(x_knots, spline_order);                              // 新建一个约束项
+  spline_kernel_ = Spline1dKernel(x_knots, spline_order);                                      // 新建一个内核函数
 }
 
 Spline1dConstraint* Spline1dGenerator::mutable_spline_constraint() {
@@ -65,7 +65,7 @@ Spline1dKernel* Spline1dGenerator::mutable_spline_kernel() {
   return &spline_kernel_;
 }
 
-bool Spline1dGenerator::Solve() {
+bool Spline1dGenerator::Solve() {                                                              // 利用求解器进行求解QP的解
   const MatrixXd& kernel_matrix = spline_kernel_.kernel_matrix();
   const MatrixXd& offset = spline_kernel_.offset();
   const MatrixXd& inequality_constraint_matrix =
@@ -95,7 +95,7 @@ bool Spline1dGenerator::Solve() {
 
   if (!use_hotstart) {
     sqp_solver_.reset(new ::qpOASES::SQProblem(num_param, num_constraint,
-                                               ::qpOASES::HST_UNKNOWN));
+                                               ::qpOASES::HST_UNKNOWN));                   // 求解器进行求解
     ::qpOASES::Options my_options;
     my_options.enableCholeskyRefactorisation = 1;
     my_options.epsNum = FLAGS_default_active_set_eps_num;
@@ -108,7 +108,7 @@ bool Spline1dGenerator::Solve() {
   }
 
   // definition of qpOASESproblem
-  const int kNumOfMatrixElements = kernel_matrix.rows() * kernel_matrix.cols();
+  const int kNumOfMatrixElements = kernel_matrix.rows() * kernel_matrix.cols();           // 定义一个QP的问题
   double h_matrix[kNumOfMatrixElements];  // NOLINT
 
   const int kNumOfOffsetRows = offset.rows();
@@ -222,7 +222,7 @@ bool Spline1dGenerator::Solve() {
   return spline_.SetSplineSegs(solved_params, spline_.spline_order());
 }
 
-const Spline1d& Spline1dGenerator::spline() const { return spline_; }
+const Spline1d& Spline1dGenerator::spline() const { return spline_; }                          // 返回一个spline的曲线
 
 }  // namespace planning
 }  // namespace apollo

@@ -29,7 +29,7 @@ namespace apollo {
 namespace planning {
 
 // NOTICE: the first point is kept at 0.0
-PiecewiseLinearGenerator::PiecewiseLinearGenerator(
+PiecewiseLinearGenerator::PiecewiseLinearGenerator(                                     // 构造函数
     const uint32_t num_of_segments, const double unit_segment)
     : num_of_segments_(num_of_segments),
       unit_segment_(unit_segment),
@@ -39,15 +39,15 @@ PiecewiseLinearGenerator::PiecewiseLinearGenerator(
   CHECK_GE(num_of_segments, 3);
 }
 
-PiecewiseLinearConstraint* PiecewiseLinearGenerator::mutable_constraint() {
+PiecewiseLinearConstraint* PiecewiseLinearGenerator::mutable_constraint() {             // 线性约束
   return &constraint_;
 }
 
-PiecewiseLinearKernel* PiecewiseLinearGenerator::mutable_kernel() {
+PiecewiseLinearKernel* PiecewiseLinearGenerator::mutable_kernel() {                     // 非线性的约束
   return &kernel_;
 }
 
-bool PiecewiseLinearGenerator::Solve() {
+bool PiecewiseLinearGenerator::Solve() {                                                // 求解器进行求解
   const Eigen::MatrixXd& kernel_matrix = kernel_.kernel_matrix();
   const Eigen::MatrixXd& offset = kernel_.offset_matrix();
 

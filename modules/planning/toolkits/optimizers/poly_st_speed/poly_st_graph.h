@@ -45,49 +45,49 @@ namespace planning {
 
 class PolyStGraph {                                                                // ST 坐标系下的多项式的图
  public:
-  explicit PolyStGraph(const PolyStSpeedConfig &config,
-                       const ReferenceLineInfo *reference_line_info,
-                       const SpeedLimit &speed_limit);
+  explicit PolyStGraph(const PolyStSpeedConfig &config,                            // 多项式st坐标系下的配置项
+                       const ReferenceLineInfo *reference_line_info,               // 中心参考线的各种信息
+                       const SpeedLimit &speed_limit);                             // 速度的限制
 
-  ~PolyStGraph() = default;
+  ~PolyStGraph() = default;                                                        // 析构函数
 
-  bool FindStTunnel(const common::TrajectoryPoint &init_point,
-                    const std::vector<const PathObstacle *> &obstacles,
-                    SpeedData *const speed_data);
+  bool FindStTunnel(const common::TrajectoryPoint &init_point,                     // 轨迹的起点
+                    const std::vector<const PathObstacle *> &obstacles,            // path上的障碍物
+                    SpeedData *const speed_data);                                  // speed相关的数据(data)
 
  private:
-  struct PolyStGraphNode {
+  struct PolyStGraphNode {                                                         // 多项式的点(st多项式图中的一个节点)
    public:
-    PolyStGraphNode() = default;
+    PolyStGraphNode() = default;                                                   // 默认的构造函数
 
-    PolyStGraphNode(const STPoint &point_st, const double speed,
+    PolyStGraphNode(const STPoint &point_st, const double speed,                   // 通过一个st的点, 速度， 加速度进行构造
                     const double accel)
         : st_point(point_st), speed(speed), accel(accel) {}
 
     STPoint st_point;
     double speed = 0.0;
     double accel = 0.0;
-    QuarticPolynomialCurve1d speed_profile;
+    QuarticPolynomialCurve1d speed_profile;                                        // 还有一个5项多项式的曲线
   };
 
-  bool GenerateMinCostSpeedProfile(
-      const std::vector<std::vector<STPoint>> &points,
-      const std::vector<const PathObstacle *> &obstacles,
-      PolyStGraphNode *const min_cost_node);
+  bool GenerateMinCostSpeedProfile(                                                // 产生最小代价函数值的速度曲线
+      const std::vector<std::vector<STPoint>> &points,                             // 二维的点
+      const std::vector<const PathObstacle *> &obstacles,                          // 障碍物的集合
+      PolyStGraphNode *const min_cost_node);                                       // 最小代价的点
 
-  bool SampleStPoints(std::vector<std::vector<STPoint>> *const points);
+  bool SampleStPoints(std::vector<std::vector<STPoint>> *const points);            // 采用点的二维数组
 
  private:
-  PolyStSpeedConfig config_;
-  common::TrajectoryPoint init_point_;
-  const ReferenceLineInfo *reference_line_info_ = nullptr;
-  const ReferenceLine &reference_line_;
-  const SpeedLimit &speed_limit_;
+  PolyStSpeedConfig config_;                                                       // st多项式优化器的配置项
+  common::TrajectoryPoint init_point_;                                             // 轨迹的起点
+  const ReferenceLineInfo *reference_line_info_ = nullptr;                         // 中心参考线的信息
+  const ReferenceLine &reference_line_;                                            // 中心参考线
+  const SpeedLimit &speed_limit_;                                                  // 速度的限制信息
 
-  double unit_t_ = 1.0;
-  double unit_s_ = 5.0;
-  double planning_distance_ = 100.0;
-  double planning_time_ = 6.0;
+  double unit_t_ = 1.0;                                                            // 时间轴上的单位为1
+  double unit_s_ = 5.0;                                                            // s(距离)的单位
+  double planning_distance_ = 100.0;                                               // 做planning的距离为100米
+  double planning_time_ = 6.0;                                                     // 做planning的时间为6秒左右
 };
 
 }  // namespace planning

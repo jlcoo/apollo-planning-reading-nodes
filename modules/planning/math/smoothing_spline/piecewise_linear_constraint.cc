@@ -30,19 +30,19 @@ namespace planning {
 
 namespace {
 
-Eigen::MatrixXd MergeMaxtrices(const std::vector<Eigen::MatrixXd>& matrices) {
+Eigen::MatrixXd MergeMaxtrices(const std::vector<Eigen::MatrixXd>& matrices) {                // 合并矩阵
   if (matrices.size() == 0) {
     return Eigen::MatrixXd(0, 0);
   }
   int32_t d = 0;
-  for (const auto& mat : matrices) {
+  for (const auto& mat : matrices) {                                                          // 统计总行数
     d += mat.rows();
   }
-  int32_t col = matrices.front().cols();
-  Eigen::MatrixXd res = Eigen::MatrixXd::Zero(d, col);
+  int32_t col = matrices.front().cols();                                                      // 获得行数
+  Eigen::MatrixXd res = Eigen::MatrixXd::Zero(d, col);                                        // 创建一个零矩阵
   int32_t index = 0;
   for (const auto& mat : matrices) {
-    res.block(index, 0, mat.rows(), mat.cols()) = mat;
+    res.block(index, 0, mat.rows(), mat.cols()) = mat;                                        // 合并多个矩阵为一个矩阵
     index += mat.rows();
   }
   return res;
@@ -50,10 +50,10 @@ Eigen::MatrixXd MergeMaxtrices(const std::vector<Eigen::MatrixXd>& matrices) {
 }  // namespace
 
 PiecewiseLinearConstraint::PiecewiseLinearConstraint(const uint32_t dimension,
-                                                     const double unit_segment)
+                                                     const double unit_segment)               // 构造函数
     : dimension_(dimension), unit_segment_(unit_segment) {}
 
-Eigen::MatrixXd PiecewiseLinearConstraint::inequality_constraint_matrix()
+Eigen::MatrixXd PiecewiseLinearConstraint::inequality_constraint_matrix()                     // 不等式的约束
     const {
   return MergeMaxtrices(inequality_matrices_);
 }
@@ -77,17 +77,17 @@ bool PiecewiseLinearConstraint::AddBoundary(
     const std::vector<double>& lower_bound,
     const std::vector<double>& upper_bound) {
   if (index_list.size() != lower_bound.size() ||
-      index_list.size() != upper_bound.size()) {
+      index_list.size() != upper_bound.size()) {                                             // 检查上下界
     AERROR << "The sizes of index list, lower_bound, upper_bound are not "
               "identical.";
     return false;
   }
   Eigen::MatrixXd inequality_matrix =
-      Eigen::MatrixXd::Zero(2 * index_list.size(), dimension_);
+      Eigen::MatrixXd::Zero(2 * index_list.size(), dimension_);                              // 新建的矩阵
   Eigen::MatrixXd inequality_boundary =
       Eigen::MatrixXd::Zero(2 * index_list.size(), 1);
 
-  for (uint32_t i = 0; i < index_list.size(); ++i) {
+  for (uint32_t i = 0; i < index_list.size(); ++i) {                                         // 获得索引值
     uint32_t index = index_list[i];
 
     // x(i) < upper_bound[i] ==> -x(i) > -upper_bound[i]
@@ -103,7 +103,7 @@ bool PiecewiseLinearConstraint::AddBoundary(
   return true;
 }
 
-bool PiecewiseLinearConstraint::AddDerivativeBoundary(
+bool PiecewiseLinearConstraint::AddDerivativeBoundary(                                      // 添加导数的边框(boundary)
     const std::vector<uint32_t>& index_list,
     const std::vector<double>& lower_bound,
     const std::vector<double>& upper_bound) {
@@ -136,7 +136,7 @@ bool PiecewiseLinearConstraint::AddDerivativeBoundary(
   return true;
 }
 
-bool PiecewiseLinearConstraint::AddSecondDerivativeBoundary(
+bool PiecewiseLinearConstraint::AddSecondDerivativeBoundary(                              // 二次导数的boundary
     const double init_derivative, const std::vector<uint32_t>& index_list,
     const std::vector<double>& lower_bound,
     const std::vector<double>& upper_bound) {
@@ -190,7 +190,7 @@ bool PiecewiseLinearConstraint::AddSecondDerivativeBoundary(
 }
 
 bool PiecewiseLinearConstraint::AddPointConstraint(const uint32_t index,
-                                                   const double val) {
+                                                   const double val) {                // 添加一个约束项中的一个点
   Eigen::MatrixXd equality_matrix = Eigen::MatrixXd::Zero(1, dimension_);
   Eigen::MatrixXd equality_boundary = Eigen::MatrixXd::Zero(1, 1);
 
@@ -218,7 +218,7 @@ bool PiecewiseLinearConstraint::AddPointDerivativeConstraint(
   return true;
 }
 
-bool PiecewiseLinearConstraint::AddMonotoneInequalityConstraint() {
+bool PiecewiseLinearConstraint::AddMonotoneInequalityConstraint() {                  // 单调不等式中的约束项
   Eigen::MatrixXd inequality_matrix =
       Eigen::MatrixXd::Zero(dimension_, dimension_);
   Eigen::MatrixXd inequality_boundary = Eigen::MatrixXd::Zero(dimension_, 1);

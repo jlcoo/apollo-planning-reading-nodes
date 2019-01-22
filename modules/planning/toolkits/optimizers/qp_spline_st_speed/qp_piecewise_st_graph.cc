@@ -31,77 +31,77 @@
 namespace apollo {
 namespace planning {
 
-using apollo::common::ErrorCode;
-using apollo::common::Status;
-using apollo::common::VehicleParam;
-using apollo::planning_internal::STGraphDebug;
+using apollo::common::ErrorCode;                                                            // 错误码
+using apollo::common::Status;                                                               // 状态
+using apollo::common::VehicleParam;                                                         // 车辆的状态
+using apollo::planning_internal::STGraphDebug;                                              // 内部debug的接口
 
 QpPiecewiseStGraph::QpPiecewiseStGraph(
     const QpStSpeedConfig& qp_st_speed_config)
-    : qp_st_speed_config_(qp_st_speed_config),
+    : qp_st_speed_config_(qp_st_speed_config),                                              // 初始化列表进行构造函数
       t_evaluated_resolution_(qp_st_speed_config_.total_time() /
                               qp_st_speed_config_.qp_piecewise_config()
                                   .number_of_evaluated_graph_t()) {
-  Init();
+  Init();                                                                                   // 在构造函数中， 调用初始化函数
 }
 
-void QpPiecewiseStGraph::Init() {
+void QpPiecewiseStGraph::Init() {                                                           // QP片段图进行初始化
   // init evaluated t positions
-  double curr_t = t_evaluated_resolution_;
+  double curr_t = t_evaluated_resolution_;                                                  // 初始化时间刻度点
   t_evaluated_.resize(
       qp_st_speed_config_.qp_piecewise_config().number_of_evaluated_graph_t());
-  for (auto& t : t_evaluated_) {
+  for (auto& t : t_evaluated_) {                                                            // 从st speed的配置参数中获取
     t = curr_t;
     curr_t += t_evaluated_resolution_;
   }
 }
 
-void QpPiecewiseStGraph::SetDebugLogger(
+void QpPiecewiseStGraph::SetDebugLogger(                                                    // 设置debug的日志接口
     planning_internal::STGraphDebug* st_graph_debug) {
-  if (st_graph_debug) {
+  if (st_graph_debug) {                                                                     // 进行debug的接口初始化
     st_graph_debug->Clear();
     st_graph_debug_ = st_graph_debug;
   }
 }
 
-Status QpPiecewiseStGraph::Search(
+Status QpPiecewiseStGraph::Search(                                                          // 在图中进行搜索
     const StGraphData& st_graph_data, SpeedData* const speed_data,
     const std::pair<double, double>& accel_bound) {
-  cruise_.clear();
+  cruise_.clear();                                                                          // 清空巡迹的数组(参考线的核函数)
 
-  init_point_ = st_graph_data.init_point();
+  init_point_ = st_graph_data.init_point();                                                 // 起点
   ADEBUG << "Init point:" << init_point_.DebugString();
 
   // reset piecewise linear generator
-  generator_.reset(new PiecewiseLinearGenerator(
+  generator_.reset(new PiecewiseLinearGenerator(                                            // 复位片段线的产生器
       qp_st_speed_config_.qp_piecewise_config().number_of_evaluated_graph_t(),
       t_evaluated_resolution_));
 
-  if (!AddConstraint(st_graph_data.init_point(), st_graph_data.speed_limit(),
+  if (!AddConstraint(st_graph_data.init_point(), st_graph_data.speed_limit(),               // 增加约束项
                      st_graph_data.st_boundaries(), accel_bound)
            .ok()) {
-    const std::string msg = "Add constraint failed!";
+    const std::string msg = "Add constraint failed!";                                       // 出错了就会报错
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  if (!AddKernel(st_graph_data.st_boundaries(), st_graph_data.speed_limit())
+  if (!AddKernel(st_graph_data.st_boundaries(), st_graph_data.speed_limit())                // 添加核函数
            .ok()) {
     const std::string msg = "Add kernel failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  if (!Solve().ok()) {
+  if (!Solve().ok()) {                                                                      // 进行求解
     const std::string msg = "Solve qp problem failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
   // extract output
-  speed_data->Clear();
+  speed_data->Clear();                                                                     // 提取输出结果
   const auto& res = generator_->params();
-  speed_data->AppendSpeedPoint(0.0, 0.0, init_point_.v(), init_point_.a(), 0.0);
+  speed_data->AppendSpeedPoint(0.0, 0.0, init_point_.v(), init_point_.a(), 0.0);           // 增加速度点
 
   double v = 0.0;
   double a = 0.0;
@@ -109,7 +109,7 @@ Status QpPiecewiseStGraph::Search(
   double time = t_evaluated_resolution_;
   double dt = t_evaluated_resolution_;
 
-  for (int i = 0; i < res.rows(); ++i, time += t_evaluated_resolution_) {
+  for (int i = 0; i < res.rows(); ++i, time += t_evaluated_resolution_) {                  // 时间点上进行新的计算
     double s = res(i, 0);
     if (i == 0) {
       v = s / dt;
@@ -119,7 +119,7 @@ Status QpPiecewiseStGraph::Search(
       a = (curr_v - v) / dt;
       v = curr_v;
     }
-    speed_data->AppendSpeedPoint(s, time, v, a, 0.0);
+    speed_data->AppendSpeedPoint(s, time, v, a, 0.0);                                      // 添加新的点
   }
   return Status::OK();
 }
@@ -127,44 +127,44 @@ Status QpPiecewiseStGraph::Search(
 Status QpPiecewiseStGraph::AddConstraint(
     const common::TrajectoryPoint& init_point, const SpeedLimit& speed_limit,
     const std::vector<const StBoundary*>& boundaries,
-    const std::pair<double, double>& accel_bound) {
+    const std::pair<double, double>& accel_bound) {                                        // 增加新的约束
   auto* constraint = generator_->mutable_constraint();
   // position, velocity, acceleration
 
   // monotone constraint
-  if (!constraint->AddMonotoneInequalityConstraint()) {
+  if (!constraint->AddMonotoneInequalityConstraint()) {                                    // 单调约束
     const std::string msg = "add monotone inequality constraint failed!";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  std::vector<uint32_t> index_list(t_evaluated_.size());
+  std::vector<uint32_t> index_list(t_evaluated_.size());                                   // 将索引值放到单列表中
 
   // boundary constraint
-  std::vector<double> s_upper_bound(t_evaluated_.size());
+  std::vector<double> s_upper_bound(t_evaluated_.size());                                  // boundary的约束
   std::vector<double> s_lower_bound(t_evaluated_.size());
 
-  for (uint32_t i = 0; i < t_evaluated_.size(); ++i) {
+  for (uint32_t i = 0; i < t_evaluated_.size(); ++i) {                                     // 取出索引值
     index_list[i] = i;
     const double curr_t = t_evaluated_[i];
     double lower_s = 0.0;
     double upper_s = 0.0;
     GetSConstraintByTime(boundaries, curr_t,
-                         qp_st_speed_config_.total_path_length(), &upper_s,
+                         qp_st_speed_config_.total_path_length(), &upper_s,                // 获得时间点上的上下界
                          &lower_s);
     s_upper_bound[i] = upper_s;
     s_lower_bound[i] = lower_s;
     ADEBUG << "Add constraint by time: " << curr_t << " upper_s: " << upper_s
            << " lower_s: " << lower_s;
   }
-  if (!constraint->AddBoundary(index_list, s_lower_bound, s_upper_bound)) {
+  if (!constraint->AddBoundary(index_list, s_lower_bound, s_upper_bound)) {                // 通过上下界增加boundary
     const std::string msg = "Fail to apply distance constraints.";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
   // speed constraint
-  std::vector<double> speed_upper_bound;
+  std::vector<double> speed_upper_bound;                                                  // 设置速度的约束
   if (!EstimateSpeedUpperBound(init_point, speed_limit, &speed_upper_bound)
            .ok()) {
     std::string msg = "Fail to estimate speed upper constraints.";
@@ -172,11 +172,11 @@ Status QpPiecewiseStGraph::AddConstraint(
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
 
-  std::vector<double> speed_lower_bound(t_evaluated_.size(), 0.0);
+  std::vector<double> speed_lower_bound(t_evaluated_.size(), 0.0);                        // 速度的下界
 
-  if (st_graph_debug_) {
+  if (st_graph_debug_) {                                                                  // 如果设置了debug的接口
     auto speed_constraint = st_graph_debug_->mutable_speed_constraint();
-    for (size_t i = 0; i < t_evaluated_.size(); ++i) {
+    for (size_t i = 0; i < t_evaluated_.size(); ++i) {                                    // 设置速度约束
       speed_constraint->add_t(t_evaluated_[i]);
       speed_constraint->add_lower_bound(speed_lower_bound[i]);
       speed_constraint->add_upper_bound(speed_upper_bound[i]);
@@ -184,12 +184,12 @@ Status QpPiecewiseStGraph::AddConstraint(
   }
 
   if (!constraint->AddDerivativeBoundary(index_list, speed_lower_bound,
-                                         speed_upper_bound)) {
+                                         speed_upper_bound)) {                            // 添加导数的边界
     const std::string msg = "Fail to apply speed constraints.";
     AERROR << msg;
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
-  for (size_t i = 0; i < t_evaluated_.size(); ++i) {
+  for (size_t i = 0; i < t_evaluated_.size(); ++i) {                                      // debug相关信息
     ADEBUG << "t_evaluated_: " << t_evaluated_[i]
            << "; speed_lower_bound: " << speed_lower_bound[i]
            << "; speed_upper_bound: " << speed_upper_bound[i];
@@ -200,12 +200,12 @@ Status QpPiecewiseStGraph::AddConstraint(
   std::vector<double> accel_upper_bound(t_evaluated_.size(),
                                         accel_bound.second);
 
-  if (!constraint->AddSecondDerivativeBoundary(
+  if (!constraint->AddSecondDerivativeBoundary(                                           // 添加一些二次微分的boundary
           init_point.v(), index_list, accel_lower_bound, accel_upper_bound)) {
     const std::string msg = "Fail to apply acceleration constraints.";
     return Status(ErrorCode::PLANNING_ERROR, msg);
   }
-  for (size_t i = 0; i < t_evaluated_.size(); ++i) {
+  for (size_t i = 0; i < t_evaluated_.size(); ++i) {                                      // debug相关的信息
     ADEBUG << "t_evaluated_: " << t_evaluated_[i]
            << "; accel_lower_bound: " << accel_lower_bound[i]
            << "; accel_upper_bound: " << accel_upper_bound[i];
@@ -214,13 +214,13 @@ Status QpPiecewiseStGraph::AddConstraint(
   return Status::OK();
 }
 
-Status QpPiecewiseStGraph::AddKernel(
+Status QpPiecewiseStGraph::AddKernel(                                                     // 添加核函数
     const std::vector<const StBoundary*>& boundaries,
     const SpeedLimit& speed_limit) {
-  auto* kernel = generator_->mutable_kernel();
+  auto* kernel = generator_->mutable_kernel();                                            // 取出产生器的核函数
   DCHECK_NOTNULL(kernel);
 
-  if (qp_st_speed_config_.qp_piecewise_config().accel_kernel_weight() > 0) {
+  if (qp_st_speed_config_.qp_piecewise_config().accel_kernel_weight() > 0) {              // 取出核函数的权重
     kernel->AddSecondOrderDerivativeMatrix(
         init_point_.v(),
         qp_st_speed_config_.qp_piecewise_config().accel_kernel_weight());
@@ -232,14 +232,14 @@ Status QpPiecewiseStGraph::AddKernel(
         qp_st_speed_config_.qp_piecewise_config().jerk_kernel_weight());
   }
 
-  if (!AddCruiseReferenceLineKernel(
+  if (!AddCruiseReferenceLineKernel(                                                     // 添加参考线的核函数
            speed_limit,
            qp_st_speed_config_.qp_piecewise_config().cruise_weight())
            .ok()) {
     return Status(ErrorCode::PLANNING_ERROR, "QpSplineStGraph::AddKernel");
   }
 
-  if (!AddFollowReferenceLineKernel(
+  if (!AddFollowReferenceLineKernel(                                                     // 跟车的核函数
            boundaries,
            qp_st_speed_config_.qp_piecewise_config().follow_weight())
            .ok()) {
@@ -250,7 +250,7 @@ Status QpPiecewiseStGraph::AddKernel(
   return Status::OK();
 }
 
-Status QpPiecewiseStGraph::AddCruiseReferenceLineKernel(
+Status QpPiecewiseStGraph::AddCruiseReferenceLineKernel(                                 // 添加寻迹的核函数
     const SpeedLimit& speed_limit, const double weight) {
   auto* ref_kernel = generator_->mutable_kernel();
   if (speed_limit.speed_limit_points().size() == 0) {
@@ -286,7 +286,7 @@ Status QpPiecewiseStGraph::AddCruiseReferenceLineKernel(
   return Status::OK();
 }
 
-Status QpPiecewiseStGraph::AddFollowReferenceLineKernel(
+Status QpPiecewiseStGraph::AddFollowReferenceLineKernel(                               // 添加跟车的核函数
     const std::vector<const StBoundary*>& boundaries, const double weight) {
   auto* follow_kernel = generator_->mutable_kernel();
   std::vector<double> ref_s;
@@ -338,7 +338,7 @@ Status QpPiecewiseStGraph::AddFollowReferenceLineKernel(
   return Status::OK();
 }
 
-Status QpPiecewiseStGraph::GetSConstraintByTime(
+Status QpPiecewiseStGraph::GetSConstraintByTime(                                     // 通过时间点获得约束项
     const std::vector<const StBoundary*>& boundaries, const double time,
     const double total_path_s, double* const s_upper_bound,
     double* const s_lower_bound) const {
@@ -365,7 +365,7 @@ Status QpPiecewiseStGraph::GetSConstraintByTime(
   return Status::OK();
 }
 
-Status QpPiecewiseStGraph::EstimateSpeedUpperBound(
+Status QpPiecewiseStGraph::EstimateSpeedUpperBound(                                 // 计算时间的上界边框
     const common::TrajectoryPoint& init_point, const SpeedLimit& speed_limit,
     std::vector<double>* speed_upper_bound) const {
   // TODO(Lianliang): define a QpStGraph class and move this function in it.
@@ -447,7 +447,7 @@ Status QpPiecewiseStGraph::EstimateSpeedUpperBound(
   return Status::OK();
 }
 
-Status QpPiecewiseStGraph::Solve() {
+Status QpPiecewiseStGraph::Solve() {                                                     // 进行求解器求解
   return generator_->Solve()
              ? Status::OK()
              : Status(ErrorCode::PLANNING_ERROR, "QpPiecewiseStGraph::solve");
