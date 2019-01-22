@@ -37,18 +37,18 @@ namespace planning {
 
 class QpSplinePathOptimizer : public PathOptimizer {                                      // path上进行QP的优化
  public:
-  QpSplinePathOptimizer();
-  bool Init(const PlanningConfig& config) override;
+  QpSplinePathOptimizer();                                                                // 默认的构造函数
+  bool Init(const PlanningConfig& config) override;                                       // 初始化函数
 
  private:
-  apollo::common::Status Process(const SpeedData& speed_data,
+  apollo::common::Status Process(const SpeedData& speed_data,                             // 进行优化器进行参数优化, 其实就是然输出的曲线更加光滑
                                  const ReferenceLine& reference_line,
                                  const common::TrajectoryPoint& init_point,
                                  PathData* const path_data) override;
 
  private:
-  QpSplinePathConfig qp_spline_path_config_;
-  std::unique_ptr<Spline1dGenerator> spline_generator_;
+  QpSplinePathConfig qp_spline_path_config_;                                              // QP的配置参数
+  std::unique_ptr<Spline1dGenerator> spline_generator_;                                   // 独享的spline的产生器
 };
 
 }  // namespace planning

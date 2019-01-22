@@ -95,19 +95,19 @@ bool PolyStGraph::GenerateMinCostSpeedProfile(                                  
                                 init_point_.a()};
   SpeedProfileCost cost(config_, obstacles, speed_limit_, init_point_);                     // 速度曲线的代价配置
   double min_cost = std::numeric_limits<double>::max();
-  for (const auto &level : points) {
-    for (const auto &st_point : level) {
-      const double speed_limit = speed_limit_.GetSpeedLimitByS(st_point.s());
-      constexpr int num_speed = 10;
+  for (const auto &level : points) {                                                        // 看看有多少个level
+    for (const auto &st_point : level) {                                                    // 迭代一个level上的点
+      const double speed_limit = speed_limit_.GetSpeedLimitByS(st_point.s());               // 通过s点获得对应的限速信息
+      constexpr int num_speed = 10;                                                         // 将两个点再细分10个点
       for (double v = 0; v < speed_limit + kEpsilon;
            v += speed_limit / num_speed) {
-        PolyStGraphNode node = {st_point, v, 0.0};
-        node.speed_profile = QuarticPolynomialCurve1d(
+        PolyStGraphNode node = {st_point, v, 0.0};                                          // 构建一个多项式的图中的点
+        node.speed_profile = QuarticPolynomialCurve1d(                                      // 新建一个5次多项式
             0.0, start_node.speed, start_node.accel, node.st_point.s(),
             node.speed, node.st_point.t());
         const double c =
-            cost.Calculate(node.speed_profile, st_point.t(), min_cost);
-        if (c < min_cost) {
+            cost.Calculate(node.speed_profile, st_point.t(), min_cost);                     // 计算对应点的代价函数
+        if (c < min_cost) {                                                                 // 取出最小的代价函数值和对应的图中的节点
           *min_cost_node = node;
           min_cost = c;
         }
@@ -117,15 +117,15 @@ bool PolyStGraph::GenerateMinCostSpeedProfile(                                  
   return true;
 }
 
-bool PolyStGraph::SampleStPoints(
-    std::vector<std::vector<STPoint>> *const points) {
+bool PolyStGraph::SampleStPoints(                                                           // 采样点
+    std::vector<std::vector<STPoint>> *const points) {                                      // 一个二维的数组
   CHECK_NOTNULL(points);
-  constexpr double start_t = 6.0;
+  constexpr double start_t = 6.0;                                                           // 开始的时间为6秒
   constexpr double start_s = 0.0;
-  for (double t = start_t; t <= planning_time_; t += unit_t_) {
+  for (double t = start_t; t <= planning_time_; t += unit_t_) {                             // 从第6秒开始采样
     std::vector<STPoint> level_points;
     for (double s = start_s; s < planning_distance_ + kEpsilon; s += unit_s_) {
-      level_points.emplace_back(s, t);
+      level_points.emplace_back(s, t);                                                      // 构建新的采样点
     }
     points->push_back(std::move(level_points));
   }

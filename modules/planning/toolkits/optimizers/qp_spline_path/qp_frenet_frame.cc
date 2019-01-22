@@ -40,15 +40,15 @@ using common::SpeedPoint;
 
 namespace {
 
-constexpr double kEpsilonTol = 1e-6;
-const auto inf = std::numeric_limits<double>::infinity();
+constexpr double kEpsilonTol = 1e-6;                            // e(时间的)
+const auto inf = std::numeric_limits<double>::infinity();       // 无穷大
 }  // namespace
 
 QpFrenetFrame::QpFrenetFrame(const ReferenceLine& reference_line,
                              const SpeedData& speed_data,
                              const common::FrenetFramePoint& init_frenet_point,
                              const double time_resolution,
-                             const std::vector<double>& evaluated_s)
+                             const std::vector<double>& evaluated_s)                         // 初始化列表
     : reference_line_(reference_line),
       speed_data_(speed_data),
       vehicle_param_(
@@ -66,14 +66,14 @@ QpFrenetFrame::QpFrenetFrame(const ReferenceLine& reference_line,
   DCHECK_GE(evaluated_s_.size(), 2);
 }
 
-bool QpFrenetFrame::Init(
+bool QpFrenetFrame::Init(                                                                   // 初始化函数
     const std::vector<const PathObstacle*>& path_obstacles) {
   if (!CalculateDiscretizedVehicleLocation()) {
     AERROR << "Fail to calculate discretized vehicle location!";
     return false;
   }
 
-  if (!CalculateHDMapBound()) {
+  if (!CalculateHDMapBound()) {                                                             // 计算bound
     AERROR << "Calculate HDMap bound failed.";
     return false;
   }
@@ -85,7 +85,7 @@ bool QpFrenetFrame::Init(
   return true;
 }
 
-void QpFrenetFrame::LogQpBound(
+void QpFrenetFrame::LogQpBound(                                                             // 将bound放到log中
     apollo::planning_internal::Debug* planning_debug) {
   if (!planning_debug) {
     return;
@@ -136,14 +136,14 @@ bool QpFrenetFrame::CalculateDiscretizedVehicleLocation() {
   return true;
 }
 
-bool QpFrenetFrame::MapDynamicObstacleWithDecision(
+bool QpFrenetFrame::MapDynamicObstacleWithDecision(                                       // 映射动态障碍的决策
     const PathObstacle& path_obstacle) {
   const Obstacle* ptr_obstacle = path_obstacle.obstacle();
   if (!path_obstacle.HasLateralDecision()) {
     ADEBUG << "object has no lateral decision";
     return false;
   }
-  const auto& decision = path_obstacle.LateralDecision();
+  const auto& decision = path_obstacle.LateralDecision();                                 // 横向决策
   if (!decision.has_nudge()) {
     ADEBUG << "only support nudge now";
     return true;
@@ -209,7 +209,7 @@ bool QpFrenetFrame::MapDynamicObstacleWithDecision(
   return true;
 }
 
-bool QpFrenetFrame::MapStaticObstacleWithDecision(
+bool QpFrenetFrame::MapStaticObstacleWithDecision(                                         // 静态障碍物
     const PathObstacle& path_obstacle) {
   const auto ptr_obstacle = path_obstacle.obstacle();
   if (!path_obstacle.HasLateralDecision()) {
@@ -231,7 +231,7 @@ bool QpFrenetFrame::MapStaticObstacleWithDecision(
   return true;
 }
 
-bool QpFrenetFrame::MapNudgePolygon(
+bool QpFrenetFrame::MapNudgePolygon(                                                      // nudge对多项式
     const common::math::Polygon2d& polygon, const ObjectNudge& nudge,
     std::vector<std::pair<double, double>>* const bound_map) {
   std::vector<common::SLPoint> sl_corners;
@@ -244,7 +244,7 @@ bool QpFrenetFrame::MapNudgePolygon(
     }
     // shift box based on buffer
     // nudge decision buffer:
-    // --- position for left nudge
+    // --- position for left nudge                                                       // 左边nudge还是从右边nudge
     // --- negative for right nudge
     corner_sl.set_l(corner_sl.l() + nudge.distance_l());
     sl_corners.push_back(std::move(corner_sl));
@@ -252,7 +252,7 @@ bool QpFrenetFrame::MapNudgePolygon(
 
   const auto corner_size = sl_corners.size();
   for (uint32_t i = 0; i < corner_size; ++i) {
-    if (!MapNudgeLine(sl_corners[i], sl_corners[(i + 1) % corner_size],
+    if (!MapNudgeLine(sl_corners[i], sl_corners[(i + 1) % corner_size],                  // nudge一条线
                       nudge.type(), bound_map)) {
       AERROR << "Map box line (sl) " << sl_corners[i].DebugString() << "->"
              << sl_corners[(i + 1) % corner_size].DebugString();
@@ -435,7 +435,7 @@ bool QpFrenetFrame::CalculateObstacleBound(
 uint32_t QpFrenetFrame::FindIndex(const double s) const {
   auto upper_bound =
       std::upper_bound(evaluated_s_.begin(), evaluated_s_.end(), s);
-  return std::distance(evaluated_s_.begin(), upper_bound);
+  return std::distance(evaluated_s_.begin(), upper_bound);                            // 获得到起点的距离
 }
 
 }  // namespace planning

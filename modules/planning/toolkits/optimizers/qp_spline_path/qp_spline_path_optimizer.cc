@@ -27,13 +27,13 @@
 namespace apollo {
 namespace planning {
 
-using apollo::common::ErrorCode;
-using apollo::common::Status;
+using apollo::common::ErrorCode;                                                             // 错误码
+using apollo::common::Status;                                                                // 状态
 
-QpSplinePathOptimizer::QpSplinePathOptimizer()
+QpSplinePathOptimizer::QpSplinePathOptimizer()                                               // 构造函数
     : PathOptimizer("QpSplinePathOptimizer") {}
 
-bool QpSplinePathOptimizer::Init(const PlanningConfig& config) {
+bool QpSplinePathOptimizer::Init(const PlanningConfig& config) {                             // 初始化函数
   qp_spline_path_config_ =
       config.lane_follow_scenario_config().qp_spline_path_config();
   std::vector<double> init_knots;
@@ -46,30 +46,30 @@ bool QpSplinePathOptimizer::Init(const PlanningConfig& config) {
 Status QpSplinePathOptimizer::Process(const SpeedData& speed_data,
                                       const ReferenceLine& reference_line,
                                       const common::TrajectoryPoint& init_point,
-                                      PathData* const path_data) {
+                                      PathData* const path_data) {                           // 进行优化器的处理
   if (!is_init_) {
     AERROR << "Please call Init() before Process.";
-    return Status(ErrorCode::PLANNING_ERROR, "Not init.");
+    return Status(ErrorCode::PLANNING_ERROR, "Not init.");                                   // 没有初始化就行进报错， 并退出
   }
   QpSplinePathGenerator path_generator(spline_generator_.get(), reference_line,
                                        qp_spline_path_config_,
-                                       reference_line_info_->AdcSlBoundary());
+                                       reference_line_info_->AdcSlBoundary());               // 构造QP spline曲线 的生成器
   path_generator.SetDebugLogger(reference_line_info_->mutable_debug());
   path_generator.SetChangeLane(reference_line_info_->IsChangeLanePath());
 
-  double boundary_extension = 0.0;
+  double boundary_extension = 0.0;                                                           // boundary的扩展
   bool is_final_attempt = false;
 
   bool ret = path_generator.Generate(
       reference_line_info_->path_decision()->path_obstacles().Items(),
-      speed_data, init_point, boundary_extension, is_final_attempt, path_data);
+      speed_data, init_point, boundary_extension, is_final_attempt, path_data);              // 产生一个生成者
   if (!ret) {
     AERROR << "failed to generate spline path with boundary_extension = 0.";
 
-    boundary_extension = qp_spline_path_config_.cross_lane_lateral_extension();
+    boundary_extension = qp_spline_path_config_.cross_lane_lateral_extension();              // 交叉车道需要进行boundary的扩展
     is_final_attempt = true;
 
-    ret = path_generator.Generate(
+    ret = path_generator.Generate(                                                           // 产生一个更平滑的解
         reference_line_info_->path_decision()->path_obstacles().Items(),
         speed_data, init_point, boundary_extension, is_final_attempt,
         path_data);

@@ -39,7 +39,7 @@ namespace apollo {
 namespace planning {
 
 namespace {
-double GetLaneChangeLateralShift(const double v) {
+double GetLaneChangeLateralShift(const double v) {                                  // 变道的横向移动值
   const double l0 = 2.0;       // shift at v = 0 m/s
   const double v_ref = 20.11;  // reference speed: 45mph = 20.11 m/s
   const double l_ref = 1.4;
@@ -49,11 +49,11 @@ double GetLaneChangeLateralShift(const double v) {
 }
 }  // namespace
 
-using apollo::common::math::CartesianFrenetConverter;
-using apollo::common::math::Vec2d;
+using apollo::common::math::CartesianFrenetConverter;                               // frenet坐标转换器
+using apollo::common::math::Vec2d;                                                  // 二维的向量
 
 QpSplinePathGenerator::QpSplinePathGenerator(
-    Spline1dGenerator* spline_generator, const ReferenceLine& reference_line,
+    Spline1dGenerator* spline_generator, const ReferenceLine& reference_line,       // 构造函数
     const QpSplinePathConfig& qp_spline_path_config,
     const SLBoundary& adc_sl_boundary)
     : spline_generator_(spline_generator),
@@ -70,29 +70,29 @@ QpSplinePathGenerator::QpSplinePathGenerator(
       << "third_derivative_weight should NOT be negative.";
 }
 
-void QpSplinePathGenerator::SetDebugLogger(
+void QpSplinePathGenerator::SetDebugLogger(                                        // debug的log日志接口
     apollo::planning_internal::Debug* debug) {
   planning_debug_ = debug;
 }
 
-void QpSplinePathGenerator::SetChangeLane(bool is_change_lane_path) {
+void QpSplinePathGenerator::SetChangeLane(bool is_change_lane_path) {              // 设置可以变道
   is_change_lane_path_ = is_change_lane_path;
 }
 
 bool QpSplinePathGenerator::Generate(
     const std::vector<const PathObstacle*>& path_obstacles,
     const SpeedData& speed_data, const common::TrajectoryPoint& init_point,
-    const double boundary_extension, bool is_final_attempt,
+    const double boundary_extension, bool is_final_attempt,                        // QP的spline曲线的产生器
     PathData* const path_data) {
   ADEBUG << "Init point: " << init_point.DebugString();
-  init_trajectory_point_ = init_point;
+  init_trajectory_point_ = init_point;                                             // 轨迹的起点
 
   const auto& path_data_history = path_data->path_data_history();
   if (!path_data_history.empty()) {
     last_discretized_path_ = &path_data_history.back().first;
   }
 
-  if (!CalculateFrenetPoint(init_point, &init_frenet_point_)) {
+  if (!CalculateFrenetPoint(init_point, &init_frenet_point_)) {                    // 将起点转换为sl坐标系下
     AERROR << "Fail to map init point: " << init_point.ShortDebugString();
     return false;
   }
@@ -102,21 +102,21 @@ bool QpSplinePathGenerator::Generate(
   }
   double start_s = init_frenet_point_.s();
 
-  constexpr double kDefaultPathLength = 50.0;
+  constexpr double kDefaultPathLength = 50.0;                                      // 默认path的长度为50米
   double end_s = std::fmin(
       init_frenet_point_.s() +
           std::fmax(kDefaultPathLength,
-                    init_trajectory_point_.v() * FLAGS_look_forward_time_sec),
+                    init_trajectory_point_.v() * FLAGS_look_forward_time_sec),     // 终点
       reference_line_.Length());
 
-  constexpr double kMinPathLength = 1.0e-6;
+  constexpr double kMinPathLength = 1.0e-6;                                        // path长度的无穷小
   if (start_s + kMinPathLength > end_s) {
     AERROR << "Path length is too small. Path start_s: " << start_s
            << ", end_s: " << end_s;
     return false;
   }
 
-  if (!InitSpline(start_s, end_s)) {
+  if (!InitSpline(start_s, end_s)) {                                               // 初始化smooth平滑spline曲线
     AERROR << "Init smoothing spline failed with (" << start_s << ",  end_s "
            << end_s;
     return false;
@@ -124,23 +124,23 @@ bool QpSplinePathGenerator::Generate(
 
   QpFrenetFrame qp_frenet_frame(reference_line_, speed_data, init_frenet_point_,
                                 qp_spline_path_config_.time_resolution(),
-                                evaluated_s_);
-  if (!qp_frenet_frame.Init(path_obstacles)) {
+                                evaluated_s_);                                     // 构造一个QP的frenet的数据框
+  if (!qp_frenet_frame.Init(path_obstacles)) {                                     // 初始化frenet坐标系下的障碍物
     AERROR << "Fail to initialize qp frenet frame";
     return false;
   }
-  qp_frenet_frame.LogQpBound(planning_debug_);
+  qp_frenet_frame.LogQpBound(planning_debug_);                                     // debug相关信息
 
-  if (!AddConstraint(qp_frenet_frame, boundary_extension)) {
+  if (!AddConstraint(qp_frenet_frame, boundary_extension)) {                       // 添加约束项
     AERROR << "Fail to setup pss path constraint.";
     return false;
   }
 
-  AddKernel();
+  AddKernel();                                                                     // 添加核函数
 
-  bool is_solved = Solve();
+  bool is_solved = Solve();                                                        // 求解器进行求解
 
-  if (!is_solved && !is_final_attempt) {
+  if (!is_solved && !is_final_attempt) {                                           // 做容错判断
     return false;
   }
 
@@ -164,9 +164,9 @@ bool QpSplinePathGenerator::Generate(
   const auto xy_diff = xy_point - Vec2d(init_point.path_point().x(),
                                         init_point.path_point().y());
 
-  double s_resolution = (end_s - start_s) / qp_spline_path_config_.num_output();
+  double s_resolution = (end_s - start_s) / qp_spline_path_config_.num_output();  // s的分辨率
   constexpr double kEpsilon = 1e-6;
-  for (double s = start_s; s + kEpsilon < end_s; s += s_resolution) {
+  for (double s = start_s; s + kEpsilon < end_s; s += s_resolution) {             // 迭代所有的分辨率
     double l = init_frenet_point_.l();
     if (is_solved) {
       l = spline(s) + ref_l_;
@@ -219,7 +219,7 @@ bool QpSplinePathGenerator::Generate(
 
 bool QpSplinePathGenerator::CalculateFrenetPoint(
     const common::TrajectoryPoint& traj_point,
-    common::FrenetFramePoint* const frenet_frame_point) {
+    common::FrenetFramePoint* const frenet_frame_point) {                         // 计算frenet坐标系下的一个点
   common::SLPoint sl_point;
   if (!reference_line_.XYToSL(
           {traj_point.path_point().x(), traj_point.path_point().y()},
@@ -240,7 +240,7 @@ bool QpSplinePathGenerator::CalculateFrenetPoint(
   const double kappa_ref = ref_point.kappa();
   const double dkappa_ref = ref_point.dkappa();
 
-  const double dl = CartesianFrenetConverter::CalculateLateralDerivative(
+  const double dl = CartesianFrenetConverter::CalculateLateralDerivative(        // 计算横向点
       theta_ref, theta, l, kappa_ref);
   const double ddl =
       CartesianFrenetConverter::CalculateSecondOrderLateralDerivative(
@@ -251,7 +251,7 @@ bool QpSplinePathGenerator::CalculateFrenetPoint(
 }
 
 bool QpSplinePathGenerator::InitSpline(const double start_s,
-                                       const double end_s) {
+                                       const double end_s) {                     // 初始化spline的曲线参数
   uint32_t number_of_spline = static_cast<uint32_t>(
       (end_s - start_s) / qp_spline_path_config_.max_spline_length() + 1.0);
   number_of_spline = std::max(1u, number_of_spline);
@@ -269,7 +269,7 @@ bool QpSplinePathGenerator::InitSpline(const double start_s,
 }
 
 bool QpSplinePathGenerator::AddConstraint(const QpFrenetFrame& qp_frenet_frame,
-                                          const double boundary_extension) {
+                                          const double boundary_extension) {    // 添加约束项
   Spline1dConstraint* spline_constraint =
       spline_generator_->mutable_spline_constraint();
 
@@ -425,14 +425,14 @@ bool QpSplinePathGenerator::AddConstraint(const QpFrenetFrame& qp_frenet_frame,
   return true;
 }
 
-void QpSplinePathGenerator::AddHistoryPathKernel() {
-  if (last_discretized_path_ == nullptr) {
+void QpSplinePathGenerator::AddHistoryPathKernel() {                                // 添加path的历史使用过的path核函数
+  if (last_discretized_path_ == nullptr) {                                          // 上次离散的path点
     return;
   }
 
   PathData last_path_data;
   last_path_data.SetReferenceLine(&reference_line_);
-  last_path_data.SetDiscretizedPath(*last_discretized_path_);
+  last_path_data.SetDiscretizedPath(*last_discretized_path_);                       // 上次的path的data(数据)
 
   std::vector<double> history_s;
   std::vector<double> histroy_l;
@@ -454,7 +454,7 @@ void QpSplinePathGenerator::AddKernel() {
 
   if (init_trajectory_point_.v() < qp_spline_path_config_.uturn_speed_limit() &&
       !is_change_lane_path_ &&
-      qp_spline_path_config_.reference_line_weight() > 0.0) {
+      qp_spline_path_config_.reference_line_weight() > 0.0) {                       // 添加核函数
     std::vector<double> ref_l(evaluated_s_.size(), -ref_l_);
     spline_kernel->AddReferenceLineKernelMatrix(
         evaluated_s_, ref_l, qp_spline_path_config_.reference_line_weight());
@@ -503,7 +503,7 @@ void QpSplinePathGenerator::AddKernel() {
   }
 }
 
-bool QpSplinePathGenerator::Solve() {
+bool QpSplinePathGenerator::Solve() {                                             // 求解器进行求解
   if (!spline_generator_->Solve()) {
     for (size_t i = 0; i < knots_.size(); ++i) {
       ADEBUG << "knots_[" << i << "]: " << knots_[i];
