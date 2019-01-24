@@ -42,10 +42,10 @@ namespace planning {
 class StdPlanning : public PlanningBase {
  public:
   StdPlanning() {   // 根据GPS信号和IMU的输入得到planning的信息， StdPlannerDispatcher是std planning的调度员
-    planner_dispatcher_ = std::make_unique<StdPlannerDispatcher>(); // 构造成一个stdplanner的空对象
+    planner_dispatcher_ = std::make_unique<StdPlannerDispatcher>(); // 构造成一个stdplanner的空对象，在构造函数指定了使用std相关的planner(规划器)的提供者
     // Dispatcher是调度的意思
   }
-  virtual ~StdPlanning();
+  virtual ~StdPlanning();                                           // 析构函数
 
   /**
    * @brief Planning algorithm name.

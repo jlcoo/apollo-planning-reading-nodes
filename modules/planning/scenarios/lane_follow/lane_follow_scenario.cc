@@ -62,7 +62,7 @@ constexpr double kPathOptimizationFallbackClost = 2e4;   // 路径优化反馈�
 constexpr double kSpeedOptimizationFallbackClost = 2e4;  // 速度优化的反馈代价
 constexpr double kStraightForwardLineCost = 10.0;        // 直线的成本代价是10
 }  // namespace
-
+// 在场景中定义具体使用那种任务(策略)
 void LaneFollowScenario::RegisterTasks() {                                                     // laneFollow场景中， 向任务工厂中注册6个任务
   task_factory_.Register(DP_POLY_PATH_OPTIMIZER,
                          []() -> Task* { return new DpPolyPathOptimizer(); });                 // 动态规划的多项式的优化器
@@ -166,7 +166,7 @@ Status LaneFollowScenario::Process(const TrajectoryPoint& planning_start_point, 
     if (!reference_line_info.IsDrivable()) {                                                   // 不能开的话就继续进行迭代
       continue;
     }
-    auto cur_status =
+    auto cur_status =                                                                          // 在跟车环境下的PlanOnReferenceLine特别重要, 在具有中心参考线的车道上进行规划
         PlanOnReferenceLine(planning_start_point, frame, &reference_line_info);                // 在道路中心线的基础上做planning
     if (cur_status.ok() && reference_line_info.IsDrivable()) {                                 // 当前的状态ok， 并且参考线是可以开车的
       has_drivable_reference_line = true;                                                      // 参考线是否可以开车
@@ -296,7 +296,7 @@ Status LaneFollowScenario::PlanOnReferenceLine(                                 
       return Status(ErrorCode::PLANNING_ERROR, msg);
     }
   }
-
+                                                                                               // 优化器做平滑处理后结果或保存在到reference_line_info中
   reference_line_info->SetTrajectory(trajectory);                                              // 全部合法就设置轨迹
   reference_line_info->SetDrivable(true);                                                      // 设置轨迹是可执行的
   return Status::OK();
