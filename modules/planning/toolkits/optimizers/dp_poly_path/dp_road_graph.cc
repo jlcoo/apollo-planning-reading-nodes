@@ -132,7 +132,7 @@ bool DPRoadGraph::GenerateMinCostPath(                       // 在DP RoadGraph�
     return false;
   }
   path_waypoints.insert(path_waypoints.begin(),
-                        std::vector<common::SLPoint>{init_sl_point_});
+                        std::vector<common::SLPoint>{init_sl_point_});//把起点加入进去
   const auto &vehicle_config =
       common::VehicleConfigHelper::instance()->GetConfig();
 
@@ -140,15 +140,15 @@ bool DPRoadGraph::GenerateMinCostPath(                       // 在DP RoadGraph�
       config_, reference_line_, reference_line_info_.IsChangeLanePath(),
       obstacles, vehicle_config.vehicle_param(), speed_data_, init_sl_point_);
 
-  std::list<std::list<DPRoadGraphNode>> graph_nodes;
+  std::list<std::list<DPRoadGraphNode>> graph_nodes; //最终的前向遍历图，类似于神经网络 N个level，每个level一排node。
   graph_nodes.emplace_back();
   graph_nodes.back().emplace_back(init_sl_point_, nullptr, ComparableCost());
   auto &front = graph_nodes.front().front();
   size_t total_level = path_waypoints.size();
 
-  for (std::size_t level = 1; level < path_waypoints.size(); ++level) {
-    const auto &prev_dp_nodes = graph_nodes.back();
-    const auto &level_points = path_waypoints[level];
+  for (std::size_t level = 1; level < path_waypoints.size(); ++level) {//level从1开始，level0是起点init_sl_point_
+    const auto &prev_dp_nodes = graph_nodes.back();//auto=std::list<DPRoadGraphNode>
+    const auto &level_points = path_waypoints[level];//把采样的SL点拿出来，稍后转化为node auto=std::vector<common::SLPoint>
 
     graph_nodes.emplace_back();
 
